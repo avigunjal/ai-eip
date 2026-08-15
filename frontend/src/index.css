@@ -1,0 +1,5 @@
+/* Entry stylesheet for the app.
+ * Pure-MUI stack: all theming lives in src/theme/* (JS) and src/styles/tokens.css
+ * (CSS custom properties). No utility framework is used.
+ */
+@import './styles/tokens.css';
