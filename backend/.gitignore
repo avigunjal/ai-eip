@@ -1,5 +1,3 @@
-# Backend
-backend/node_modules/
-backend/.env
-backend/coverage/
-backend/*.log
+node_modules/
+data/*.db
+.env
