@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * empty, and error states across pages.
  */
 export function useData(fetcher, deps = []) {
-  const [state, setState] = useState({ data: null, loading: true, error: null });
+  const [state, setState] = useState({ data: undefined, loading: true, error: null });
   const fetcherRef = useRef(fetcher);
   fetcherRef.current = fetcher;
 

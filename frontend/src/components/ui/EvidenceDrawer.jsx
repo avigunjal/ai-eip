@@ -4,6 +4,7 @@ import { getSeverity, getRiskStatus } from '../../config/riskLabels.js';
 import StatusBadge from '../common/StatusBadge.jsx';
 import { formatRelative } from '../../config/dates.js';
 import { paths } from '../../config/paths.js';
+import { TOPBAR_HEIGHT } from '../../config/constants.js';
 
 /**
  * Right-side drawer that shows the evidence (signals) behind a risk, plus
@@ -22,7 +23,7 @@ const EvidenceDrawer = ({ open, onClose, risk }) => {
   const project = getProject(risk.projectId);
 
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} slotProps={{ paper: { sx: { width: { xs: '100%', sm: 400 } } } }}>
+    <Drawer anchor="right" open={open} onClose={onClose} slotProps={{ paper: { sx: { width: { xs: '100%', sm: 400 }, pt: `${TOPBAR_HEIGHT}px` } } }}>
       <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
           <Typography variant="h6" sx={{ fontSize: 18 }}>Risk evidence</Typography>

@@ -4,7 +4,11 @@ import Block from '@mui/icons-material/Block';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import InsightCard from '../../components/ui/InsightCard.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
-import { insights } from '../../data/insights.js';
+import LoadingState from '../../components/common/LoadingState.jsx';
+import ErrorState from '../../components/common/ErrorState.jsx';
+import { useData } from '../../hooks/useData.js';
+import { fetchInsights } from '../../api/insights.js';
+import { mapInsightToViewModel } from '../../api/insights.adapter.js';
 import { useActionStore } from '../../store/actionStore.js';
 import { useToast } from '../../hooks/useToast.js';
 
@@ -13,14 +17,18 @@ import { useToast } from '../../hooks/useToast.js';
  * with "Why am I seeing this?" disclosures.
  *
  * REMAINING (extend later):
- *  - add `severity` to each insight for the InsightCard badge
  *  - "restore" from Dismissed / "unsave" from Saved (undo within group)
  *  - empty-state descriptions per group
  */
 const Insights = () => {
+  const { data: raw, loading, error, retry } = useData(fetchInsights, []);
   const { isSaved, dismissedInsightIds, saveInsight, unsaveInsight, dismissInsight, restoreInsight } = useActionStore();
   const toast = useToast();
 
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState onRetry={retry} />;
+
+  const insights = (raw ?? []).map(mapInsightToViewModel);
   const needsReview = insights.filter((i) => !isSaved(i.id) && !dismissedInsightIds.includes(i.id));
   const saved = insights.filter((i) => isSaved(i.id));
   const dismissed = insights.filter((i) => dismissedInsightIds.includes(i.id));

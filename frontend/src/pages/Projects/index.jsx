@@ -5,7 +5,10 @@ import MetricCard from '../../components/common/MetricCard.jsx';
 import DataTable from '../../components/ui/DataTable.jsx';
 import FilterBar from '../../components/ui/FilterBar.jsx';
 import StatusBadge from '../../components/common/StatusBadge.jsx';
-import { getProjects } from '../../data/service.js';
+import LoadingState from '../../components/common/LoadingState.jsx';
+import ErrorState from '../../components/common/ErrorState.jsx';
+import { useData } from '../../hooks/useData.js';
+import { fetchProjects } from '../../api/projects.js';
 import { getProjectStatus } from '../../config/riskLabels.js';
 import { PROJECT_STATUS } from '../../config/constants.js';
 import { paths } from '../../config/paths.js';
@@ -25,7 +28,10 @@ import { useUrlFilters } from '../../hooks/useUrlFilters.js';
  */
 const Projects = () => {
   const { values, set, clear } = useUrlFilters(['search', 'status']);
-  const projects = getProjects();
+  const { data: projects = [], loading, error, retry } = useData(fetchProjects);
+
+  if (loading) return <LoadingState variant="grid" sx={{ mt: 3 }} />;
+  if (error) return <ErrorState onRetry={retry} />;
 
   const q = (values.search ?? '').toLowerCase();
   const filtered = projects.filter((p) => {

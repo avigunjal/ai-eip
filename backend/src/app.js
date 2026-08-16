@@ -6,14 +6,19 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
-import { env } from './config/env.js';
-import dashboardRoutes from './api/routes/dashboard.routes.js';
-import projectsRoutes from './api/routes/projects.routes.js';
-import knowledgeRoutes from './api/routes/knowledge.routes.js';
-import teamComposerRoutes from './api/routes/team-composer.routes.js';
-import recognitionRoutes from './api/routes/recognition.routes.js';
-import aiRoutes from './api/routes/ai.routes.js';
-import { notFoundHandler, errorHandler } from './api/middleware/error.middleware.js';
+import { env } from './config/env.config.js';
+import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
+import projectRoutes from './modules/project/project.routes.js';
+import riskRoutes from './modules/risk/risk.routes.js';
+import teamRoutes from './modules/team/team.routes.js';
+import personRoutes from './modules/person/person.routes.js';
+import capabilityRoutes from './modules/capability/capability.routes.js';
+import knowledgeRoutes from './modules/knowledge/knowledge.routes.js';
+import teamComposerRoutes from './modules/team-composer/team-composer.routes.js';
+import recognitionRoutes from './modules/recognition/recognition.routes.js';
+import insightRoutes from './modules/insight/insight.routes.js';
+import aiRoutes from './modules/ai/ai.routes.js';
+import { notFoundHandler, errorHandler } from './middleware/error.middleware.js';
 
 const app = express();
 
@@ -27,10 +32,15 @@ app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 // Feature routes
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/projects', projectsRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/risks', riskRoutes);
+app.use('/api/teams', teamRoutes);
+app.use('/api/people', personRoutes);
+app.use('/api/capabilities', capabilityRoutes);
 app.use('/api/knowledge', knowledgeRoutes);
 app.use('/api/team-composer', teamComposerRoutes);
 app.use('/api/recognition', recognitionRoutes);
+app.use('/api/insights', insightRoutes);
 app.use('/api/ai', aiRoutes);
 
 // Fallbacks

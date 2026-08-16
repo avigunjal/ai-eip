@@ -14,8 +14,8 @@ import ErrorState from '../../components/common/ErrorState.jsx';
 import { useData } from '../../hooks/useData.js';
 import { useToast } from '../../hooks/useToast.js';
 import { useActionStore } from '../../store/actionStore.js';
-import { fetchProject, getTeam, getRisksForProject, peopleForProject } from '../../data/service.js';
-import { knowledgeAreas } from '../../data/fixtures.js';
+import { fetchProject, fetchProjectRisks } from '../../api/projects.js';
+import { mapProjectOwners } from '../../api/projects.adapter.js';
 import { getProjectStatus, getSeverity } from '../../config/riskLabels.js';
 import { paths } from '../../config/paths.js';
 import { formatDate } from '../../config/dates.js';
@@ -33,6 +33,7 @@ import { useState } from 'react';
 const ProjectDetail = () => {
   const { projectId } = useParams();
   const { data: project, loading, error, retry } = useData(() => fetchProject(projectId), [projectId]);
+  const { data: risks = [], loading: risksLoading, error: risksError } = useData(() => fetchProjectRisks(projectId), [projectId]);
   const [tab, setTab] = useState(0);
   const { isWatched, toggleWatch } = useActionStore();
   const toast = useToast();
@@ -41,9 +42,8 @@ const ProjectDetail = () => {
   if (error) return <ErrorState onRetry={retry} />;
   if (!project) return <Typography>Project not found.</Typography>;
 
-  const team = getTeam(project.teamIds[0]);
-  const risks = getRisksForProject(project.id);
-  const people = peopleForProject(project);
+  const team = project.teams?.[0];
+  const people = mapProjectOwners(project.owners ?? []);
 
   return (
     <Box>
@@ -74,7 +74,7 @@ const ProjectDetail = () => {
       <Grid container spacing={3} sx={{ mt: 3 }}>
         <Grid item xs={6} md={3}><MetricCard label="Health" value={project.healthScore} /></Grid>
         <Grid item xs={6} md={3}><MetricCard label="Delivery confidence" value={`${project.deliveryConfidence}%`} /></Grid>
-        <Grid item xs={6} md={3}><MetricCard label="Open risks" value={risks.length} /></Grid>
+        <Grid item xs={6} md={3}><MetricCard label="Open risks" value={risks?.length ?? 0} /></Grid>
         <Grid item xs={6} md={3}>
           <Box sx={{ height: '100%', outline: '1px solid', outlineColor: 'divider', borderRadius: 'var(--radius-card)', p: 3, bgcolor: 'background.paper' }}>
             <Typography sx={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'text.secondary' }}>Owners</Typography>
@@ -118,17 +118,23 @@ const ProjectDetail = () => {
           )}
 
           {tab === 1 && (
-            <DataTable
-              columns={[
-                { key: 'title', label: 'Risk', render: (r) => <Link to={paths.risks} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>{r.title}</Link> },
-                { key: 'severity', label: 'Severity', render: (r) => <StatusBadge config={getSeverity(r.severity)} /> },
-                { key: 'confidence', label: 'Confidence', sortable: true },
-                { key: 'trend', label: 'Trend' },
-              ]}
-              rows={risks}
-              emptyTitle="No open risks"
-              emptyDescription="This project has no tracked risks."
-            />
+            risksLoading ? (
+              <LoadingState variant="table" />
+            ) : risksError ? (
+              <Typography sx={{ color: 'var(--red)' }}>Couldn't load risks.</Typography>
+            ) : (
+              <DataTable
+                columns={[
+                  { key: 'title', label: 'Risk', render: (r) => <Link to={paths.risks} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>{r.title}</Link> },
+                  { key: 'severity', label: 'Severity', render: (r) => <StatusBadge config={getSeverity(r.severity)} /> },
+                  { key: 'confidence', label: 'Confidence', sortable: true },
+                  { key: 'trend', label: 'Trend' },
+                ]}
+                rows={risks}
+                emptyTitle="No open risks"
+                emptyDescription="This project has no tracked risks."
+              />
+            )
           )}
 
           {tab === 2 && (
@@ -142,7 +148,7 @@ const ProjectDetail = () => {
       {/* Related areas */}
       <Box sx={{ mt: 3, display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
         <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>Linked systems:</Typography>
-        {knowledgeAreas.filter((a) => a.linkedProjectIds.includes(project.id)).map((a) => (
+        {project.knowledgeAreas.map((a) => (
           <Chip key={a.id} component="a" href={paths.system(a.id)} label={a.name} variant="outlined" size="small" clickable />
         ))}
       </Box>

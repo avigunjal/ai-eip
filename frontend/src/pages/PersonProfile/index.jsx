@@ -6,7 +6,8 @@ import AvatarGroup from '../../components/common/AvatarGroup.jsx';
 import LoadingState from '../../components/common/LoadingState.jsx';
 import ErrorState from '../../components/common/ErrorState.jsx';
 import { useData } from '../../hooks/useData.js';
-import { fetchPerson, getTeam, getRecognitions, getKnowledgeAreas } from '../../data/service.js';
+import { fetchPerson } from '../../api/people.js';
+import { getTeam, getRecognitions, getKnowledgeAreas } from '../../data/service.js';
 import { paths } from '../../config/paths.js';
 import { formatRelative } from '../../config/dates.js';
 
@@ -39,7 +40,7 @@ const PersonProfile = () => {
     <Box>
       <PageHeader
         title={person.name}
-        subtitle={`${person.role} · ${team?.name ?? 'No team'}`}
+        subtitle={`${person.role} · ${person.yearsOfExperience} yrs exp · ${team?.name ?? 'No team'}`}
       />
 
       <Grid container spacing={3} sx={{ mt: 3 }}>
@@ -66,6 +67,16 @@ const PersonProfile = () => {
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1.5 }}>
           {expertise.map((x) => (
             <Chip key={x.knowledgeAreaId} label={`${x.area} (${x.level})`} variant="outlined" component="a" href={paths.system(x.knowledgeAreaId)} clickable />
+          ))}
+        </Box>
+      </Box>
+
+      <Box sx={{ mt: 3, p: 3, outline: '1px solid', outlineColor: 'divider', borderRadius: 'var(--radius-card)', bgcolor: 'background.paper' }}>
+        <Typography sx={{ fontWeight: 600 }}>Capabilities</Typography>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1.5 }}>
+          {(person.capabilities ?? []).length === 0 && <Typography sx={{ color: 'text.secondary' }}>No capabilities recorded.</Typography>}
+          {(person.capabilities ?? []).map((c) => (
+            <Chip key={c.capabilityId} label={`${c.name} (${c.level})`} variant="outlined" />
           ))}
         </Box>
       </Box>

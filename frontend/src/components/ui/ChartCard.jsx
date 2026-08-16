@@ -3,6 +3,7 @@ import { Box, IconButton, Menu, MenuItem, Table, TableBody, TableCell, TableHead
 import TableChart from '@mui/icons-material/TableChart';
 import OpenInFull from '@mui/icons-material/OpenInFull';
 import Surface from '../styled/Surface.jsx';
+import ChartBoundary from './ChartBoundary.jsx';
 
 /**
  * Wraps any Recharts chart in a titled card with:
@@ -104,7 +105,9 @@ const ChartCard = ({
           </TableBody>
         </Table>
       ) : (
-        <Box sx={{ mt: 2, flex: 1, minHeight: 200 }}>{children}</Box>
+        <Box sx={{ mt: 2, flex: 1, minHeight: 200 }}>
+          <ChartBoundary>{children}</ChartBoundary>
+        </Box>
       )}
     </Surface>
   );

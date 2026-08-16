@@ -6,7 +6,11 @@ import MetricCard from '../../components/common/MetricCard.jsx';
 import AvatarGroup from '../../components/common/AvatarGroup.jsx';
 import StatusBadge from '../../components/common/StatusBadge.jsx';
 import DataTable from '../../components/ui/DataTable.jsx';
-import { getPeople, getKnowledgeAreas, knowledgeRiskSummary, priorityKnowledgeRisks, transferOpportunities, areaHierarchy } from '../../data/service.js';
+import { getPeople, transferOpportunities, areaHierarchy } from '../../data/service.js';
+import { fetchKnowledgeAreas } from '../../api/knowledge.js';
+import { useData } from '../../hooks/useData.js';
+import LoadingState from '../../components/common/LoadingState.jsx';
+import ErrorState from '../../components/common/ErrorState.jsx';
 import { coverageStatus, getRiskLevel } from '../../config/riskLabels.js';
 import { paths } from '../../config/paths.js';
 
@@ -18,12 +22,25 @@ import { paths } from '../../config/paths.js';
  */
 const Knowledge = () => {
   const [view, setView] = useState('areas');
+  const { data: areas = [], loading, error, retry } = useData(fetchKnowledgeAreas);
   const people = getPeople();
-  const areas = getKnowledgeAreas();
-  const summary = knowledgeRiskSummary();
-  const priorityRisks = priorityKnowledgeRisks();
   const opportunities = transferOpportunities();
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState onRetry={retry} />;
+
   const sortedAreas = [...areas].sort((a, b) => a.coverage - b.coverage);
+  const priorityRisks = [...areas].sort((a, b) => b.riskScore - a.riskScore);
+
+  const summary = {
+    criticalRisks: areas.filter((a) => a.riskLevel === 'critical' || a.riskLevel === 'high').length,
+    singleOwner: areas.filter((a) => {
+      const expertise = a.expertise ?? [];
+      return expertise.length <= 1 || !expertise.some((x) => x.level === 'capable');
+    }).length,
+    docsFresh: `${Math.round((areas.filter((a) => a.documentationFreshnessDays <= 30).length / Math.max(areas.length, 1)) * 100)}%`,
+    coverageTrend: '+8%',
+  };
 
   const kpis = [
     { label: 'Critical knowledge risks', value: summary.criticalRisks },

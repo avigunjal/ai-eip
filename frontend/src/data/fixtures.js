@@ -76,6 +76,16 @@ const areaMeta = [
 ];
 
 // ---------- people (28) ----------
+const YEARS_BY_ROLE = {
+  'Engineering Manager': between(12, 16),
+  'Tech Lead': between(12, 16),
+  'Staff Engineer': between(12, 16),
+  'Senior Engineer': between(7, 11),
+  'Platform Engineer': between(7, 11),
+  SRE: between(7, 11),
+  'Data Engineer': between(7, 11),
+  Engineer: between(3, 6),
+};
 const people = Array.from({ length: 28 }, (_, i) => {
   const first = FIRST[i % FIRST.length];
   const last = LAST[i % LAST.length];
@@ -90,12 +100,15 @@ const people = Array.from({ length: 28 }, (_, i) => {
     level: pick(['primary', 'capable', 'learning']),
     lastContributionAt: daysAgo(between(1, 40)),
   }));
+  const role = i % teamMeta.length === 0 ? 'Engineering Manager' : ROLES[i % ROLES.length];
   return {
     id: `p-${String(i + 1).padStart(2, '0')}`,
     name,
     initials,
-    role: i % teamMeta.length === 0 ? 'Engineering Manager' : ROLES[i % ROLES.length],
+    role,
+    yearsOfExperience: YEARS_BY_ROLE[role] ?? between(3, 16),
     teamId: `t-${String(teamIndex + 1).padStart(2, '0')}`,
+    availabilityFte: Number((between(80, 100) / 100).toFixed(2)),
     avatarColor: AVATAR_COLORS[i % AVATAR_COLORS.length],
     expertise,
   };
@@ -297,16 +310,16 @@ const clientMeta = [
 
 // ---------- projects (10) ----------
 const projectMeta = [
-  { name: 'Atlas Platform Migration', client: 'Zenith Retail Group', status: 'at_risk', team: 'Platform Engineering' },
-  { name: 'Checkout Modernization', client: 'Zenith Retail Group', status: 'at_risk', team: 'Growth Engineering' },
-  { name: 'Data Lake Consolidation', client: 'Meridian Financial', status: 'on_track', team: 'Data Platform' },
-  { name: 'ML Inference at Scale', client: 'Meridian Financial', status: 'on_track', team: 'Data Platform' },
-  { name: 'Multi-region Reliability', client: 'Aurelia Health Systems', status: 'at_risk', team: 'Core Infrastructure' },
-  { name: 'Developer Portal', client: 'Aurelia Health Systems', status: 'on_track', team: 'Developer Experience' },
-  { name: 'Payments 3.0', client: 'Meridian Financial', status: 'at_risk', team: 'Payments Engineering' },
-  { name: 'Search Relevance', client: 'Zenith Retail Group', status: 'on_track', team: 'Growth Engineering' },
-  { name: 'Billing Upgrade', client: 'Orbit Logistics', status: 'paused', team: 'Payments Engineering' },
-  { name: 'Observability Rollout', client: 'Orbit Logistics', status: 'complete', team: 'Core Infrastructure' },
+  { name: 'Atlas Platform Migration', client: 'Zenith Retail Group', status: 'at_risk', team: 'Platform Engineering', type: 'migration', phase: 'implementation', description: 'Migration of legacy platform services to Kubernetes architecture.' },
+  { name: 'Checkout Modernization', client: 'Zenith Retail Group', status: 'at_risk', team: 'Growth Engineering', type: 'modernization', phase: 'implementation', description: 'Modernization of checkout services to an event-driven architecture.' },
+  { name: 'Data Lake Consolidation', client: 'Meridian Financial', status: 'on_track', team: 'Data Platform', type: 'migration', phase: 'design', description: 'Consolidation of siloed data warehouses into a single analytics data lake.' },
+  { name: 'ML Inference at Scale', client: 'Meridian Financial', status: 'on_track', team: 'Data Platform', type: 'research', phase: 'implementation', description: 'Scaling ML inference workloads with lower-latency serving infrastructure.' },
+  { name: 'Multi-region Reliability', client: 'Aurelia Health Systems', status: 'at_risk', team: 'Core Infrastructure', type: 'platform', phase: 'implementation', description: 'Extending service reliability across multiple cloud regions.' },
+  { name: 'Developer Portal', client: 'Aurelia Health Systems', status: 'on_track', team: 'Developer Experience', type: 'platform', phase: 'release', description: 'Self-service developer portal for internal platform tooling.' },
+  { name: 'Payments 3.0', client: 'Meridian Financial', status: 'at_risk', team: 'Payments Engineering', type: 'migration', phase: 'implementation', description: 'Replatforming payment services to the new Payments 3.0 architecture.' },
+  { name: 'Search Relevance', client: 'Zenith Retail Group', status: 'on_track', team: 'Growth Engineering', type: 'new_feature', phase: 'testing', description: 'Improving search ranking and relevance for the product catalog.' },
+  { name: 'Billing Upgrade', client: 'Orbit Logistics', status: 'paused', team: 'Payments Engineering', type: 'modernization', phase: 'design', description: 'Migration of billing services to a new payment gateway with improved reliability and transaction processing.' },
+  { name: 'Observability Rollout', client: 'Orbit Logistics', status: 'complete', team: 'Core Infrastructure', type: 'maintenance', phase: 'complete', description: 'Rolling out standard observability tooling to all production services.' },
 ];
 
 const drivers = [
@@ -331,6 +344,9 @@ const projects = projectMeta.map((pm, i) => {
   return {
     id: `pr-${String(i + 1).padStart(2, '0')}`,
     name: pm.name,
+    description: pm.description,
+    type: pm.type,
+    phase: pm.phase,
     clientId: clientByName[pm.client],
     status: pm.status,
     healthScore,
@@ -338,6 +354,7 @@ const projects = projectMeta.map((pm, i) => {
     deliveryConfidence: Math.max(30, Math.min(98, healthScore + between(-6, 6))),
     targetDate: daysAgo(between(-60, 150)),
     teamIds: [team.id],
+    teamSize: team.memberIds.length,
     ownerIds: team.memberIds.slice(0, between(1, 3)),
     topDriver: drivers[i % drivers.length],
     trend,
@@ -353,6 +370,18 @@ projects.forEach((proj, i) => {
       knowledgeAreas[a].linkedProjectIds.push(proj.id);
     }
   });
+});
+
+// derive project AI metadata + knowledgeAreas from the linked areas above
+projects.forEach((proj) => {
+  proj.knowledgeAreas = knowledgeAreas
+    .filter((area) => area.linkedProjectIds.includes(proj.id))
+    .map((area) => ({ id: area.id, name: area.name }));
+  proj.aiMetadata = {
+    lastAnalyzedAt: '2026-08-16',
+    confidence: between(70, 95),
+    signalsUsed: ['technical_dependency', 'knowledge_dependency', 'team_capacity', 'delivery_history'],
+  };
 });
 
 // ---------- risks (18) ----------
