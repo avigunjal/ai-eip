@@ -3,7 +3,6 @@ import {
   teams,
   projects,
   knowledgeAreas,
-  transferPlans,
   risks,
   recognitions,
   clients,
@@ -11,7 +10,6 @@ import {
   teamById,
   projectById,
   knowledgeAreaById,
-  transferPlanById,
   clientById,
   singleOwnerSystemIds,
 } from './fixtures.js';
@@ -27,33 +25,7 @@ const simulateLatency = (ms = 450) => new Promise((resolve) => setTimeout(resolv
 // ---------------------------------------------------------------------------
 // Fetchers (async)
 // ---------------------------------------------------------------------------
-export async function fetchPeople() { await simulateLatency(420); return people; }
-export async function fetchTeams() { await simulateLatency(420); return teams; }
-export async function fetchProjects() { await simulateLatency(500); return projects; }
 export async function fetchRisks() { await simulateLatency(500); return risks; }
-export async function fetchKnowledgeAreas() { await simulateLatency(500); return knowledgeAreas; }
-export async function fetchRecognitions() { await simulateLatency(450); return recognitions; }
-
-export async function fetchProject(id) {
-  await simulateLatency(280);
-  return projectById[id] ?? null;
-}
-export async function fetchTeam(id) {
-  await simulateLatency(280);
-  return teamById[id] ?? null;
-}
-export async function fetchPerson(id) {
-  await simulateLatency(280);
-  return personById[id] ?? null;
-}
-export async function fetchKnowledgeArea(id) {
-  await simulateLatency(280);
-  return knowledgeAreaById[id] ?? null;
-}
-export async function fetchTransferPlans() {
-  await simulateLatency(480);
-  return transferPlans;
-}
 
 // ---------------------------------------------------------------------------
 // Synchronous getters
@@ -67,9 +39,6 @@ export const getTeam = (id) => teamById[id] ?? null;
 export const getPeople = () => people;
 export const getPerson = (id) => personById[id] ?? null;
 export const getKnowledgeAreas = () => knowledgeAreas;
-export const getKnowledgeArea = (id) => knowledgeAreaById[id] ?? null;
-export const getTransferPlans = () => transferPlans;
-export const getTransferPlan = (id) => transferPlanById[id] ?? null;
 export const getRecognitions = () => recognitions;
 
 export const getRisksForProject = (projectId) => risks.filter((r) => r.projectId === projectId);
@@ -225,36 +194,7 @@ export function expertiseForArea(area) {
   return (area.expertise ?? []).map((x) => ({ ...x, person: personById[x.personId] ?? null }));
 }
 
-/** Group an area's expertise into Primary / Capable / Learning / Unverified buckets. */
-export function expertiseGroups(area) {
-  const groups = { primary: [], capable: [], learning: [], unverified: [] };
-  (area.expertise ?? []).forEach((x) => {
-    const g = groups[x.level] ?? groups.learning;
-    g.push({ ...x, person: personById[x.personId] ?? null });
-  });
-  return groups;
-}
-
-/** Knowledge risk module KPIs: critical risks, single-owner, docs freshness, coverage trend. */
-export function knowledgeRiskSummary() {
-  const criticalRisks = knowledgeAreas.filter((a) => a.riskLevel === 'critical' || a.riskLevel === 'high').length;
-  const singleOwner = singleOwnerSystemIds.length;
-  const fresh = knowledgeAreas.filter((a) => a.documentationFreshnessDays <= 30).length;
-  const pctFresh = Math.round((fresh / knowledgeAreas.length) * 100);
-  const avgCoverage = Math.round(knowledgeAreas.reduce((s, a) => s + a.coverage, 0) / knowledgeAreas.length);
-  return {
-    criticalRisks,
-    singleOwner,
-    docsFresh: `${pctFresh}%`,
-    coverageTrend: '+8%',
-    avgCoverage,
-  };
-}
-
 /** Knowledge areas sorted so high-risk, low-coverage areas come first. */
-export function priorityKnowledgeRisks() {
-  return [...knowledgeAreas].sort((a, b) => b.riskScore - a.riskScore);
-}
 
 /** AI-suggested knowledge-transfer opportunities with expected coverage gain. */
 export function transferOpportunities() {
@@ -283,38 +223,3 @@ export function transferOpportunities() {
  * Projects → Teams → People → Skills → Knowledge → Risk.
  * Returns the resolved entities so a card can render each hop with live links.
  */
-export function engineeringChain(projectId) {
-  const project = projectById[projectId];
-  if (!project) return null;
-  const teams = project.teamIds.map((id) => teamById[id]).filter(Boolean);
-  const people = peopleForProject(project);
-  const areas = (project.linkedProjectIds ?? [])
-    .map((id) => knowledgeAreaById[id])
-    .filter(Boolean);
-  const areaByIdLookup = Object.fromEntries(areas.map((a) => [a.id, a]));
-  const skills = [...new Set(
-    people
-      .flatMap((p) => p.expertise ?? [])
-      .filter((x) => areaByIdLookup[x.knowledgeAreaId])
-      .map((x) => x.knowledgeAreaId),
-  )]
-    .map((id) => areaByIdLookup[id])
-    .filter(Boolean);
-  const projectRisks = risks.filter((r) => r.projectId === projectId);
-  return {
-    project,
-    teams,
-    people,
-    areas,
-    skills,
-    risks: projectRisks,
-    riskCount: projectRisks.length,
-    atRiskCount: projectRisks.filter((r) => r.severity === 'critical' || r.severity === 'high').length,
-  };
-}
-
-/** People involved in a project (from owner/team ids). */
-export function peopleForProject(project) {
-  const ids = new Set([...project.ownerIds, ...project.teamIds.flatMap((tid) => teamById[tid]?.memberIds ?? [])]);
-  return people.filter((p) => ids.has(p.id));
-}

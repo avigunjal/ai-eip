@@ -5,7 +5,11 @@ import PageHeader from '../../components/common/PageHeader.jsx';
 import MetricCard from '../../components/common/MetricCard.jsx';
 import AvatarGroup from '../../components/common/AvatarGroup.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
-import { getRecognitions, getPeople } from '../../data/service.js';
+import { getPeople } from '../../data/service.js';
+import { fetchRecognitionFeed, createRecognition } from '../../api/recognition.js';
+import { useData } from '../../hooks/useData.js';
+import LoadingState from '../../components/common/LoadingState.jsx';
+import ErrorState from '../../components/common/ErrorState.jsx';
 import { formatRelative } from '../../config/dates.js';
 import { useActionStore } from '../../store/actionStore.js';
 import { useToast } from '../../hooks/useToast.js';
@@ -27,21 +31,31 @@ const TYPE_LABEL = {
  *  - link each recognition to its evidence (`evidenceIds`)
  */
 const Recognition = () => {
-  const feed = getRecognitions();
+  const { data: feed = [], loading, error, retry } = useData(fetchRecognitionFeed);
   const people = getPeople();
   const { markRecognized, unmarkRecognized } = useActionStore();
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [composer, setComposer] = useState({ personId: '', type: 'delivery', summary: '' });
 
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState onRetry={retry} />;
+
   const personOf = (id) => people.find((p) => p.id === id);
   const visible = feed.filter((r) => r.visibility === 'public');
 
-  const handleSubmit = () => {
-    markRecognized(`draft-${Date.now()}`);
-    toast('Recognition sent', { actionLabel: 'Undo', action: () => unmarkRecognized(`draft-${Date.now()}`) });
-    setOpen(false);
-    setComposer({ personId: '', type: 'delivery', summary: '' });
+  const handleSubmit = async () => {
+    try {
+      const draftId = `draft-${Date.now()}`;
+      markRecognized(draftId);
+      await createRecognition({ personId: composer.personId, type: composer.type, summary: composer.summary });
+      toast('Recognition sent', { actionLabel: 'Undo', action: () => unmarkRecognized(draftId) });
+      setOpen(false);
+      setComposer({ personId: '', type: 'delivery', summary: '' });
+      retry();
+    } catch (err) {
+      toast(err.message ?? 'Could not send recognition');
+    }
   };
 
   const counts = {
@@ -80,7 +94,7 @@ const Recognition = () => {
                 {p && <AvatarGroup people={[p]} max={1} size={36} />}
                 <Box sx={{ minWidth: 0 }}>
                   <Typography sx={{ fontWeight: 600, fontSize: 14 }}>
-                    {p?.name ?? 'Team member'}
+                    {r.person?.name ?? p?.name ?? 'Team member'}
                     <Typography component="span" sx={{ color: 'text.secondary', fontWeight: 400, ml: 1 }}>
                       {TYPE_LABEL[r.type]} · {formatRelative(r.occurredAt)}
                     </Typography>

@@ -9,7 +9,8 @@ import EmptyState from '../../components/common/EmptyState.jsx';
 import DataTable from '../../components/ui/DataTable.jsx';
 import AssignmentTurnedIn from '@mui/icons-material/AssignmentTurnedIn';
 import { useData } from '../../hooks/useData.js';
-import { fetchTransferPlans, getPeople } from '../../data/service.js';
+import { getPeople } from '../../data/service.js';
+import { fetchTransferPlans } from '../../api/knowledge.js';
 import { getRiskLevel } from '../../config/riskLabels.js';
 import { paths } from '../../config/paths.js';
 

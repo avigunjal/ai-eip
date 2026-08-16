@@ -43,8 +43,11 @@
  *   name: string;
  *   initials: string;
  *   role: string;
+ *   yearsOfExperience: number;
  *   teamId: string;
  *   avatarColor: string;
+ *   availabilityFte: number;
+ *   capabilities: { capabilityId: string; name: string; criticality: number; level: ExpertiseLevel; lastUsedAt: string|null }[];
  *   expertise: { knowledgeAreaId: string; level: ExpertiseLevel; lastContributionAt: string }[];
  * }} Person
  */
@@ -76,15 +79,24 @@
  * @typedef {{
  *   id: string;
  *   name: string;
+ *   description: string;
+ *   type: 'new_feature'|'migration'|'modernization'|'platform'|'maintenance'|'client_delivery'|'research';
+ *   phase: 'planning'|'design'|'implementation'|'testing'|'release'|'maintenance'|'complete';
  *   status: ProjectStatus;
  *   healthScore: number;
  *   healthDelta: number;
  *   deliveryConfidence: number;
  *   targetDate: string;
  *   teamIds: string[];
+ *   teamSize: number;
  *   ownerIds: string[];
+ *   teams: { id: string; name: string }[];
+ *   owners: { id: string; name: string }[];
+ *   knowledgeAreas: { id: string; name: string }[];
  *   topDriver: string;
  *   trend: { date: string; score: number }[];
+ *   risk: { score: number; severity: Severity; confidence: number; drivers: { riskId: string; title: string; category: RiskCategory; severity: Severity; score: number; evidence: string[] }[] };
+ *   aiMetadata: { lastAnalyzedAt: string; confidence: number; signalsUsed: string[] };
  * }} Project
  */
 

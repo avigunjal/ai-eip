@@ -3,7 +3,11 @@ import { Box, Grid, LinearProgress, Typography } from '@mui/material';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import MetricCard from '../../components/common/MetricCard.jsx';
 import AvatarGroup from '../../components/common/AvatarGroup.jsx';
-import { getTeams, getProjects, getPeople } from '../../data/service.js';
+import { getProjects, getPeople } from '../../data/service.js';
+import { fetchTeams } from '../../api/teams.js';
+import { useData } from '../../hooks/useData.js';
+import LoadingState from '../../components/common/LoadingState.jsx';
+import ErrorState from '../../components/common/ErrorState.jsx';
 import { SUSTAINABLE_CAPACITY } from '../../config/constants.js';
 import { paths } from '../../config/paths.js';
 
@@ -16,9 +20,13 @@ import { paths } from '../../config/paths.js';
  *  - toggle between card and table views
  */
 const Teams = () => {
-  const teams = getTeams();
+  const { data: teams = [], loading, error, retry } = useData(fetchTeams);
   const projects = getProjects();
   const people = getPeople();
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState onRetry={retry} />;
+
   const overloaded = teams.filter((t) => t.capacityPct > SUSTAINABLE_CAPACITY).length;
 
   return (

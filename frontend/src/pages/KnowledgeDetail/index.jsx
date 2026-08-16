@@ -8,7 +8,8 @@ import LoadingState from '../../components/common/LoadingState.jsx';
 import ErrorState from '../../components/common/ErrorState.jsx';
 import { useData } from '../../hooks/useData.js';
 import { useToast } from '../../hooks/useToast.js';
-import { fetchKnowledgeArea, getPeople, getProject, getTransferPlan, expertiseGroups, areaHierarchy } from '../../data/service.js';
+import { getPeople, getProject, areaHierarchy } from '../../data/service.js';
+import { fetchKnowledgeArea, fetchTransferPlans } from '../../api/knowledge.js';
 import { coverageStatus, getRiskLevel } from '../../config/riskLabels.js';
 import { paths } from '../../config/paths.js';
 import { formatRelative } from '../../config/dates.js';
@@ -21,6 +22,7 @@ const SOURCE_LABEL = { github: 'GitHub', jira: 'Jira', docs: 'Docs', incident: '
 const KnowledgeDetail = () => {
   const { systemId } = useParams();
   const { data: area, loading, error, retry } = useData(() => fetchKnowledgeArea(systemId), [systemId]);
+  const { data: plans = [] } = useData(fetchTransferPlans, []);
   const toast = useToast();
   const [planOpen, setPlanOpen] = useState(false);
   const [planForm, setPlanForm] = useState({ backupOwnerId: '', sessions: 2, dueDate: '' });
@@ -31,8 +33,9 @@ const KnowledgeDetail = () => {
 
   const people = getPeople();
   const projects = area.linkedProjectIds.map((id) => getProject(id)).filter(Boolean);
-  const groups = expertiseGroups(area);
-  const transferPlan = getTransferPlan(area.transferPlanId);
+  const groups = { primary: [], capable: [], learning: [], unverified: [] };
+  (area.expertise ?? []).forEach((x) => (groups[x.level] ?? groups.learning).push(x));
+  const transferPlan = plans?.find((p) => p.areaId === area.id) ?? null;
   const chain = areaHierarchy(area.id);
 
   const submitPlan = () => {
@@ -134,7 +137,7 @@ const KnowledgeDetail = () => {
                 {members.map((m) => (
                   <Box key={m.personId} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
                     <Link to={paths.person(m.personId)} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>
-                      {m.person?.name ?? 'Unknown'}
+                      {m.name ?? 'Unknown'}
                     </Link>
                     <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{m.share}% · {formatRelative(m.lastContributionAt)}</Typography>
                   </Box>
