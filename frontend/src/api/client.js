@@ -117,11 +117,30 @@ function normalizeError(error) {
   });
 }
 
+/**
+ * Resolve the API base URL.
+ * - If VITE_API_BASE_URL is explicitly set, use it.
+ * - If running on localhost without an explicit URL, use the Vite proxy ('/api').
+ * - This allows zero-config local dev while supporting remote prod URLs.
+ */
+function resolveBaseUrl() {
+  const explicit = import.meta.env.VITE_API_BASE_URL;
+  if (explicit) return explicit;
+
+  // No explicit URL → if we're on localhost, use the dev proxy.
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return '/api';
+  }
+
+  // Fallback: assume same-origin API.
+  return '/api';
+}
+
 // ---------------------------------------------------------------------------
 // Axios instance
 // ---------------------------------------------------------------------------
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api',
+  baseURL: resolveBaseUrl(),
   timeout: DEFAULT_TIMEOUT_MS,
   headers: {
     'Content-Type': 'application/json',
