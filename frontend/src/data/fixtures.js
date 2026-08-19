@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
  * Uses a seeded PRNG so the data is stable across reloads within a session.
  * All timestamps are relative to "now" so the data stays in the selected period.
  *
- * Minimum seed sizes: 10 projects, 6 teams, 28 people, 16 knowledge areas,
+ * Minimum seed sizes: 10 projects, 9 teams, 28 people, 16 knowledge areas,
  * 18 risks, 30 recognition events, 12 weekly trend points.
  * Varied states: 2 critical + 3 high risks, 3 single-owner systems,
  * 2 overloaded teams, plus empty-filter and error-state triggers.
@@ -47,12 +47,15 @@ const AVATAR_COLORS = ['#2563EB', '#0F9F8A', '#D88A12', '#7C5CE0', '#D14343', '#
 
 // ---------- teams ----------
 const teamMeta = [
+  { name: 'Payments Engineering', manager: 'Olivia Williams' },
+  { name: 'Frontend Engineering', manager: 'Emma Johnson' },
+  { name: 'Backend Engineering', manager: 'Rohan Patel' },
   { name: 'Platform Engineering', manager: 'Aarav Sharma' },
-  { name: 'Growth Engineering', manager: 'Emma Johnson' },
-  { name: 'Data Platform', manager: 'Rohan Patel' },
-  { name: 'Core Infrastructure', manager: 'Priya Iyer' },
-  { name: 'Developer Experience', manager: 'Arjun Singh' },
-  { name: 'Payments Engineering', manager: 'Olivia Davis' },
+  { name: 'Cloud & Infrastructure', manager: 'Priya Iyer' },
+  { name: 'Data Engineering', manager: 'Arjun Reddy' },
+  { name: 'QA Engineering', manager: 'Sarah Anderson' },
+  { name: 'SRE / Reliability Engineering', manager: 'Michael Miller' },
+  { name: 'Engineering Leadership & Architecture', manager: 'Kiran Nair' },
 ];
 
 // ---------- knowledge areas ----------
@@ -127,8 +130,8 @@ const teams = teamMeta.map((t, i) => {
     id: `t-${String(i + 1).padStart(2, '0')}`,
     name: t.name,
     managerId: manager.id,
-    capacityPct: [92, 88, 74, 66, 81, 95][i], // 92, 88, 95 = overloaded (above 85)
-    healthScore: [72, 68, 81, 85, 77, 58][i],
+    capacityPct: [116, 82, 96, 105, 68, 76, 71, 84, 62][i], // 116, 96, 105 = overloaded (above 85)
+    healthScore: [43, 74, 48, 69, 73, 80, 65, 76, 63][i],
     memberIds,
   };
 });
@@ -310,16 +313,16 @@ const clientMeta = [
 
 // ---------- projects (10) ----------
 const projectMeta = [
-  { name: 'Atlas Platform Migration', client: 'Zenith Retail Group', status: 'at_risk', team: 'Platform Engineering', type: 'migration', phase: 'implementation', description: 'Migration of legacy platform services to Kubernetes architecture.' },
-  { name: 'Checkout Modernization', client: 'Zenith Retail Group', status: 'at_risk', team: 'Growth Engineering', type: 'modernization', phase: 'implementation', description: 'Modernization of checkout services to an event-driven architecture.' },
-  { name: 'Data Lake Consolidation', client: 'Meridian Financial', status: 'on_track', team: 'Data Platform', type: 'migration', phase: 'design', description: 'Consolidation of siloed data warehouses into a single analytics data lake.' },
-  { name: 'ML Inference at Scale', client: 'Meridian Financial', status: 'on_track', team: 'Data Platform', type: 'research', phase: 'implementation', description: 'Scaling ML inference workloads with lower-latency serving infrastructure.' },
-  { name: 'Multi-region Reliability', client: 'Aurelia Health Systems', status: 'at_risk', team: 'Core Infrastructure', type: 'platform', phase: 'implementation', description: 'Extending service reliability across multiple cloud regions.' },
-  { name: 'Developer Portal', client: 'Aurelia Health Systems', status: 'on_track', team: 'Developer Experience', type: 'platform', phase: 'release', description: 'Self-service developer portal for internal platform tooling.' },
-  { name: 'Payments 3.0', client: 'Meridian Financial', status: 'at_risk', team: 'Payments Engineering', type: 'migration', phase: 'implementation', description: 'Replatforming payment services to the new Payments 3.0 architecture.' },
-  { name: 'Search Relevance', client: 'Zenith Retail Group', status: 'on_track', team: 'Growth Engineering', type: 'new_feature', phase: 'testing', description: 'Improving search ranking and relevance for the product catalog.' },
-  { name: 'Billing Upgrade', client: 'Orbit Logistics', status: 'paused', team: 'Payments Engineering', type: 'modernization', phase: 'design', description: 'Migration of billing services to a new payment gateway with improved reliability and transaction processing.' },
-  { name: 'Observability Rollout', client: 'Orbit Logistics', status: 'complete', team: 'Core Infrastructure', type: 'maintenance', phase: 'complete', description: 'Rolling out standard observability tooling to all production services.' },
+  { name: 'Atlas Platform Migration', client: 'Zenith Retail Group', status: 'at_risk', teams: ['Platform Engineering', 'Cloud & Infrastructure'], type: 'migration', phase: 'implementation', description: 'Migration of legacy platform services to Kubernetes architecture.' },
+  { name: 'Checkout Modernization', client: 'Zenith Retail Group', status: 'at_risk', teams: ['Frontend Engineering', 'Backend Engineering', 'QA Engineering'], type: 'modernization', phase: 'implementation', description: 'Modernization of checkout services to an event-driven architecture.' },
+  { name: 'Data Lake Consolidation', client: 'Meridian Financial', status: 'on_track', teams: ['Data Engineering', 'Engineering Leadership & Architecture'], type: 'migration', phase: 'design', description: 'Consolidation of siloed data warehouses into a single analytics data lake.' },
+  { name: 'ML Inference at Scale', client: 'Meridian Financial', status: 'on_track', teams: ['Data Engineering', 'Engineering Leadership & Architecture'], type: 'research', phase: 'implementation', description: 'Scaling ML inference workloads with lower-latency serving infrastructure.' },
+  { name: 'Multi-region Reliability', client: 'Aurelia Health Systems', status: 'at_risk', teams: ['SRE / Reliability Engineering'], type: 'platform', phase: 'implementation', description: 'Extending service reliability across multiple cloud regions.' },
+  { name: 'Developer Portal', client: 'Aurelia Health Systems', status: 'on_track', teams: ['Platform Engineering', 'Frontend Engineering'], type: 'platform', phase: 'release', description: 'Self-service developer portal for internal platform tooling.' },
+  { name: 'Payments 3.0', client: 'Meridian Financial', status: 'at_risk', teams: ['Payments Engineering', 'Backend Engineering', 'QA Engineering'], type: 'migration', phase: 'implementation', description: 'Replatforming payment services to the new Payments 3.0 architecture.' },
+  { name: 'Search Relevance', client: 'Zenith Retail Group', status: 'on_track', teams: ['Frontend Engineering', 'QA Engineering'], type: 'new_feature', phase: 'testing', description: 'Improving search ranking and relevance for the product catalog.' },
+  { name: 'Billing Upgrade', client: 'Orbit Logistics', status: 'paused', teams: ['Payments Engineering', 'Backend Engineering', 'Engineering Leadership & Architecture'], type: 'modernization', phase: 'design', description: 'Migration of billing services to a new payment gateway with improved reliability and transaction processing.' },
+  { name: 'Observability Rollout', client: 'Orbit Logistics', status: 'complete', teams: ['Cloud & Infrastructure', 'SRE / Reliability Engineering'], type: 'maintenance', phase: 'complete', description: 'Rolling out standard observability tooling to all production services.' },
 ];
 
 const drivers = [
@@ -335,7 +338,8 @@ const clients = clientMeta.map((c, i) => ({
 const clientByName = Object.fromEntries(clients.map((c) => [c.name, c.id]));
 
 const projects = projectMeta.map((pm, i) => {
-  const team = teams.find((t) => t.name === pm.team) ?? teams[0];
+  const teamIds = pm.teams.map((name) => teams.find((t) => t.name === name)?.id).filter(Boolean);
+  const team = teams.find((t) => t.id === teamIds[0]) ?? teams[0];
   const healthScore = pm.status === 'at_risk' ? between(40, 62) : pm.status === 'paused' ? 30 : between(72, 92);
   const trend = Array.from({ length: 12 }, (_, wk) => {
     const base = healthScore + between(-6, 6);
@@ -353,8 +357,8 @@ const projects = projectMeta.map((pm, i) => {
     healthDelta: between(-8, 9),
     deliveryConfidence: Math.max(30, Math.min(98, healthScore + between(-6, 6))),
     targetDate: daysAgo(between(-60, 150)),
-    teamIds: [team.id],
-    teamSize: team.memberIds.length,
+    teamIds,
+    teamSize: teamIds.reduce((sum, id) => sum + (teams.find((t) => t.id === id)?.memberIds.length ?? 0), 0),
     ownerIds: team.memberIds.slice(0, between(1, 3)),
     topDriver: drivers[i % drivers.length],
     trend,

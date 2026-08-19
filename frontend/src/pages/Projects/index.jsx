@@ -1,6 +1,8 @@
 import { Link } from 'react-router';
 import { Box, Grid, MenuItem, TextField } from '@mui/material';
 import PageHeader from '../../components/common/PageHeader.jsx';
+import AISubtitle from '../../components/ui/AISubtitle.jsx';
+import { useAiTerms } from '../../hooks/useAiTerms.js';
 import MetricCard from '../../components/common/MetricCard.jsx';
 import DataTable from '../../components/ui/DataTable.jsx';
 import FilterBar from '../../components/ui/FilterBar.jsx';
@@ -29,6 +31,7 @@ import { useUrlFilters } from '../../hooks/useUrlFilters.js';
 const Projects = () => {
   const { values, set, clear } = useUrlFilters(['search', 'status']);
   const { data: projects = [], loading, error, retry } = useData(fetchProjects);
+  const { t } = useAiTerms();
 
   if (loading) return <LoadingState variant="grid" sx={{ mt: 3 }} />;
   if (error) return <ErrorState onRetry={retry} />;
@@ -56,7 +59,7 @@ const Projects = () => {
 
   return (
     <Box>
-      <PageHeader title="Projects" subtitle="Compare delivery risk and health across the portfolio." />
+      <PageHeader title="Projects" subtitle={<AISubtitle>{t('subtitleProjects')}</AISubtitle>} />
 
       {/* KPI strip */}
       <Grid container spacing={3} sx={{ mt: 3 }}>

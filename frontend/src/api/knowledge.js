@@ -38,3 +38,12 @@ export async function updateTransferPlan(planId, patch) {
   const { plan } = await http.patch(`/knowledge/transfer-plans/${planId}`, patch);
   return plan;
 }
+
+/**
+ * @param {{ areaId: string, backupOwnerId: string, dueDate: string }} payload
+ * @returns {Promise<TransferPlan>}
+ */
+export async function createTransferPlan(payload) {
+  const { plan } = await http.post('/knowledge/transfer-plans', payload);
+  return plan;
+}

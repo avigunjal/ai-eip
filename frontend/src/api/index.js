@@ -1,4 +1,5 @@
 export * from './client.js';
+export * from './ai.js';
 export * from './capabilities.js';
 export * from './dashboard.js';
 export * from './insights.js';

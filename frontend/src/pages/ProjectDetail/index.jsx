@@ -2,19 +2,25 @@ import { Link, useParams } from 'react-router';
 import { Box, Button, Chip, Grid, Tab, Tabs, Typography } from '@mui/material';
 import StarBorder from '@mui/icons-material/StarBorder';
 import Star from '@mui/icons-material/Star';
+import BarChart from '@mui/icons-material/BarChart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import StatusBadge from '../../components/common/StatusBadge.jsx';
 import MetricCard from '../../components/common/MetricCard.jsx';
 import AvatarGroup from '../../components/common/AvatarGroup.jsx';
+import SparkleIcon from '../../components/ui/SparkleIcon.jsx';
 import ChartCard from '../../components/ui/ChartCard.jsx';
 import DataTable from '../../components/ui/DataTable.jsx';
+import ProjectAssessmentCard from '../../components/ui/ProjectAssessmentCard.jsx';
 import LoadingState from '../../components/common/LoadingState.jsx';
 import ErrorState from '../../components/common/ErrorState.jsx';
 import { useData } from '../../hooks/useData.js';
 import { useToast } from '../../hooks/useToast.js';
+import { useAiTerms } from '../../hooks/useAiTerms.js';
 import { useActionStore } from '../../store/actionStore.js';
 import { fetchProject, fetchProjectRisks } from '../../api/projects.js';
+import { getProjectAssessment, explainProjectAnalysis, regenerateProjectAnalysis, fetchAiSettings } from '../../api/ai.js';
+import { withRetry } from '../../api/client.js';
 import { mapProjectOwners } from '../../api/projects.adapter.js';
 import { getProjectStatus, getSeverity } from '../../config/riskLabels.js';
 import { paths } from '../../config/paths.js';
@@ -23,6 +29,10 @@ import { useState } from 'react';
 
 /**
  * ProjectDetail — header with status/owners/watch, KPI row, and tabs.
+ *
+ * One Project Assessment card renders either the deterministic view or the AI
+ * view; the AI action lives in the header next to Watch. The cached AI result
+ * is never deleted — switching views never calls the API again.
  *
  * REMAINING (extend later):
  *  - annotated health trend with milestone markers
@@ -34,9 +44,78 @@ const ProjectDetail = () => {
   const { projectId } = useParams();
   const { data: project, loading, error, retry } = useData(() => fetchProject(projectId), [projectId]);
   const { data: risks = [], loading: risksLoading, error: risksError } = useData(() => fetchProjectRisks(projectId), [projectId]);
+  const { data: aiSettings } = useData(fetchAiSettings, []);
+  const { data: assessment } = useData(() => getProjectAssessment(projectId), [projectId]);
   const [tab, setTab] = useState(0);
+  const [aiState, setAiState] = useState({ status: 'idle', analysis: null, regenerating: false });
+  const [view, setView] = useState('deterministic');
   const { isWatched, toggleWatch } = useActionStore();
   const toast = useToast();
+
+  // The cached AI analysis (from the page-load GET) is surfaced without any
+  // LLM call; the header offers "View AI Assessment" instead of "Explain with AI".
+  const aiAnalysis = aiState.analysis ?? assessment?.ai ?? null;
+  const aiStatus = aiState.status === 'idle' && aiAnalysis ? 'success' : aiState.status;
+  // If the settings fetch fails, default to the current behavior (AI on).
+  const aiEnabled = aiSettings?.enabled ?? true;
+  const { t } = useAiTerms();
+  const hasAi = Boolean(aiAnalysis);
+  const busy = aiStatus === 'loading' || aiState.regenerating;
+
+  const handleExplain = async () => {
+    setAiState({ status: 'loading', analysis: null, regenerating: false });
+    try {
+      const analysis = await withRetry(() => explainProjectAnalysis(projectId));
+      if (!analysis) {
+        setAiState({ status: 'error', analysis: null, regenerating: false });
+        toast("Couldn't run the AI analysis.", { severity: 'error' });
+        return;
+      }
+      setAiState({ status: 'success', analysis, regenerating: false });
+      setView('ai');
+    } catch {
+      setAiState({ status: 'error', analysis: null, regenerating: false });
+      toast("Couldn't run the AI analysis.", { severity: 'error' });
+    }
+  };
+
+  const handleRegenerate = async () => {
+    if (!hasAi) return;
+    setAiState((state) => ({ ...state, regenerating: true }));
+    try {
+      // A 502 from the backend means "provider failed, previous analysis
+      // kept" — retrying would just burn tokens, so do not auto-retry that.
+      const analysis = await withRetry(() => regenerateProjectAnalysis(projectId), {
+        retryable: (err) =>
+          err.isNetworkError ||
+          err.status === 429 ||
+          err.status === 500 ||
+          err.status === 503 ||
+          err.status === 504,
+      });
+      setAiState({ status: 'success', analysis, regenerating: false });
+      setView('ai');
+      toast('AI analysis regenerated');
+    } catch (err) {
+      setAiState((state) => ({ ...state, regenerating: false }));
+      toast(err?.message ?? "Couldn't regenerate the AI analysis", { severity: 'error' });
+    }
+  };
+
+  const headerAction = () => {
+    if (view === 'ai') {
+      return { label: 'View Engineering Signals', icon: <BarChart />, onClick: () => setView('deterministic') };
+    }
+    if (hasAi) {
+      return { label: t('viewAssessment'), icon: <SparkleIcon />, onClick: () => setView('ai') };
+    }
+    return {
+      label: t('explain'),
+      icon: <SparkleIcon />,
+      disabled: !aiEnabled,
+      onClick: handleExplain,
+    };
+  };
 
   if (loading) return <LoadingState />;
   if (error) return <ErrorState onRetry={retry} />;
@@ -44,6 +123,7 @@ const ProjectDetail = () => {
 
   const team = project.teams?.[0];
   const people = mapProjectOwners(project.owners ?? []);
+  const action = headerAction();
 
   return (
     <Box>
@@ -52,7 +132,16 @@ const ProjectDetail = () => {
         subtitle={`${team?.name ?? 'No team'} · Target ${formatDate(project.targetDate)}`}
         actions={
           <>
-            <StatusBadge config={getProjectStatus(project.status)} />
+            <StatusBadge config={getProjectStatus(project.status)} size="medium" />
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={busy ? undefined : action.icon}
+              disabled={busy || action.disabled}
+              onClick={action.onClick}
+            >
+              {aiStatus === 'loading' ? 'Analyzing…' : aiState.regenerating ? 'Regenerating…' : action.label}
+            </Button>
             <Button
               variant="outlined"
               startIcon={isWatched(project.id) ? <Star /> : <StarBorder />}
@@ -82,6 +171,18 @@ const ProjectDetail = () => {
           </Box>
         </Grid>
       </Grid>
+
+      {assessment?.deterministic && (
+        <ProjectAssessmentCard
+          deterministic={assessment.deterministic}
+          ai={aiAnalysis}
+          view={view}
+          aiStatus={aiStatus}
+          regenerating={aiState.regenerating}
+          onRegenerate={handleRegenerate}
+          onViewSignals={() => setView('deterministic')}
+        />
+      )}
 
       {/* Tabs */}
       <Box sx={{ mt: 3 }}>

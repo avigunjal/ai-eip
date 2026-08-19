@@ -22,7 +22,13 @@ import LoadingState from '../../components/common/LoadingState.jsx';
 import ErrorState from '../../components/common/ErrorState.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import LightbulbOutlined from '@mui/icons-material/LightbulbOutlined';
+import AiStatusCard from '../../components/ui/AiStatusCard.jsx';
 import { useDashboard, useDashboardInsights } from '../../hooks/useDashboard.js';
+import { useInsightAi } from '../../hooks/useInsightAi.js';
+import { useAiTerms } from '../../hooks/useAiTerms.js';
+import { collectSources } from '../../api/insights.adapter.js';
+import EngineeringRelationshipGraph from '../../components/ui/EngineeringRelationshipGraph.jsx';
+import { fetchPerson } from '../../api/people.js';
 
 /**
  * Overview — the four MVP pillars (health, risk, knowledge, capacity) plus
@@ -37,7 +43,9 @@ import { useDashboard, useDashboardInsights } from '../../hooks/useDashboard.js'
 const Overview = () => {
   const { data: dashboard, loading, error, retry } = useDashboard();
   const { data: insights = [], loading: insightsLoading, error: insightsError } = useDashboardInsights();
+  const { t } = useAiTerms();
   const { isSaved, saveInsight, unsaveInsight, dismissInsight, restoreInsight } = useActionStore();
+  const { aiEnabled, explanations, explainingId, regeneratingId, handleExplain, handleRegenerate } = useInsightAi();
   const toast = useToast();
 
   if (loading) return <LoadingState variant="grid" sx={{ mt: 3 }} />;
@@ -90,36 +98,29 @@ const Overview = () => {
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 3 }}>
         {/* KPI strip — deliberate 5-across on desktop (flex, lg = 1 row) */}
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
           {kpiCards.map((k) => (
             <Box key={k.label} sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 30%', lg: '1 1 0' }, minWidth: 0 }}>
-              <MetricCard {...k} />
+              <MetricCard compact {...k} />
             </Box>
           ))}
         </Box>
 
-        {/* Relationship chain — Projects → Teams → People → Skills → Knowledge → Risk */}
+        {/* Engineering relationships — interactive relationship graph */}
         {chain && (
-          <ChartCard title="Engineering relationships" subtitle={`How ${chain.project.name} connects teams, people, skills, knowledge, and risk.`}>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'center', py: 1 }}>
-              <ChainNode label={chain.project.name} to={paths.project(chain.project.id)} tone="primary" />
-              <ChainArrow />
-              <ChainGroup label={`${chain.teams.length} team${chain.teams.length === 1 ? '' : 's'}`} items={chain.teams.map((t) => ({ id: t.id, name: t.name, to: paths.team(t.id) }))} />
-              <ChainArrow />
-              <ChainGroup label={`${chain.people.length} people`} items={chain.people.slice(0, 5).map((p) => ({ id: p.id, name: p.name, to: paths.person(p.id) }))} />
-              <ChainArrow />
-              <ChainGroup label={`${chain.skills.length} skills`} items={chain.skills.map((a) => ({ id: a.id, name: a.name, to: paths.system(a.id) }))} />
-              <ChainArrow />
-              <ChainGroup label={`${chain.areas.length} systems`} items={chain.areas.map((a) => ({ id: a.id, name: a.name, to: paths.system(a.id) }))} />
-              <ChainArrow />
-              <ChainGroup label={`${chain.risks.length} risks`} items={chain.risks.slice(0, 4).map((r) => ({ id: r.id, name: r.title }))} tone="error" />
-            </Box>
+          <ChartCard
+            title="Engineering relationships"
+            subtitle={`How ${chain.project.name} connects teams, people, skills, systems, and risk.`}
+            data={relationshipRows(chain)}
+            dataColumns={[{ key: 'type', label: 'Type' }, { key: 'name', label: 'Name' }]}
+          >
+            <EngineeringRelationshipGraph data={chain} paths={paths} fetchPerson={fetchPerson} />
           </ChartCard>
         )}
 
         {/* Health trend + insights */}
         <Grid container spacing={3}>
-          <Grid item xs={12} lg={7}>
+          <Grid item size={{ xs: 12, lg: 3.6 }}>
             <ChartCard
               title="Engineering health trend"
               subtitle="Average project health, last 12 weeks"
@@ -139,9 +140,14 @@ const Overview = () => {
             </ChartCard>
           </Grid>
 
-          <Grid item xs={12} lg={5}>
+          <Grid item size={{ xs: 12, lg: 8.4 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Typography sx={{ fontWeight: 600 }}>AI insights</Typography>
+              {!insightsLoading && !insightsError && (
+                <AiStatusCard
+                  signals={insights.reduce((n, ins) => n + ins.why.evidence.length, 0)}
+                  sources={collectSources(insights)}
+                />
+              )}
               {insightsLoading ? (
                 <LoadingState sx={{ p: 2.5 }} />
               ) : insightsError ? (
@@ -154,12 +160,21 @@ const Overview = () => {
                     saved={isSaved(ins.id)}
                     onSave={() => handleSave(ins.id)}
                     onDismiss={() => handleDismiss(ins.id)}
+                    onExplain={() => handleExplain(ins.id)}
+                    onRegenerate={() => handleRegenerate(ins.id)}
+                    explaining={explainingId === ins.id}
+                    regenerating={regeneratingId === ins.id}
+                    aiEnabled={aiEnabled}
+                    aiExplanation={explanations.get(ins.id)?.explanation ?? null}
+                    aiMeta={explanations.get(ins.id)?.explanationMeta ?? null}
+                    showAiLabel={ins.id === insights[0]?.id}
+                    defaultOpen={ins.id === insights[0]?.id}
                   />
                 ))
               ) : (
                 <EmptyState
                   icon={LightbulbOutlined}
-                  title="No AI insights yet"
+                  title="No insights yet"
                   description="Insights will appear here as signals are analyzed."
                   sx={{ py: 4 }}
                 />
@@ -168,10 +183,10 @@ const Overview = () => {
           </Grid>
         </Grid>
 
-        {/* Projects needing attention */}
+        {/* AI-prioritized projects */}
         <ChartCard
-          title="Projects needing attention"
-          subtitle="Sorted by lowest engineering health"
+          title={t('prioritized')}
+          subtitle="Ranked by engineering health risk"
         >
           <DataTable
             dense
@@ -192,43 +207,15 @@ const Overview = () => {
   );
 };
 
-function ChainArrow() {
-  return <Typography sx={{ color: 'text.disabled', fontWeight: 700 }}>→</Typography>;
-}
-
-function ChainGroup({ label, items, tone }) {
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0 }}>
-      <Typography sx={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'text.secondary' }}>
-        {label}
-      </Typography>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-        {items.map((it) => (
-          <Chip
-            key={it.id}
-            size="small"
-            component={it.to ? Link : undefined}
-            to={it.to}
-            clickable
-            label={it.name}
-            variant="outlined"
-            sx={tone === 'error' ? { color: 'var(--red)', borderColor: 'var(--red-lighter)', bgcolor: 'var(--red-lighter)' } : undefined}
-          />
-        ))}
-      </Box>
-    </Box>
-  );
-}
-
-function ChainNode({ label, to }) {
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0 }}>
-      <Typography sx={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'text.secondary' }}>
-        Project
-      </Typography>
-      <Chip size="small" component={Link} to={to} clickable label={label} sx={{ bgcolor: 'var(--primary-lighter)', color: 'var(--primary)', border: 'none', fontWeight: 600 }} />
-    </Box>
-  );
+function relationshipRows(chain) {
+  return [
+    { type: 'Project', name: chain.project.name },
+    ...chain.teams.map((t) => ({ type: 'Team', name: t.name })),
+    ...chain.people.map((p) => ({ type: 'Engineer', name: p.name })),
+    ...chain.skills.map((s) => ({ type: 'Skill', name: s.name })),
+    ...chain.systems.map((s) => ({ type: 'System', name: s.name })),
+    ...chain.risks.map((r) => ({ type: 'Risk', name: r.title })),
+  ];
 }
 
 export default Overview;

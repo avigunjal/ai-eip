@@ -1,14 +1,19 @@
 import { useState } from 'react';
 import { Box, Grid, MenuItem, TextField, Typography } from '@mui/material';
 import PageHeader from '../../components/common/PageHeader.jsx';
+import AISubtitle from '../../components/ui/AISubtitle.jsx';
+import { useAiTerms } from '../../hooks/useAiTerms.js';
 import MetricCard from '../../components/common/MetricCard.jsx';
 import StatusBadge from '../../components/common/StatusBadge.jsx';
 import DataTable from '../../components/ui/DataTable.jsx';
 import FilterBar from '../../components/ui/FilterBar.jsx';
 import EvidenceDrawer from '../../components/ui/EvidenceDrawer.jsx';
-import { getRisks, riskSummary, getRisk } from '../../data/service.js';
+import LoadingState from '../../components/common/LoadingState.jsx';
+import ErrorState from '../../components/common/ErrorState.jsx';
+import { fetchRisks } from '../../api/risks.js';
 import { getSeverity, getRiskStatus } from '../../config/riskLabels.js';
 import { RISK_CATEGORIES, RISK_CATEGORY_LABELS, RISK_STATUS } from '../../config/constants.js';
+import { useData } from '../../hooks/useData.js';
 import { useUrlFilters } from '../../hooks/useUrlFilters.js';
 
 /**
@@ -23,10 +28,13 @@ const Risks = () => {
   const { values, set, clear } = useUrlFilters(['severity', 'category', 'status']);
   const [selectedRisk, setSelectedRisk] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { data: risks = [], loading, error, retry } = useData(fetchRisks);
+  const { t } = useAiTerms();
 
-  const risks = getRisks();
-  const summary = riskSummary();
+  if (loading) return <LoadingState variant="table" />;
+  if (error) return <ErrorState onRetry={retry} />;
 
+  const today = new Date().toISOString().slice(0, 10);
   const filtered = risks.filter((r) => {
     if (values.severity && r.severity !== values.severity) return false;
     if (values.category && r.category !== values.category) return false;
@@ -41,20 +49,20 @@ const Risks = () => {
   ].filter(Boolean);
 
   const openRisk = (risk) => {
-    setSelectedRisk(getRisk(risk.id));
+    setSelectedRisk(risk);
     setDrawerOpen(true);
   };
 
   const kpis = [
-    { label: 'Critical', value: summary.critical },
-    { label: 'High', value: summary.high },
-    { label: 'Rising', value: summary.rising },
-    { label: 'Overdue actions', value: summary.overdueActions },
+    { label: 'Critical', value: risks.filter((r) => r.severity === 'critical').length },
+    { label: 'High', value: risks.filter((r) => r.severity === 'high').length },
+    { label: 'Rising', value: risks.filter((r) => r.trend === 'rising').length },
+    { label: 'Overdue actions', value: risks.reduce((n, r) => n + (r.actions ?? []).filter((a) => a.dueDate && a.dueDate < today).length, 0) },
   ];
 
   return (
     <Box>
-      <PageHeader title="Risks" subtitle="Cross-project risk register and prevention workflow." />
+      <PageHeader title="Risks" subtitle={<AISubtitle>{t('subtitleRisks')}</AISubtitle>} />
 
       <Grid container spacing={3} sx={{ mt: 3 }}>
         {kpis.map((k) => (
@@ -83,7 +91,7 @@ const Risks = () => {
         <DataTable
           columns={[
             { key: 'title', label: 'Risk', sortable: true, render: (r) => <Typography sx={{ fontWeight: 600 }}>{r.title}</Typography> },
-            { key: 'severity', label: 'Severity', render: (r) => <StatusBadge config={getSeverity(r.severity)} /> },
+            { key: 'severity', label: 'Severity', render: (r) => <StatusBadge config={getSeverity(r.severity)} pulse={r.severity === 'critical'} /> },
             { key: 'category', label: 'Category', render: (r) => RISK_CATEGORY_LABELS[r.category] },
             { key: 'confidence', label: 'Confidence', sortable: true, render: (r) => `${r.confidence}%` },
             { key: 'trend', label: 'Trend' },

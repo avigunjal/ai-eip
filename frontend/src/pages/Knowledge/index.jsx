@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router';
-import { Box, Chip, Grid, LinearProgress, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Chip, Grid, Tab, Tabs, Typography } from '@mui/material';
 import PageHeader from '../../components/common/PageHeader.jsx';
+import AISubtitle from '../../components/ui/AISubtitle.jsx';
+import { useAiTerms } from '../../hooks/useAiTerms.js';
 import MetricCard from '../../components/common/MetricCard.jsx';
 import AvatarGroup from '../../components/common/AvatarGroup.jsx';
 import StatusBadge from '../../components/common/StatusBadge.jsx';
@@ -9,10 +11,32 @@ import DataTable from '../../components/ui/DataTable.jsx';
 import { getPeople, transferOpportunities, areaHierarchy } from '../../data/service.js';
 import { fetchKnowledgeAreas } from '../../api/knowledge.js';
 import { useData } from '../../hooks/useData.js';
+import { useCountUpNumber } from '../../hooks/useCountUp.js';
 import LoadingState from '../../components/common/LoadingState.jsx';
 import ErrorState from '../../components/common/ErrorState.jsx';
 import { coverageStatus, getRiskLevel } from '../../config/riskLabels.js';
 import { paths } from '../../config/paths.js';
+
+/**
+ * Animated coverage bar — counts up 0 → value on mount (same treatment as the
+ * Teams page capacity bars).
+ */
+function CoverageBar({ value, color }) {
+  const display = useCountUpNumber(value);
+  return (
+    <Box sx={{ flex: 1, height: 6, borderRadius: 4, bgcolor: 'action.hover', overflow: 'hidden' }}>
+      <Box
+        sx={{
+          height: '100%',
+          borderRadius: 4,
+          bgcolor: color,
+          width: `${display}%`,
+          transition: 'width 800ms cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      />
+    </Box>
+  );
+}
 
 /**
  * Knowledge — knowledge concentration + knowledge-risk module.
@@ -23,6 +47,7 @@ import { paths } from '../../config/paths.js';
 const Knowledge = () => {
   const [view, setView] = useState('areas');
   const { data: areas = [], loading, error, retry } = useData(fetchKnowledgeAreas);
+  const { t } = useAiTerms();
   const people = getPeople();
   const opportunities = transferOpportunities();
 
@@ -63,7 +88,7 @@ const Knowledge = () => {
   if (view === 'risks') {
     return (
       <Box>
-        <PageHeader title="Knowledge" subtitle="Find critical systems that depend on too few people." actions={headerActions} />
+        <PageHeader title="Knowledge" subtitle={<AISubtitle>{t('subtitleKnowledge')}</AISubtitle>} actions={headerActions} />
 
         <Grid container spacing={3} sx={{ mt: 3 }}>
           {kpis.map((k) => (
@@ -95,7 +120,7 @@ const Knowledge = () => {
               { key: 'criticalityScore', label: 'Criticality', sortable: true, render: (r) => `${r.criticalityScore}/100` },
               { key: 'coverage', label: 'Coverage', sortable: true, render: (r) => (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 120 }}>
-                  <LinearProgress variant="determinate" value={r.coverage} sx={{ flex: 1, height: 6, borderRadius: 4, bgcolor: 'action.hover', '& .MuiLinearProgress-bar': { bgcolor: coverageStatus(r.coverage).color } }} />
+                  <CoverageBar value={r.coverage} color={coverageStatus(r.coverage).color} />
                   <Typography sx={{ fontSize: 13, fontWeight: 700 }}>{r.coverage}%</Typography>
                 </Box>
               )},
@@ -141,7 +166,7 @@ const Knowledge = () => {
 
   return (
     <Box>
-      <PageHeader title="Knowledge" subtitle="Find critical systems that depend on too few people." actions={headerActions} />
+      <PageHeader title="Knowledge" subtitle={<AISubtitle>{t('subtitleKnowledge')}</AISubtitle>} actions={headerActions} />
 
       <Grid container spacing={3} sx={{ mt: 3 }}>
         {kpis.map((k) => (
@@ -188,7 +213,7 @@ const Knowledge = () => {
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.25 }}>
-                  <LinearProgress variant="determinate" value={a.coverage} sx={{ flex: 1, height: 6, borderRadius: 4, bgcolor: 'action.hover', '& .MuiLinearProgress-bar': { bgcolor: coverageStatus(a.coverage).color } }} />
+                  <CoverageBar value={a.coverage} color={coverageStatus(a.coverage).color} />
                   <Typography sx={{ fontSize: 13, fontWeight: 700 }}>{a.coverage}%</Typography>
                 </Box>
 

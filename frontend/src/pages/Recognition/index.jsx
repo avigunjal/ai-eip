@@ -8,6 +8,7 @@ import EmptyState from '../../components/common/EmptyState.jsx';
 import { getPeople } from '../../data/service.js';
 import { fetchRecognitionFeed, createRecognition } from '../../api/recognition.js';
 import { useData } from '../../hooks/useData.js';
+import { useAiTerms } from '../../hooks/useAiTerms.js';
 import LoadingState from '../../components/common/LoadingState.jsx';
 import ErrorState from '../../components/common/ErrorState.jsx';
 import { formatRelative } from '../../config/dates.js';
@@ -35,6 +36,7 @@ const Recognition = () => {
   const people = getPeople();
   const { markRecognized, unmarkRecognized } = useActionStore();
   const toast = useToast();
+  const { t } = useAiTerms();
   const [open, setOpen] = useState(false);
   const [composer, setComposer] = useState({ personId: '', type: 'delivery', summary: '' });
 
@@ -100,6 +102,20 @@ const Recognition = () => {
                     </Typography>
                   </Typography>
                   <Typography sx={{ color: 'text.secondary', fontSize: 14, mt: 0.25 }}>{r.summary}</Typography>
+                  {r.impact?.length > 0 && (
+                    <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid', borderTopColor: 'divider' }}>
+                      <Typography sx={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'text.secondary' }}>
+                        {t('detected')} impact
+                      </Typography>
+                      <Box component="ul" sx={{ m: 0, mt: 0.25, pl: 2 }}>
+                        {r.impact.map((line) => (
+                          <Typography component="li" key={line} sx={{ fontSize: 13, color: 'text.secondary', '& + &': { mt: 0.25 } }}>
+                            {line}
+                          </Typography>
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
                 </Box>
               </Box>
             );

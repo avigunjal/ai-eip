@@ -15,6 +15,42 @@ const SEVERITY_ASSESSMENT = {
   low: { assessment: 'Positive', tone: 'success' },
 };
 
+const SOURCE_LABELS = {
+  github: 'GitHub',
+  gitlab: 'GitLab',
+  jira: 'Jira',
+  docs: 'Docs',
+  confluence: 'Confluence',
+  slack: 'Slack',
+  pagerduty: 'PagerDuty',
+  datadog: 'Datadog',
+  incident: 'Incidents',
+  planning: 'Planning',
+};
+const SOURCE_KEYS = Object.keys(SOURCE_LABELS);
+
+/**
+ * Signal-source coverage for the AI Analysis Engine card, derived from the
+ * insight evidence actually in view (counts stay honest, never fabricated).
+ *
+ * @param {{ why: { evidence: string[] } }[]} insights - insight view models.
+ * @returns {{ name: string; count: number }[]}
+ */
+export function collectSources(insights) {
+  const counts = new Map();
+  for (const ins of insights) {
+    for (const item of ins.why.evidence) {
+      const lower = item.toLowerCase();
+      for (const key of SOURCE_KEYS) {
+        if (lower.includes(key)) counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+    }
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([key, count]) => ({ name: SOURCE_LABELS[key], count }));
+}
+
 /**
  * Map a backend insight DTO to the contract InsightCard expects.
  * The backend has no `title` / `why` / `assessmentTone`; they are derived
@@ -56,5 +92,11 @@ export function mapInsightToViewModel(insight) {
       assessment: tone.assessment,
       assessmentTone: tone.tone,
     },
+    // Optional AI layer from the explain/regenerate endpoints:
+    // explanation = { reasoning, impact } (advisory only; deterministic
+    // evidence/scores are untouched), explanationMeta = { source, provider,
+    // model, generatedAt } for attribution ("AI · model · Generated X ago").
+    aiExplanation: insight.explanation ?? null,
+    aiMeta: insight.explanationMeta ?? null,
   };
 }

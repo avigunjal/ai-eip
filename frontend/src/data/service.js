@@ -3,7 +3,6 @@ import {
   teams,
   projects,
   knowledgeAreas,
-  risks,
   recognitions,
   clients,
   personById,
@@ -15,25 +14,15 @@ import {
 } from './fixtures.js';
 
 /**
- * In-memory data service. Mirrors an API surface: async fetchers with a small
- * simulated delay (so loading/skeleton states are real), plus synchronous
- * getters/selectors used by pages after load.
+ * In-memory data service. Mirrors an API surface: synchronous
+ * getters/selectors used by pages that are not yet wired to the backend.
  */
-
-const simulateLatency = (ms = 450) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// ---------------------------------------------------------------------------
-// Fetchers (async)
-// ---------------------------------------------------------------------------
-export async function fetchRisks() { await simulateLatency(500); return risks; }
 
 // ---------------------------------------------------------------------------
 // Synchronous getters
 // ---------------------------------------------------------------------------
 export const getProjects = () => projects;
 export const getProject = (id) => projectById[id] ?? null;
-export const getRisks = () => risks;
-export const getRisk = (id) => risks.find((r) => r.id === id) ?? null;
 export const getTeams = () => teams;
 export const getTeam = (id) => teamById[id] ?? null;
 export const getPeople = () => people;
@@ -41,7 +30,6 @@ export const getPerson = (id) => personById[id] ?? null;
 export const getKnowledgeAreas = () => knowledgeAreas;
 export const getRecognitions = () => recognitions;
 
-export const getRisksForProject = (projectId) => risks.filter((r) => r.projectId === projectId);
 export const getProjectsForTeam = (teamId) => projects.filter((p) => p.teamIds.includes(teamId));
 export const getProjectsForArea = (areaId) =>
   (knowledgeAreaById[areaId]?.linkedProjectIds ?? [])
@@ -142,26 +130,6 @@ export function deliveryConfidenceDistribution() {
     { name: 'Medium confidence', value: buckets.medium, color: 'var(--amber)' },
     { name: 'Low confidence', value: buckets.low, color: 'var(--red)' },
   ];
-}
-
-/** Risk register summary counts. */
-export function riskSummary() {
-  return {
-    critical: risks.filter((r) => r.severity === 'critical').length,
-    high: risks.filter((r) => r.severity === 'high').length,
-    rising: risks.filter((r) => r.trend === 'rising').length,
-    overdueActions: 2,
-  };
-}
-
-/** Risk counts by severity and category (for stacked bars). */
-export function riskBySeverityAndCategory() {
-  const categories = ['schedule', 'dependency', 'knowledge', 'capacity', 'quality'];
-  const severities = ['critical', 'high', 'medium', 'low'];
-  return categories.map((cat) => ({
-    category: cat,
-    ...Object.fromEntries(severities.map((sev) => [sev, risks.filter((r) => r.category === cat && r.severity === sev).length])),
-  }));
 }
 
 /** Knowledge coverage trend (last 12 weeks of a sample index, for KPI). */

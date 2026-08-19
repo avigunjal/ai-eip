@@ -6,17 +6,34 @@
  * Insight mapping lives in `insights.adapter.js` (shared by Overview + Insights).
  */
 
-/** Build the Engineering-relationships chain from a project DTO. */
+/** Build the Engineering-relationships graph model from a project DTO. */
 function buildChain(project) {
   const areas = project.knowledgeAreas ?? [];
-  const risks = project.risk?.drivers ?? [];
+  const drivers = project.risk?.drivers ?? [];
   return {
-    project: { id: project.id, name: project.name },
+    project: {
+      id: project.id,
+      name: project.name,
+      healthScore: project.healthScore ?? null,
+      status: project.status ?? null,
+      phase: project.phase ?? null,
+      ownerId: project.owners?.[0]?.id ?? null,
+      owner: project.owners?.[0]?.name ?? null,
+    },
     teams: (project.teams ?? []).map((team) => ({ id: team.id, name: team.name })),
     people: (project.owners ?? []).map((person) => ({ id: person.id, name: person.name })),
-    skills: areas.map((area) => ({ id: area.id, name: area.name })),
-    areas: areas.map((area) => ({ id: area.id, name: area.name })),
-    risks: risks.map((driver) => ({ id: driver.riskId, title: driver.title })),
+    // Skills are the capability areas the project requires; systems are the
+    // knowledge areas (services/components) the project touches.
+    skills: (project.skills ?? []).map((skill) => ({ id: skill.id, name: skill.name })),
+    systems: areas.map((area) => ({ id: area.id, name: area.name })),
+    risks: drivers.map((driver) => ({
+      id: driver.riskId,
+      title: driver.title,
+      category: driver.category ?? null,
+      severity: driver.severity ?? null,
+      score: driver.score ?? null,
+      evidence: driver.evidence ?? [],
+    })),
   };
 }
 

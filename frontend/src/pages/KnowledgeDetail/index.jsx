@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem, TextField, Typography } from '@mui/material';
+import HelpOutlineOutlined from '@mui/icons-material/HelpOutlineOutlined';
+import InfoOutlined from '@mui/icons-material/InfoOutlined';
+import Check from '@mui/icons-material/Check';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import StatusBadge from '../../components/common/StatusBadge.jsx';
 import MetricCard from '../../components/common/MetricCard.jsx';
@@ -9,7 +12,9 @@ import ErrorState from '../../components/common/ErrorState.jsx';
 import { useData } from '../../hooks/useData.js';
 import { useToast } from '../../hooks/useToast.js';
 import { getPeople, getProject, areaHierarchy } from '../../data/service.js';
-import { fetchKnowledgeArea, fetchTransferPlans } from '../../api/knowledge.js';
+import { createTransferPlan, fetchKnowledgeArea, fetchTransferPlans } from '../../api/knowledge.js';
+import SparkleIcon from '../../components/ui/SparkleIcon.jsx';
+import { useAiTerms } from '../../hooks/useAiTerms.js';
 import { coverageStatus, getRiskLevel } from '../../config/riskLabels.js';
 import { paths } from '../../config/paths.js';
 import { formatRelative } from '../../config/dates.js';
@@ -19,13 +24,29 @@ const LEVEL_COLOR = { primary: 'var(--primary)', capable: 'var(--teal)', learnin
 
 const SOURCE_LABEL = { github: 'GitHub', jira: 'Jira', docs: 'Docs', incident: 'Incident', pagerduty: 'PagerDuty' };
 
+const SOURCE_BASIS = {
+  github: 'GitHub ownership patterns',
+  incident: 'Incident history',
+  docs: 'Documentation freshness',
+  jira: 'Jira activity',
+  pagerduty: 'PagerDuty on-call history',
+};
+
+const BASIS_ORDER = ['github', 'incident', 'docs', 'jira', 'pagerduty'];
+
 const KnowledgeDetail = () => {
   const { systemId } = useParams();
   const { data: area, loading, error, retry } = useData(() => fetchKnowledgeArea(systemId), [systemId]);
-  const { data: plans = [] } = useData(fetchTransferPlans, []);
+  const { data: plans = [], retry: retryPlans } = useData(fetchTransferPlans, []);
   const toast = useToast();
+  const { t } = useAiTerms();
   const [planOpen, setPlanOpen] = useState(false);
   const [planForm, setPlanForm] = useState({ backupOwnerId: '', sessions: 2, dueDate: '' });
+  const [planSubmitting, setPlanSubmitting] = useState(false);
+
+  // Normalize height + vertical padding across select and date inputs so all
+  // three plan fields render at an identical medium size.
+  const uniformInputSx = { height: '3.4em', paddingTop: '16.5px', paddingBottom: '16.5px' };
 
   if (loading) return <LoadingState variant="card" />;
   if (error) return <ErrorState onRetry={retry} />;
@@ -38,12 +59,19 @@ const KnowledgeDetail = () => {
   const transferPlan = plans?.find((p) => p.areaId === area.id) ?? null;
   const chain = areaHierarchy(area.id);
 
-  const submitPlan = () => {
-    setPlanOpen(false);
-    toast('Transfer plan started', {
-      actionLabel: 'Undo',
-      action: () => setPlanOpen(true),
-    });
+  const submitPlan = async () => {
+    if (planSubmitting) return;
+    setPlanSubmitting(true);
+    try {
+      await createTransferPlan({ areaId: area.id, backupOwnerId: planForm.backupOwnerId, dueDate: planForm.dueDate });
+      setPlanOpen(false);
+      retryPlans();
+      toast('Transfer plan started', { severity: 'success' });
+    } catch (err) {
+      toast(err?.message ?? 'Could not start the transfer plan', { severity: 'error' });
+    } finally {
+      setPlanSubmitting(false);
+    }
   };
 
   return (
@@ -81,8 +109,20 @@ const KnowledgeDetail = () => {
         <Typography sx={{ mt: 1.5, maxWidth: 720 }}>
           {area.name} is a {area.riskLevel === 'critical' ? 'critical single-expert dependency' : 'concentrated-knowledge area'}. The dominant expert holds {area.dominantExpertShare}% of recent contribution and incident-resolution knowledge{area.expertise.some((x) => x.level === 'capable') ? '' : '; no confirmed backup can independently support the service'}.
         </Typography>
-        <Typography sx={{ mt: 1, fontSize: 13, color: 'text.secondary' }}>
-          Confidence 87% · Evidence {area.evidence?.length ?? 0} signals · Last assessed recently
+        <Typography sx={{ mt: 1.5, display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', fontSize: 13, color: 'text.secondary' }}>
+          <SparkleIcon sx={{ fontSize: 15, color: 'var(--primary)', flexShrink: 0 }} />
+          <Box component="span" sx={{ fontWeight: 700, color: 'text.primary' }}>{t('confidence')} 87%</Box>
+          <Box component="span" sx={{ opacity: 0.55 }}>·</Box>
+          <Box component="span" sx={{ fontWeight: 600 }}>Based on</Box>
+          {BASIS_ORDER
+            .map((k) => (area.evidence ?? []).some((ev) => ev.source === k) ? SOURCE_BASIS[k] : null)
+            .filter(Boolean)
+            .map((label) => (
+              <Box key={label} component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4 }}>
+                <Check sx={{ fontSize: 13, color: 'var(--primary)' }} />
+                {label}
+              </Box>
+            ))}
         </Typography>
         {projects.length > 0 && (
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1.5 }}>
@@ -96,7 +136,19 @@ const KnowledgeDetail = () => {
       {/* Why flagged */}
       <Box sx={{ mt: 3, p: 3, outline: '1px solid', outlineColor: 'divider', borderRadius: 'var(--radius-card)', bgcolor: 'background.paper' }}>
         <Typography sx={{ fontSize: 18, fontWeight: 700 }}>Why flagged</Typography>
-        <Typography sx={{ color: 'text.secondary', mb: 2 }}>Scoring inputs and the evidence timeline behind this assessment.</Typography>
+        <Typography sx={{ color: 'text.secondary', mb: 0.75 }}>Scoring inputs and the evidence timeline behind this assessment.</Typography>
+        {(() => {
+          const sources = [...new Set((area.evidence ?? []).map((ev) => SOURCE_LABEL[ev.source] ?? ev.source).filter(Boolean))];
+          return (
+            <Typography sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, fontSize: 13, color: 'text.secondary', mb: 1.5 }}>
+              <SparkleIcon sx={{ fontSize: 15, color: 'var(--primary)', flexShrink: 0 }} />
+              {t('detectedConcentration')}{' '}
+              <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                {sources.length ? sources.join(' · ') : 'recorded engineering signals'}
+              </Box>
+            </Typography>
+          );
+        })()}
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(4, 1fr)' }, gap: 1.5, mb: 2 }}>
           {[
             ['Criticality', `${area.criticalityScore}/100`],
@@ -175,44 +227,139 @@ const KnowledgeDetail = () => {
       )}
 
       {/* Start transfer plan modal */}
-      <Dialog open={planOpen} onClose={() => setPlanOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Start transfer plan</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-            <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>
-              Build a knowledge-transfer plan to raise coverage for {area.name} from {area.coverage}% toward {Math.min(90, area.coverage + 27)}%.
-            </Typography>
+      <Dialog
+        open={planOpen}
+        onClose={() => setPlanOpen(false)}
+        fullWidth
+        maxWidth="md"
+        PaperProps={{ sx: { width: 760, maxWidth: '100%', borderRadius: 'var(--radius-card)' } }}
+      >
+        <DialogTitle sx={{ px: 4, pt: 3.5, pb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box
+              sx={{
+                width: 46,
+                height: 46,
+                borderRadius: 'var(--radius-control)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'var(--primary-lighter)',
+                color: 'var(--primary)',
+                flexShrink: 0,
+              }}
+            >
+              <HelpOutlineOutlined sx={{ fontSize: 24 }} />
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography sx={{ fontSize: 20, fontWeight: 700, lineHeight: 1.25 }}>Start transfer plan</Typography>
+              <Typography sx={{ fontSize: 13, color: 'text.secondary', mt: 0.25, lineHeight: 1.4 }}>
+                Create a knowledge-transfer plan for {area.name}
+              </Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ px: 4, pt: 0, pb: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: 'var(--radius-control)',
+                bgcolor: 'var(--surface-subtle)',
+                outline: '1px solid',
+                outlineColor: 'divider',
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(3, 1fr)' },
+                gap: 2,
+              }}
+            >
+              <Box>
+                <Typography sx={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'text.secondary' }}>
+                  Current coverage
+                </Typography>
+                <Typography sx={{ fontSize: 20, fontWeight: 700, mt: 0.25 }}>{area.coverage}%</Typography>
+              </Box>
+              <Box>
+                <Typography sx={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'text.secondary' }}>
+                  Target coverage
+                </Typography>
+                <Typography sx={{ fontSize: 20, fontWeight: 700, mt: 0.25, color: 'var(--primary)' }}>
+                  {Math.min(90, area.coverage + 27)}%
+                </Typography>
+              </Box>
+              <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                <Typography sx={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'text.secondary' }}>
+                  Risk level
+                </Typography>
+                <Box sx={{ mt: 0.5 }}>
+                  <StatusBadge config={getRiskLevel(area.riskLevel)} />
+                </Box>
+              </Box>
+            </Box>
+
             <TextField
               select
+              fullWidth
+              size="medium"
               label="Backup owner"
               value={planForm.backupOwnerId}
               onChange={(e) => setPlanForm({ ...planForm, backupOwnerId: e.target.value })}
-              helperText="Name one accountable backup and define support expectations."
+              slotProps={{ input: { sx: uniformInputSx } }}
             >
               <MenuItem value="">Select a person</MenuItem>
               {people.map((p) => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
             </TextField>
-            <TextField
-              select
-              label="Knowledge-transfer sessions"
-              value={planForm.sessions}
-              onChange={(e) => setPlanForm({ ...planForm, sessions: Number(e.target.value) })}
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3 }}>
+              <TextField
+                select
+                fullWidth
+                size="medium"
+                label="Transfer sessions"
+                value={planForm.sessions}
+                onChange={(e) => setPlanForm({ ...planForm, sessions: Number(e.target.value) })}
+                slotProps={{ input: { sx: uniformInputSx } }}
+              >
+                {[2, 3, 4].map((n) => <MenuItem key={n} value={n}>{n} sessions</MenuItem>)}
+              </TextField>
+              <TextField
+                fullWidth
+                size="medium"
+                label="Target date"
+                type="date"
+                value={planForm.dueDate}
+                onChange={(e) => setPlanForm({ ...planForm, dueDate: e.target.value })}
+                slotProps={{ inputLabel: { shrink: true }, input: { sx: uniformInputSx } }}
+              />
+            </Box>
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: 'var(--radius-control)',
+                outline: '1px solid',
+                outlineColor: 'divider',
+                bgcolor: 'background.paper',
+                display: 'inline-flex',
+                alignItems: 'flex-start',
+                gap: 1.5,
+              }}
             >
-              {[2, 3, 4].map((n) => <MenuItem key={n} value={n}>{n} sessions</MenuItem>)}
-            </TextField>
-            <TextField
-              label="Target date"
-              type="date"
-              value={planForm.dueDate}
-              onChange={(e) => setPlanForm({ ...planForm, dueDate: e.target.value })}
-              slotProps={{ inputLabel: { shrink: true } }}
-            />
+              <InfoOutlined sx={{ fontSize: 18, color: 'var(--primary)', mt: 0.15, flexShrink: 0 }} />
+              <Typography sx={{ fontSize: 13, color: 'text.secondary', lineHeight: 1.5 }}>
+                Pick one accountable backup owner and define support expectations before starting. The plan is saved immediately with the selected owner and target date, then shown in the mitigation plan section.
+              </Typography>
+            </Box>
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setPlanOpen(false)}>Cancel</Button>
-          <Button variant="contained" disabled={!planForm.backupOwnerId || !planForm.dueDate} onClick={submitPlan}>
-            Start plan
+        <DialogActions sx={{ px: 4, pb: 3.5, pt: 1.5, gap: 1.5 }}>
+          <Button size="large" onClick={() => setPlanOpen(false)} disabled={planSubmitting}>Cancel</Button>
+          <Button
+            size="large"
+            variant="contained"
+            disabled={!planForm.backupOwnerId || !planForm.dueDate || planSubmitting}
+            onClick={submitPlan}
+            sx={{ px: 3 }}
+          >
+            {planSubmitting ? 'Starting…' : 'Start plan'}
           </Button>
         </DialogActions>
       </Dialog>
