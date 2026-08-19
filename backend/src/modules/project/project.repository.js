@@ -27,13 +27,22 @@ export async function findOwnerIds(projectId) {
 }
 
 export async function findRisks(projectId) {
-  return db.prepare('SELECT * FROM risks WHERE project_id = ? ORDER BY score DESC').all(projectId);
+  return db.prepare(`SELECT r.*, po.name AS owner_name FROM risks r
+    LEFT JOIN people po ON po.id = r.owner_person_id
+    WHERE r.project_id = ? ORDER BY r.score DESC`).all(projectId);
 }
 
 export async function findAreas(projectId) {
   return db.prepare(`SELECT k.* FROM knowledge_areas k
     JOIN knowledge_area_projects kap ON kap.knowledge_area_id = k.id
     WHERE kap.project_id = ? ORDER BY k.criticality DESC`).all(projectId);
+}
+
+export async function findCapabilities(projectId) {
+  return db.prepare(`SELECT c.id, c.name FROM capabilities c
+    JOIN project_requirements pr ON pr.capability_id = c.id
+    WHERE pr.project_id = ?
+    ORDER BY pr.weight DESC, c.name ASC`).all(projectId);
 }
 
 export async function findTeams(projectId) {

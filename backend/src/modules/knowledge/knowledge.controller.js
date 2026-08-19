@@ -18,6 +18,11 @@ export const listTransferPlans = asyncHandler(async (_req, res) => {
   res.json({ plans: await transferPlanService.listPlans() });
 });
 
+export const createTransferPlan = asyncHandler(async (req, res) => {
+  const plan = await transferPlanService.createPlan(req.body ?? {});
+  res.status(201).json({ plan });
+});
+
 export const patchTransferPlan = asyncHandler(async (req, res) => {
   const { status } = req.body ?? {};
   if (!status) return res.status(400).json({ error: { message: 'A status value is required' } });

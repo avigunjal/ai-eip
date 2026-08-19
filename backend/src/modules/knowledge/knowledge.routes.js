@@ -8,6 +8,7 @@ const router = Router();
 router.get('/', knowledgeController.listAreas);
 router.get('/areas', knowledgeController.listAreas);
 router.get('/transfer-plans', knowledgeController.listTransferPlans);
+router.post('/transfer-plans', knowledgeController.createTransferPlan);
 router.patch('/transfer-plans/:planId', knowledgeController.patchTransferPlan);
 router.get('/:areaId', knowledgeController.getArea);
 

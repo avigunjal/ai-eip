@@ -18,7 +18,7 @@ const SIGNAL_BY_CATEGORY = {
 };
 
 async function toProject(row) {
-  const [teamIds, ownerIds, risks, teams, owners, areas, teamSize] = await Promise.all([
+  const [teamIds, ownerIds, risks, teams, owners, areas, teamSize, capabilities] = await Promise.all([
     repository.findTeamIds(row.id),
     repository.findOwnerIds(row.id),
     repository.findRisks(row.id),
@@ -26,6 +26,7 @@ async function toProject(row) {
     repository.findOwners(row.id),
     repository.findAreas(row.id),
     repository.findTeamSize(row.id),
+    repository.findCapabilities(row.id),
   ]);
   const riskSummary = scoreProjectRisk(row, risks);
   const drivers = await Promise.all(riskSummary.drivers.map(async (driver) => {
@@ -55,6 +56,7 @@ async function toProject(row) {
     teams,
     owners,
     knowledgeAreas: areas.map((area) => ({ id: area.id, name: area.name })),
+    skills: capabilities.map((capability) => ({ id: capability.id, name: capability.name })),
     topDriver,
     trend: deterministicSeries(hashSeed(row.id), Number(row.health_score)).map((score, index) => ({
       date: weekLabel(row.target_date, index),

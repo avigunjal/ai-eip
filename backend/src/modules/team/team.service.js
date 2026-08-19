@@ -14,9 +14,10 @@ export function deliveryPressure(team) {
 }
 
 async function toTeam(row) {
-  const [memberIds, projects] = await Promise.all([
+  const [memberIds, projects, riskExposure] = await Promise.all([
     repository.findMemberIds(row.id),
     repository.findProjects(row.id),
+    repository.findRiskExposure(row.id),
   ]);
   const averageHealth = projects.length
     ? Math.round(projects.reduce((sum, project) => sum + Number(project.health_score), 0) / projects.length)
@@ -31,6 +32,7 @@ async function toTeam(row) {
     capacityPct: deliveryPressure(row),
     deliveryPressure: deliveryPressure(row),
     healthScore: averageHealth,
+    riskExposure,
     memberIds,
     projectIds: projects.map((project) => project.id),
   };

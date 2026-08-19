@@ -4,7 +4,28 @@
 import * as repository from './risk.repository.js';
 import { toSignals, toActions, lastSignalAt } from '../../utils/mappers.js';
 
+const CATEGORY_REASON = {
+  dependency: 'a dependency that can block downstream delivery',
+  knowledge: 'a single-owner knowledge gap that raises bus-factor',
+  capacity: 'a capacity constraint that slows throughput',
+  quality: 'a quality gap that erodes confidence and adds rework',
+  schedule: 'a schedule risk to the target date',
+};
+
+// Deterministic, grounded framing derived from the risk row itself — the LLM is
+// never involved, so "why / impact" can never contradict the numbers.
+function describeRisk(row) {
+  const anchor = CATEGORY_REASON[row.category] ?? `a ${row.category} risk`;
+  const impactPct = Math.round(Number(row.impact) * 100);
+  const probabilityPct = Math.round(Number(row.probability) * 100);
+  return {
+    whyThisMatters: `${row.title} is ${anchor} on ${row.project_name ?? 'the project'}, rated ${row.severity} (${probabilityPct}% probable, ${impactPct}% impact).`,
+    expectedImpact: `If it materializes, expect about ${impactPct}% delivery impact on ${row.project_name ?? 'the project'}; it is tracked with ${row.urgency} urgency.`,
+  };
+}
+
 function toRiskDTO(row, evidence, actions) {
+  const description = describeRisk(row);
   return {
     id: row.id,
     title: row.title,
@@ -20,9 +41,12 @@ function toRiskDTO(row, evidence, actions) {
     trend: row.trend,
     status: row.status,
     ownerId: row.owner_person_id ?? null,
+    ownerName: row.owner_name ?? null,
     lastSignalAt: lastSignalAt(evidence),
     signals: toSignals(evidence),
     actions: toActions(actions),
+    ...description,
+    suggestedMitigation: actions[0]?.title ?? 'Define a mitigation plan and assign an owner.',
   };
 }
 

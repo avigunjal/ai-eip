@@ -11,8 +11,8 @@ export async function findAll() {
 }
 
 export async function insert(recognition) {
-  db.prepare(`INSERT INTO recognition (id, person_id, project_id, knowledge_area_id, contribution_type, summary, occurred_at, visibility)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(
+  db.prepare(`INSERT INTO recognition (id, person_id, project_id, knowledge_area_id, contribution_type, summary, occurred_at, visibility, impact)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
     recognition.id,
     recognition.personId,
     recognition.projectId ?? null,
@@ -21,5 +21,6 @@ export async function insert(recognition) {
     recognition.summary,
     recognition.occurredAt,
     recognition.visibility ?? 'public',
+    recognition.impact ? JSON.stringify(recognition.impact) : null,
   );
 }

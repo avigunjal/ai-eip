@@ -2,7 +2,8 @@
 
 import { toActions } from '../../utils/mappers.js';
 import * as repository from './transfer-plan.repository.js';
-import { findById as findAreaById } from './knowledge.repository.js';
+import { findById as findAreaById, findExpertise } from './knowledge.repository.js';
+import { findById as findPersonById } from '../person/person.repository.js';
 import { toArea } from './knowledge.service.js';
 
 async function toPlan(row) {
@@ -14,7 +15,7 @@ async function toPlan(row) {
     areaId: area.id,
     riskLevel: area.riskLevel,
     ownerId: row.owner_person_id,
-    backupOwnerId: backup?.personId ?? null,
+    backupOwnerId: row.backup_person_id ?? backup?.personId ?? null,
     nextSessionAt: row.next_session_at ?? null,
     dueDate: row.due_date,
     status: row.status,
@@ -38,4 +39,51 @@ export async function getPlanById(id) {
 export async function updatePlanStatus(id, status) {
   const row = await repository.updateStatus(id, status);
   return toPlan(row);
+}
+
+export async function createPlan(payload) {
+  const { areaId, backupOwnerId, dueDate } = payload ?? {};
+  if (!areaId) {
+    const error = new Error('A knowledge area id is required');
+    error.status = 400;
+    throw error;
+  }
+  if (!backupOwnerId) {
+    const error = new Error('A backup owner is required');
+    error.status = 400;
+    throw error;
+  }
+  if (!dueDate) {
+    const error = new Error('A target date is required');
+    error.status = 400;
+    throw error;
+  }
+  const area = await findAreaById(areaId);
+  if (!area) {
+    const error = new Error('Knowledge area not found');
+    error.status = 404;
+    throw error;
+  }
+  const backup = await findPersonById(backupOwnerId);
+  if (!backup) {
+    const error = new Error('Backup owner not found');
+    error.status = 400;
+    throw error;
+  }
+
+  const expertise = await findExpertise(areaId);
+  const owner = expertise.find((person) => person.level === 'primary') ?? expertise[0];
+  const plan = {
+    id: `tp-${Date.now()}`,
+    knowledgeAreaId: areaId,
+    ownerPersonId: owner?.person_id ?? backupOwnerId,
+    backupPersonId: backupOwnerId,
+    targetCoverage: Math.min(90, Number(area.coverage_score) + 27),
+    dueDate,
+    status: 'in_progress',
+    progress: 0,
+    nextSessionAt: null,
+  };
+  repository.insert(plan);
+  return toPlan(await repository.findById(plan.id));
 }

@@ -4,13 +4,15 @@ import { db } from '../../config/database.config.js';
 import * as evidenceRepository from '../evidence/evidence.repository.js';
 
 export async function findAll() {
-  return db.prepare(`SELECT r.*, p.name AS project_name FROM risks r
-    LEFT JOIN projects p ON p.id = r.project_id ORDER BY r.score DESC`).all();
+  return db.prepare(`SELECT r.*, p.name AS project_name, po.name AS owner_name FROM risks r
+    LEFT JOIN projects p ON p.id = r.project_id
+    LEFT JOIN people po ON po.id = r.owner_person_id ORDER BY r.score DESC`).all();
 }
 
 export async function findById(id) {
-  return db.prepare(`SELECT r.*, p.name AS project_name FROM risks r
-    LEFT JOIN projects p ON p.id = r.project_id WHERE r.id = ?`).get(id);
+  return db.prepare(`SELECT r.*, p.name AS project_name, po.name AS owner_name FROM risks r
+    LEFT JOIN projects p ON p.id = r.project_id
+    LEFT JOIN people po ON po.id = r.owner_person_id WHERE r.id = ?`).get(id);
 }
 
 export async function findEvidence(riskId) {

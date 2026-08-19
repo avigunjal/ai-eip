@@ -101,7 +101,7 @@ export function seed() {
     insertRows('knowledge_areas', 7, knowledgeAreas);
     insertRows('knowledge_area_projects', 2, knowledgeAreaProjects);
     insertRows('knowledge_expertise', 6, knowledgeExpertise);
-    insertRows('knowledge_transfer_plans', 8, transferPlans);
+    insertRows('knowledge_transfer_plans', 9, transferPlans);
     insertRows('transfer_actions', 7, transferActions);
     insertRows('risks', 13, risks.map(([id, projectId, title, category, probability, impact, urgency, confidence, trend, status, ownerPersonId]) => [
       id, projectId, title, category, probability, impact, urgency,
@@ -113,7 +113,7 @@ export function seed() {
     insertRows('evidence', 7, evidence);
     insertRows('staffing_scenarios', 8, staffingScenarios);
     insertRows('scenario_changes', 6, scenarioChanges);
-    insertRows('recognition', 8, recognitions);
+    insertRows('recognition', 9, recognitions);
   });
   run();
   return {

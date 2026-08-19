@@ -85,3 +85,9 @@ export async function listInsights() {
   }
   return insights.slice(0, 8);
 }
+
+/** Resolve a single deterministic insight by id (null when unknown). */
+export async function findInsightById(insightId) {
+  const insights = await listInsights();
+  return insights.find((insight) => insight.id === insightId) ?? null;
+}

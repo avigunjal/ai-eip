@@ -6,6 +6,15 @@ import * as repository from './recognition.repository.js';
 const VALID_TYPES = new Set(['reliability', 'mentorship', 'delivery', 'knowledge_sharing']);
 const VALID_VISIBILITY = new Set(['public', 'private']);
 
+function parseImpact(value) {
+  try {
+    const parsed = JSON.parse(value ?? '');
+    return Array.isArray(parsed) ? parsed.filter((item) => typeof item === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
 function toItem(row) {
   return {
     id: row.id,
@@ -15,6 +24,7 @@ function toItem(row) {
     knowledgeArea: row.knowledge_area_id ? { id: row.knowledge_area_id, name: row.knowledge_area_name } : null,
     type: row.contribution_type,
     summary: row.summary,
+    impact: parseImpact(row.impact),
     occurredAt: row.occurred_at,
     visibility: row.visibility,
     evidenceIds: [`ev-${row.id}`, `ev-${row.id}-2`],

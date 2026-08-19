@@ -18,57 +18,65 @@ export { DEMO_TODAY };
 // ---------------------------------------------------------------------------
 // [id, name, role, teamId, availabilityFte, yearsOfExperience, capabilities: [capabilityId, level][]]
 export const people = [
-  ['p-01', 'Aarav Sharma', 'Engineering Manager', 't-01', 0.8, 14, [['cap-node', 'primary'], ['cap-api', 'primary'], ['cap-kubernetes', 'capable']]],
-  ['p-02', 'Emma Johnson', 'Engineering Manager', 't-02', 0.85, 15, [['cap-frontend', 'primary'], ['cap-api', 'capable']]],
-  ['p-03', 'Rohan Patel', 'Engineering Manager', 't-03', 0.8, 13, [['cap-data', 'primary'], ['cap-databases', 'primary']]],
-  ['p-04', 'Olivia Williams', 'Engineering Manager', 't-04', 0.8, 14, [['cap-reliability', 'primary'], ['cap-kubernetes', 'capable'], ['cap-observability', 'capable']]],
-  ['p-05', 'Priya Iyer', 'Engineering Manager', 't-05', 0.85, 12, [['cap-devx', 'primary'], ['cap-node', 'capable']]],
-  ['p-06', 'James Brown', 'Senior Engineer', 't-06', 0.9, 9, [['cap-payments', 'primary'], ['cap-node', 'capable'], ['cap-databases', 'capable']]],
-  ['p-07', 'Vikram Singh', 'Platform Engineer', 't-01', 0.9, 9, [['cap-node', 'capable'], ['cap-kubernetes', 'primary'], ['cap-api', 'capable']]],
-  ['p-08', 'Sophia Davis', 'Senior Engineer', 't-02', 0.9, 8, [['cap-frontend', 'primary'], ['cap-payments', 'capable'], ['cap-api', 'capable']]],
-  ['p-09', 'Arjun Reddy', 'Engineering Manager', 't-03', 0.75, 13, [['cap-data', 'capable'], ['cap-ml', 'primary']]],
-  ['p-10', 'Michael Miller', 'SRE', 't-04', 0.9, 11, [['cap-reliability', 'primary'], ['cap-observability', 'primary']]],
-  ['p-11', 'Riya Kumar', 'Platform Engineer', 't-05', 0.9, 8, [['cap-devx', 'primary'], ['cap-node', 'capable']]],
-  ['p-12', 'David Wilson', 'Senior Engineer', 't-06', 0.9, 9, [['cap-payments', 'primary'], ['cap-api', 'primary'], ['cap-databases', 'capable']]],
-  ['p-13', 'Kiran Nair', 'Staff Engineer', 't-01', 0.85, 15, [['cap-api', 'primary'], ['cap-node', 'primary'], ['cap-kubernetes', 'capable']]],
-  ['p-14', 'Sarah Anderson', 'Engineer', 't-02', 0.95, 4, [['cap-frontend', 'primary'], ['cap-analytics', 'primary']]],
-  ['p-15', 'Ananya Gupta', 'Data Engineer', 't-03', 0.9, 8, [['cap-data', 'primary'], ['cap-databases', 'capable'], ['cap-analytics', 'capable']]],
-  ['p-16', 'Ryan Thomas', 'SRE', 't-04', 0.85, 10, [['cap-kubernetes', 'primary'], ['cap-reliability', 'capable'], ['cap-observability', 'capable']]],
-  ['p-17', 'Ishaan Sharma', 'Engineer', 't-05', 0.95, 3, [['cap-devx', 'primary'], ['cap-frontend', 'capable']]],
-  ['p-18', 'Emily Johnson', 'Engineer', 't-06', 0.95, 4, [['cap-payments', 'capable'], ['cap-frontend', 'learning'], ['cap-api', 'capable']]],
-  ['p-19', 'Sanjay Patel', 'Tech Lead', 't-01', 0.8, 12, [['cap-node', 'primary'], ['cap-api', 'primary']]],
-  ['p-20', 'Rachel Williams', 'Engineer', 't-02', 0.95, 3, [['cap-frontend', 'capable'], ['cap-analytics', 'capable']]],
-  ['p-21', 'Meera Iyer', 'Data Engineer', 't-03', 0.9, 9, [['cap-data', 'primary'], ['cap-ml', 'capable'], ['cap-databases', 'capable']]],
-  ['p-22', 'Daniel Brown', 'Platform Engineer', 't-04', 0.85, 10, [['cap-kubernetes', 'primary'], ['cap-reliability', 'capable'], ['cap-observability', 'capable']]],
-  ['p-23', 'Rahul Singh', 'Engineer', 't-05', 0.9, 5, [['cap-devx', 'capable'], ['cap-api', 'capable']]],
-  ['p-24', 'Grace Davis', 'Senior Engineer', 't-06', 0.85, 10, [['cap-payments', 'primary'], ['cap-databases', 'primary'], ['cap-api', 'capable']]],
-  ['p-25', 'Divya Reddy', 'Engineer', 't-01', 0.95, 4, [['cap-api', 'capable'], ['cap-kubernetes', 'capable']]],
-  ['p-26', 'Matthew Miller', 'Engineer', 't-02', 0.95, 5, [['cap-frontend', 'primary'], ['cap-analytics', 'capable'], ['cap-payments', 'capable']]],
-  ['p-27', 'Aditi Kumar', 'Data Engineer', 't-03', 0.9, 7, [['cap-data', 'capable'], ['cap-analytics', 'capable'], ['cap-databases', 'capable']]],
-  ['p-28', 'Christopher Wilson', 'SRE', 't-04', 0.85, 9, [['cap-reliability', 'primary'], ['cap-kubernetes', 'capable']]],
+  ['p-01', 'Aarav Sharma', 'Engineering Manager', 't-04', 0.8, 14, [['cap-tech-leadership', 'primary'], ['cap-agile', 'primary'], ['cap-jira', 'primary'], ['cap-system-design', 'capable'], ['cap-node', 'capable'], ['cap-aws', 'capable']]],
+  ['p-02', 'Emma Johnson', 'Engineering Manager', 't-02', 0.85, 15, [['cap-tech-leadership', 'primary'], ['cap-agile', 'primary'], ['cap-jira', 'primary'], ['cap-react', 'capable'], ['cap-javascript', 'capable']]],
+  ['p-03', 'Rohan Patel', 'Engineering Manager', 't-03', 0.8, 13, [['cap-tech-leadership', 'primary'], ['cap-agile', 'primary'], ['cap-jira', 'primary'], ['cap-python', 'primary'], ['cap-sql', 'capable']]],
+  ['p-04', 'Olivia Williams', 'Engineering Manager', 't-01', 0.8, 14, [['cap-tech-leadership', 'primary'], ['cap-agile', 'primary'], ['cap-jira', 'primary'], ['cap-aws', 'capable'], ['cap-kubernetes', 'capable']]],
+  ['p-05', 'Priya Iyer', 'Engineering Manager', 't-05', 0.85, 12, [['cap-tech-leadership', 'primary'], ['cap-agile', 'primary'], ['cap-jira', 'primary'], ['cap-cicd', 'primary'], ['cap-docker', 'capable']]],
+  ['p-06', 'James Brown', 'Senior Engineer', 't-01', 0.9, 9, [['cap-node', 'primary'], ['cap-javascript', 'primary'], ['cap-rest-api', 'primary'], ['cap-microservices', 'capable'], ['cap-postgres', 'capable']]],
+  ['p-07', 'Vikram Singh', 'Cloud Engineer', 't-05', 0.9, 9, [['cap-kubernetes', 'primary'], ['cap-docker', 'primary'], ['cap-aws', 'primary'], ['cap-node', 'capable'], ['cap-cicd', 'capable']]],
+  ['p-08', 'Sophia Davis', 'Senior Engineer', 't-02', 0.9, 8, [['cap-react', 'primary'], ['cap-typescript', 'primary'], ['cap-javascript', 'primary'], ['cap-redux', 'capable'], ['cap-rest-api', 'capable']]],
+  ['p-09', 'Arjun Reddy', 'Engineering Manager', 't-06', 0.75, 13, [['cap-tech-leadership', 'primary'], ['cap-python', 'primary'], ['cap-genai', 'primary'], ['cap-llm', 'capable'], ['cap-rag', 'capable']]],
+  ['p-10', 'Michael Miller', 'SRE', 't-08', 0.9, 11, [['cap-aws', 'primary'], ['cap-kubernetes', 'primary'], ['cap-cicd', 'primary'], ['cap-docker', 'capable'], ['cap-distributed-systems', 'capable']]],
+  ['p-11', 'Riya Kumar', 'Platform Engineer', 't-04', 0.9, 8, [['cap-cicd', 'primary'], ['cap-docker', 'primary'], ['cap-node', 'capable'], ['cap-aws', 'capable'], ['cap-kubernetes', 'capable']]],
+  ['p-12', 'David Wilson', 'Senior Engineer', 't-01', 0.9, 9, [['cap-node', 'primary'], ['cap-rest-api', 'primary'], ['cap-microservices', 'primary'], ['cap-postgres', 'capable'], ['cap-sql', 'capable']]],
+  ['p-13', 'Kiran Nair', 'Staff Engineer', 't-09', 0.85, 15, [['cap-system-design', 'primary'], ['cap-api-design', 'primary'], ['cap-node', 'primary'], ['cap-microservices', 'primary'], ['cap-aws', 'capable'], ['cap-distributed-systems', 'capable']]],
+  ['p-14', 'Sarah Anderson', 'QA Lead', 't-07', 0.95, 4, [['cap-react', 'primary'], ['cap-javascript', 'primary'], ['cap-typescript', 'capable'], ['cap-redux', 'capable']]],
+  ['p-15', 'Ananya Gupta', 'Data Engineer', 't-06', 0.9, 8, [['cap-python', 'primary'], ['cap-sql', 'primary'], ['cap-postgres', 'primary'], ['cap-mongodb', 'capable'], ['cap-redis', 'capable']]],
+  ['p-16', 'Ryan Thomas', 'SRE', 't-08', 0.85, 10, [['cap-kubernetes', 'primary'], ['cap-aws', 'primary'], ['cap-docker', 'primary'], ['cap-cicd', 'capable'], ['cap-distributed-systems', 'capable']]],
+  ['p-17', 'Ishaan Sharma', 'Engineer', 't-03', 0.95, 3, [['cap-node', 'primary'], ['cap-javascript', 'primary'], ['cap-docker', 'capable'], ['cap-cicd', 'capable']]],
+  ['p-18', 'Emily Johnson', 'Engineer', 't-01', 0.95, 4, [['cap-node', 'capable'], ['cap-javascript', 'capable'], ['cap-rest-api', 'capable'], ['cap-react', 'learning'], ['cap-postgres', 'capable']]],
+  ['p-19', 'Sanjay Patel', 'Tech Lead', 't-09', 0.8, 12, [['cap-node', 'primary'], ['cap-api-design', 'primary'], ['cap-system-design', 'primary'], ['cap-microservices', 'primary'], ['cap-aws', 'capable']]],
+  ['p-20', 'Rachel Williams', 'QA Engineer', 't-07', 0.95, 3, [['cap-react', 'primary'], ['cap-javascript', 'primary'], ['cap-redux', 'capable'], ['cap-typescript', 'capable']]],
+  ['p-21', 'Meera Iyer', 'Data Engineer', 't-06', 0.9, 9, [['cap-python', 'primary'], ['cap-sql', 'capable'], ['cap-mongodb', 'capable'], ['cap-genai', 'capable'], ['cap-llm', 'capable'], ['cap-rag', 'capable']]],
+  ['p-22', 'Daniel Brown', 'Platform Engineer', 't-04', 0.85, 10, [['cap-kubernetes', 'primary'], ['cap-aws', 'primary'], ['cap-docker', 'primary'], ['cap-cicd', 'capable'], ['cap-distributed-systems', 'capable']]],
+  ['p-23', 'Rahul Singh', 'Engineer', 't-03', 0.9, 5, [['cap-node', 'capable'], ['cap-cicd', 'capable'], ['cap-docker', 'capable'], ['cap-aws', 'capable'], ['cap-javascript', 'capable']]],
+  ['p-24', 'Grace Davis', 'Senior Engineer', 't-01', 0.85, 10, [['cap-node', 'primary'], ['cap-postgres', 'primary'], ['cap-rest-api', 'primary'], ['cap-microservices', 'capable'], ['cap-sql', 'capable']]],
+  ['p-25', 'Divya Reddy', 'Engineer', 't-03', 0.95, 4, [['cap-node', 'capable'], ['cap-rest-api', 'capable'], ['cap-kubernetes', 'capable'], ['cap-docker', 'capable'], ['cap-javascript', 'capable']]],
+  ['p-26', 'Matthew Miller', 'Engineer', 't-02', 0.95, 5, [['cap-react', 'primary'], ['cap-javascript', 'primary'], ['cap-typescript', 'capable'], ['cap-redux', 'capable']]],
+  ['p-27', 'Aditi Kumar', 'Data Engineer', 't-06', 0.9, 7, [['cap-python', 'capable'], ['cap-sql', 'primary'], ['cap-postgres', 'capable'], ['cap-mongodb', 'capable'], ['cap-redis', 'capable']]],
+  ['p-28', 'Christopher Wilson', 'Cloud Engineer', 't-05', 0.85, 9, [['cap-aws', 'primary'], ['cap-kubernetes', 'primary'], ['cap-docker', 'capable'], ['cap-distributed-systems', 'capable']]],
 ];
 
 // ---------------------------------------------------------------------------
 // Teams
 // ---------------------------------------------------------------------------
 // [id, name, managerPersonId, sustainableCapacityFte, committedFte, unplannedFte]
+// Committed load is spread realistically: Payments, Backend and Platform run
+// above sustainable capacity while the rest stay within it.
 export const teams = [
-  ['t-01', 'Platform Engineering', 'p-01', 4.25, 4.6, 0.1],
-  ['t-02', 'Growth Engineering', 'p-02', 4.25, 4.4, 0.1],
-  ['t-03', 'Data Platform', 'p-03', 4.25, 3.7, 0.05],
-  ['t-04', 'Core Infrastructure', 'p-05', 4.25, 3.3, 0.0],
-  ['t-05', 'Developer Experience', 'p-09', 3.4, 3.24, 0.0],
-  ['t-06', 'Payments Engineering', 'p-04', 3.4, 3.8, 0.15],
+  ['t-01', 'Payments Engineering', 'p-04', 3.4, 3.8, 0.15],
+  ['t-02', 'Frontend Engineering', 'p-02', 3.4, 2.75, 0.04],
+  ['t-03', 'Backend Engineering', 'p-03', 3.4, 3.2, 0.06],
+  ['t-04', 'Platform Engineering', 'p-01', 3.4, 3.5, 0.07],
+  ['t-05', 'Cloud & Infrastructure', 'p-05', 2.4, 1.6, 0.03],
+  ['t-06', 'Data Engineering', 'p-09', 3.4, 2.55, 0.03],
+  ['t-07', 'QA Engineering', 'p-14', 1.7, 1.2, 0.01],
+  ['t-08', 'SRE / Reliability Engineering', 'p-10', 1.7, 1.4, 0.03],
+  ['t-09', 'Engineering Leadership & Architecture', 'p-13', 1.6, 0.97, 0.02],
 ];
 
 // team_memberships: [teamId, personId]
 export const teamMemberships = [
-  ['t-01', 'p-01'], ['t-01', 'p-07'], ['t-01', 'p-13'], ['t-01', 'p-19'], ['t-01', 'p-25'],
-  ['t-02', 'p-02'], ['t-02', 'p-08'], ['t-02', 'p-14'], ['t-02', 'p-20'], ['t-02', 'p-26'],
-  ['t-03', 'p-03'], ['t-03', 'p-09'], ['t-03', 'p-15'], ['t-03', 'p-21'], ['t-03', 'p-27'],
-  ['t-04', 'p-04'], ['t-04', 'p-10'], ['t-04', 'p-16'], ['t-04', 'p-22'], ['t-04', 'p-28'],
-  ['t-05', 'p-05'], ['t-05', 'p-11'], ['t-05', 'p-17'], ['t-05', 'p-23'],
-  ['t-06', 'p-06'], ['t-06', 'p-12'], ['t-06', 'p-18'], ['t-06', 'p-24'],
+  ['t-01', 'p-04'], ['t-01', 'p-06'], ['t-01', 'p-12'], ['t-01', 'p-18'], ['t-01', 'p-24'],
+  ['t-02', 'p-02'], ['t-02', 'p-08'], ['t-02', 'p-26'],
+  ['t-03', 'p-03'], ['t-03', 'p-17'], ['t-03', 'p-23'], ['t-03', 'p-25'],
+  ['t-04', 'p-01'], ['t-04', 'p-11'], ['t-04', 'p-22'],
+  ['t-05', 'p-05'], ['t-05', 'p-07'], ['t-05', 'p-28'],
+  ['t-06', 'p-09'], ['t-06', 'p-15'], ['t-06', 'p-21'], ['t-06', 'p-27'],
+  ['t-07', 'p-14'], ['t-07', 'p-20'],
+  ['t-08', 'p-10'], ['t-08', 'p-16'],
+  ['t-09', 'p-13'], ['t-09', 'p-19'],
 ];
 
 // ---------------------------------------------------------------------------
@@ -97,17 +105,25 @@ export const projects = [
   ['pr-10', 'Observability Rollout', 'Rolling out standard observability tooling to all production services.', 'maintenance', 'complete', 'complete', '2026-08-01', 91, 5, 96, 'cl-04'],
 ];
 
-// project_teams: [projectId, teamId]
+// project_teams: [projectId, teamId] — primary team first, supporting teams after.
+// Balanced so every team has 1–3 projects (no 0-project teams, no team spread thin).
 export const projectTeams = [
-  ['pr-01', 't-01'], ['pr-02', 't-02'], ['pr-03', 't-03'], ['pr-04', 't-03'],
-  ['pr-05', 't-04'], ['pr-06', 't-05'], ['pr-07', 't-06'], ['pr-08', 't-02'],
-  ['pr-09', 't-06'], ['pr-10', 't-04'],
+  ['pr-01', 't-04'], ['pr-01', 't-05'],
+  ['pr-02', 't-02'], ['pr-02', 't-03'], ['pr-02', 't-07'],
+  ['pr-03', 't-06'], ['pr-03', 't-09'],
+  ['pr-04', 't-06'], ['pr-04', 't-09'],
+  ['pr-05', 't-08'],
+  ['pr-06', 't-04'], ['pr-06', 't-02'],
+  ['pr-07', 't-01'], ['pr-07', 't-03'], ['pr-07', 't-07'],
+  ['pr-08', 't-02'], ['pr-08', 't-07'],
+  ['pr-09', 't-01'], ['pr-09', 't-03'], ['pr-09', 't-09'],
+  ['pr-10', 't-05'], ['pr-10', 't-08'],
 ];
 
 // project_owners: [projectId, personId]
 export const projectOwners = [
-  ['pr-01', 'p-01'], ['pr-02', 'p-02'], ['pr-03', 'p-03'], ['pr-04', 'p-03'],
-  ['pr-05', 'p-05'], ['pr-06', 'p-09'], ['pr-07', 'p-04'], ['pr-08', 'p-02'],
+  ['pr-01', 'p-01'], ['pr-02', 'p-02'], ['pr-03', 'p-09'], ['pr-04', 'p-09'],
+  ['pr-05', 'p-10'], ['pr-06', 'p-01'], ['pr-07', 'p-04'], ['pr-08', 'p-02'],
   ['pr-09', 'p-04'], ['pr-10', 'p-05'],
 ];
 
@@ -115,43 +131,106 @@ export const projectOwners = [
 // Capabilities
 // ---------------------------------------------------------------------------
 // capabilities: [id, name, criticality]
+// 28 realistic enterprise engineering skills grouped by category (see taxonomy):
+// Frontend / Backend / Cloud-DevOps / Data / Architecture / AI / Process.
 export const capabilities = [
-  ['cap-node', 'Node.js Services', 74],
-  ['cap-frontend', 'React Frontend', 74],
-  ['cap-payments', 'Payments & Billing', 92],
-  ['cap-api', 'API & Platform', 92],
-  ['cap-data', 'Data Engineering', 74],
-  ['cap-ml', 'ML & Inference', 55],
-  ['cap-databases', 'SQL & PostgreSQL', 74],
-  ['cap-reliability', 'SRE & Reliability', 92],
-  ['cap-kubernetes', 'Kubernetes & Platform Ops', 74],
-  ['cap-observability', 'Observability', 74],
-  ['cap-devx', 'CI/CD & Developer Experience', 55],
-  ['cap-analytics', 'Search & Analytics', 55],
+  // Frontend
+  ['cap-react', 'React', 74],
+  ['cap-angular', 'Angular', 55],
+  ['cap-typescript', 'TypeScript', 74],
+  ['cap-javascript', 'JavaScript', 74],
+  ['cap-redux', 'Redux', 55],
+  // Backend
+  ['cap-node', 'Node.js', 92],
+  ['cap-java', 'Java Spring Boot', 74],
+  ['cap-rest-api', 'REST API', 92],
+  ['cap-microservices', 'Microservices', 92],
+  ['cap-python', 'Python', 74],
+  // Cloud / DevOps
+  ['cap-aws', 'AWS', 92],
+  ['cap-azure', 'Azure', 55],
+  ['cap-docker', 'Docker', 74],
+  ['cap-kubernetes', 'Kubernetes', 74],
+  ['cap-cicd', 'CI/CD', 74],
+  // Data
+  ['cap-sql', 'SQL', 74],
+  ['cap-postgres', 'PostgreSQL', 74],
+  ['cap-mongodb', 'MongoDB', 55],
+  ['cap-redis', 'Redis', 55],
+  // Architecture
+  ['cap-system-design', 'System Design', 74],
+  ['cap-distributed-systems', 'Distributed Systems', 92],
+  ['cap-api-design', 'API Design', 92],
+  // AI / Data
+  ['cap-genai', 'Generative AI', 55],
+  ['cap-llm', 'LLM Integration', 55],
+  ['cap-rag', 'RAG', 55],
+  // Engineering process / leadership
+  ['cap-agile', 'Agile/Scrum', 55],
+  ['cap-jira', 'Jira', 55],
+  ['cap-tech-leadership', 'Technical Leadership', 74],
 ];
 
 // team_capability_coverage: [teamId, capabilityId, coverageScore]
 export const teamCapabilityCoverage = [
-  ['t-01', 'cap-node', 82], ['t-01', 'cap-api', 86], ['t-01', 'cap-kubernetes', 74],
-  ['t-02', 'cap-frontend', 88], ['t-02', 'cap-api', 72], ['t-02', 'cap-analytics', 68], ['t-02', 'cap-payments', 52],
-  ['t-03', 'cap-data', 90], ['t-03', 'cap-databases', 84], ['t-03', 'cap-ml', 62],
-  ['t-04', 'cap-reliability', 86], ['t-04', 'cap-kubernetes', 78], ['t-04', 'cap-observability', 80],
-  ['t-05', 'cap-devx', 88], ['t-05', 'cap-node', 70], ['t-05', 'cap-api', 64],
-  ['t-06', 'cap-payments', 86], ['t-06', 'cap-api', 74], ['t-06', 'cap-databases', 78], ['t-06', 'cap-node', 66],
+  // Payments Engineering
+  ['t-01', 'cap-node', 86], ['t-01', 'cap-rest-api', 84], ['t-01', 'cap-microservices', 80],
+  ['t-01', 'cap-postgres', 78], ['t-01', 'cap-sql', 70], ['t-01', 'cap-javascript', 74],
+  ['t-01', 'cap-aws', 60],
+  // Frontend Engineering
+  ['t-02', 'cap-react', 88], ['t-02', 'cap-typescript', 82], ['t-02', 'cap-javascript', 88],
+  ['t-02', 'cap-redux', 68], ['t-02', 'cap-rest-api', 72],
+  // Backend Engineering
+  ['t-03', 'cap-node', 82], ['t-03', 'cap-java', 74], ['t-03', 'cap-rest-api', 84],
+  ['t-03', 'cap-microservices', 80], ['t-03', 'cap-sql', 76], ['t-03', 'cap-postgres', 74],
+  ['t-03', 'cap-api-design', 70],
+  // Platform Engineering
+  ['t-04', 'cap-kubernetes', 78], ['t-04', 'cap-docker', 82], ['t-04', 'cap-aws', 80],
+  ['t-04', 'cap-cicd', 74], ['t-04', 'cap-node', 70], ['t-04', 'cap-api-design', 74],
+  ['t-04', 'cap-system-design', 76],
+  // Cloud & Infrastructure
+  ['t-05', 'cap-aws', 86], ['t-05', 'cap-azure', 60], ['t-05', 'cap-kubernetes', 74],
+  ['t-05', 'cap-docker', 76], ['t-05', 'cap-cicd', 78], ['t-05', 'cap-distributed-systems', 70],
+  // Data Engineering
+  ['t-06', 'cap-python', 90], ['t-06', 'cap-sql', 84], ['t-06', 'cap-postgres', 78],
+  ['t-06', 'cap-mongodb', 70], ['t-06', 'cap-redis', 62], ['t-06', 'cap-genai', 60],
+  ['t-06', 'cap-llm', 55], ['t-06', 'cap-rag', 55],
+  // QA Engineering
+  ['t-07', 'cap-javascript', 70], ['t-07', 'cap-typescript', 66], ['t-07', 'cap-react', 68],
+  ['t-07', 'cap-rest-api', 64],
+  // SRE / Reliability
+  ['t-08', 'cap-aws', 84], ['t-08', 'cap-kubernetes', 82], ['t-08', 'cap-docker', 74],
+  ['t-08', 'cap-cicd', 72], ['t-08', 'cap-distributed-systems', 80], ['t-08', 'cap-redis', 66],
+  // Leadership & Architecture
+  ['t-09', 'cap-system-design', 84], ['t-09', 'cap-api-design', 82],
+  ['t-09', 'cap-distributed-systems', 78], ['t-09', 'cap-tech-leadership', 88],
+  ['t-09', 'cap-agile', 80], ['t-09', 'cap-jira', 78],
 ];
 
 // project_requirements: [projectId, capabilityId, weight]
 export const projectRequirements = [
-  ['pr-01', 'cap-api', 1], ['pr-01', 'cap-node', 1], ['pr-01', 'cap-kubernetes', 0.8],
-  ['pr-02', 'cap-frontend', 1], ['pr-02', 'cap-payments', 0.8], ['pr-02', 'cap-api', 1],
-  ['pr-03', 'cap-data', 1], ['pr-03', 'cap-databases', 1], ['pr-03', 'cap-ml', 0.5],
-  ['pr-04', 'cap-data', 1], ['pr-04', 'cap-ml', 1], ['pr-04', 'cap-databases', 0.5],
-  ['pr-05', 'cap-reliability', 1], ['pr-05', 'cap-observability', 1], ['pr-05', 'cap-kubernetes', 0.8],
-  ['pr-06', 'cap-devx', 1], ['pr-06', 'cap-frontend', 0.8], ['pr-06', 'cap-api', 0.5],
-  ['pr-07', 'cap-payments', 1], ['pr-07', 'cap-node', 1], ['pr-07', 'cap-databases', 0.8], ['pr-07', 'cap-api', 0.8],
-  ['pr-08', 'cap-frontend', 1], ['pr-08', 'cap-analytics', 1], ['pr-08', 'cap-data', 0.5],
-  ['pr-09', 'cap-payments', 1], ['pr-09', 'cap-api', 0.8], ['pr-09', 'cap-databases', 0.5],
-  ['pr-10', 'cap-reliability', 1], ['pr-10', 'cap-observability', 1],
+  ['pr-01', 'cap-kubernetes', 1], ['pr-01', 'cap-node', 1], ['pr-01', 'cap-aws', 0.8],
+  ['pr-01', 'cap-docker', 0.8], ['pr-01', 'cap-api-design', 0.8], ['pr-01', 'cap-microservices', 0.5],
+  ['pr-02', 'cap-react', 1], ['pr-02', 'cap-typescript', 0.8], ['pr-02', 'cap-javascript', 1],
+  ['pr-02', 'cap-rest-api', 0.8], ['pr-02', 'cap-node', 0.8], ['pr-02', 'cap-microservices', 0.5],
+  ['pr-03', 'cap-python', 1], ['pr-03', 'cap-sql', 1], ['pr-03', 'cap-postgres', 0.8],
+  ['pr-03', 'cap-mongodb', 0.5], ['pr-03', 'cap-aws', 0.5],
+  ['pr-04', 'cap-python', 1], ['pr-04', 'cap-genai', 0.8], ['pr-04', 'cap-llm', 0.8],
+  ['pr-04', 'cap-rag', 0.5], ['pr-04', 'cap-aws', 0.8], ['pr-04', 'cap-kubernetes', 0.5],
+  ['pr-05', 'cap-aws', 1], ['pr-05', 'cap-kubernetes', 1], ['pr-05', 'cap-docker', 0.8],
+  ['pr-05', 'cap-distributed-systems', 1], ['pr-05', 'cap-cicd', 0.5],
+  ['pr-06', 'cap-react', 1], ['pr-06', 'cap-typescript', 0.8], ['pr-06', 'cap-javascript', 1],
+  ['pr-06', 'cap-api-design', 0.8], ['pr-06', 'cap-aws', 0.5], ['pr-06', 'cap-cicd', 0.5],
+  ['pr-07', 'cap-node', 1], ['pr-07', 'cap-rest-api', 1], ['pr-07', 'cap-microservices', 0.8],
+  ['pr-07', 'cap-postgres', 0.8], ['pr-07', 'cap-javascript', 0.8], ['pr-07', 'cap-sql', 0.5],
+  ['pr-07', 'cap-aws', 0.5],
+  ['pr-08', 'cap-react', 1], ['pr-08', 'cap-typescript', 0.8], ['pr-08', 'cap-javascript', 1],
+  ['pr-08', 'cap-python', 0.8], ['pr-08', 'cap-postgres', 0.5], ['pr-08', 'cap-aws', 0.5],
+  ['pr-09', 'cap-node', 1], ['pr-09', 'cap-rest-api', 1], ['pr-09', 'cap-postgres', 0.8],
+  ['pr-09', 'cap-microservices', 0.8], ['pr-09', 'cap-javascript', 0.8], ['pr-09', 'cap-sql', 0.5],
+  ['pr-09', 'cap-aws', 0.5],
+  ['pr-10', 'cap-aws', 1], ['pr-10', 'cap-kubernetes', 0.8], ['pr-10', 'cap-docker', 0.5],
+  ['pr-10', 'cap-distributed-systems', 0.5], ['pr-10', 'cap-redis', 0.5], ['pr-10', 'cap-cicd', 0.5],
 ];
 
 // ---------------------------------------------------------------------------
@@ -241,12 +320,12 @@ export const knowledgeExpertise = [
   ['k-16', 'p-13', 'learning', 23, '2026-07-24', 0],
 ];
 
-// knowledge_transfer_plans: [id, areaId, ownerPersonId, targetCoverage, dueDate, status, progress, nextSessionAt]
+// knowledge_transfer_plans: [id, areaId, ownerPersonId, targetCoverage, dueDate, status, progress, nextSessionAt, backupPersonId]
 export const transferPlans = [
-  ['tp-01', 'k-01', 'p-01', 65, '2026-09-20', 'in_progress', 15, '2026-08-21'],
-  ['tp-03', 'k-03', 'p-15', 75, '2026-09-25', 'todo', 0, '2026-08-24'],
-  ['tp-06', 'k-06', 'p-06', 75, '2026-09-22', 'scheduled', 40, '2026-08-22'],
-  ['tp-13', 'k-13', 'p-12', 75, '2026-10-01', 'todo', 0, '2026-08-26'],
+  ['tp-01', 'k-01', 'p-01', 65, '2026-09-20', 'in_progress', 15, '2026-08-21', null],
+  ['tp-03', 'k-03', 'p-15', 75, '2026-09-25', 'todo', 0, '2026-08-24', null],
+  ['tp-06', 'k-06', 'p-06', 75, '2026-09-22', 'scheduled', 40, '2026-08-22', null],
+  ['tp-13', 'k-13', 'p-12', 75, '2026-10-01', 'todo', 0, '2026-08-26', 'p-24'],
 ];
 
 // transfer_actions: [id, planId, title, ownerPersonId, dueDate, status, expectedOutcome]
@@ -291,7 +370,7 @@ export const risks = [
 export const preventionActions = [
   ['action-contract-review', 'r-01', 'Run API contract review and assign decision owner', 'p-04', '2026-08-18', 'todo', 'Unblock dependent payments stories'],
   ['action-payment-backup', 'r-02', 'Assign a capable Payment Service backup and pair on the next release', 'p-01', '2026-08-20', 'in_progress', 'Raise verified Payment Service coverage above 60%'],
-  ['action-capacity', 'r-03', 'Rebalance Growth Engineering capacity for four weeks', 'p-02', '2026-08-21', 'todo', 'Bring delivery pressure below 100%'],
+  ['action-capacity', 'r-03', 'Rebalance Frontend Engineering capacity for four weeks', 'p-02', '2026-08-21', 'todo', 'Bring delivery pressure below 100%'],
   ['action-rollback', 'r-08', 'Draft and review a rollback plan for the feature-flag rollout', 'p-01', '2026-08-22', 'todo', 'Rollback exercise passes in staging'],
   ['action-oncall', 'r-11', 'Add a named on-call backup for the notifications service', 'p-05', '2026-08-19', 'todo', 'No unbacked on-call windows'],
   ['action-latency', 'r-13', 'Profile and fix the recommendation engine latency regression', 'p-03', '2026-08-25', 'in_progress', 'p95 latency returns under threshold'],
@@ -310,7 +389,7 @@ export const evidence = [
   ['ev-r02-1', 'risk', 'r-02', 'github', '83% of Payment Service pull requests and all three recent production incidents were led by Aarav Sharma.', '2026-08-15', 'https://github.com/hitachi/payment'],
   ['ev-r02-2', 'risk', 'r-02', 'incident', 'Aarav Sharma is the only named owner for the payment runbook and deployment procedure.', '2026-08-13', 'https://wiki.hitachi/runbooks/payment'],
   ['ev-r02-3', 'risk', 'r-02', 'docs', 'The Payment Service architecture document was last updated 47 days ago.', '2026-08-03', 'https://wiki.hitachi/architecture/payment'],
-  ['ev-r03-1', 'risk', 'r-03', 'planning', 'Growth Engineering committed demand is 104% of sustainable capacity.', '2026-08-14', null],
+  ['ev-r03-1', 'risk', 'r-03', 'planning', 'Frontend Engineering committed demand is 104% of sustainable capacity.', '2026-08-14', null],
   ['ev-r03-2', 'risk', 'r-03', 'jira', 'Two engineers carry ten open tickets between them this sprint.', '2026-08-12', 'https://hitachi.atlassian.net/browse/GRW-114'],
   ['ev-r04-1', 'risk', 'r-04', 'jira', 'Release is blocked pending a billing engine dependency change.', '2026-08-14', 'https://hitachi.atlassian.net/browse/BILL-77'],
   ['ev-r08-1', 'risk', 'r-08', 'github', 'Feature-flag rollout has no documented rollback plan.', '2026-08-13', 'https://github.com/hitachi/atlas'],
@@ -320,6 +399,14 @@ export const evidence = [
   ['ev-r13-1', 'risk', 'r-13', 'datadog', 'Recommendation engine p95 latency rose 40% after the latest release.', '2026-08-14', null],
   ['ev-r16-1', 'risk', 'r-16', 'github', 'All recent payment releases were led by the same two engineers.', '2026-08-15', 'https://github.com/hitachi/payments-30'],
   ['ev-r17-1', 'risk', 'r-17', 'incident', 'Rate-limit misconfiguration caused a public API outage last month.', '2026-08-09', 'https://status.hitachi.io'],
+  ...knowledgeAreas
+    .filter(([areaId]) => areaId !== 'k-01')
+    .flatMap(([areaId, name]) => [
+      [`kev-${areaId}-gh`, 'knowledge_area', areaId, 'github', `The primary expert owns the majority of ${name} pull requests and incident resolutions.`, '2026-08-14', null],
+      [`kev-${areaId}-inc`, 'knowledge_area', areaId, 'incident', `The primary expert resolved the most recent ${name} production incidents.`, '2026-08-12', null],
+      [`kev-${areaId}-docs`, 'knowledge_area', areaId, 'docs', `${name} runbook and architecture documentation are owned by a single engineer.`, '2026-08-10', null],
+      [`kev-${areaId}-jira`, 'knowledge_area', areaId, 'jira', `Only the primary expert has led ${name} changes and releases this quarter.`, '2026-08-08', null],
+    ]),
 ];
 
 // ---------------------------------------------------------------------------
@@ -327,43 +414,43 @@ export const evidence = [
 // ---------------------------------------------------------------------------
 // [id, name, projectId, teamId, capacityDeltaFte, capabilityDelta, tradeOff, confidence]
 export const staffingScenarios = [
-  ['sc-01', 'Balanced Payments team for Payments 3.0', 'pr-07', 't-06', 0.9, '+1 payments, +1 node/postgres', 'Platform Engineering is already above sustainable capacity; time-box the assignment and pair the backup.', 82],
-  ['sc-02', 'Growth rebalance for Checkout Modernization', 'pr-02', 't-02', 0.6, '+1 frontend, +1 api', 'Growth Engineering is near sustainable capacity; the rebalance reduces checkout throughput for two weeks.', 74],
-  ['sc-03', 'Reliability lift for Multi-region rollout', 'pr-05', 't-04', 0.5, '+1 reliability, +1 observability', 'Core Infrastructure loses a senior SRE from incident rotation for the window.', 71],
+  ['sc-01', 'Balanced Payments team for Payments 3.0', 'pr-07', 't-01', 0.9, '+1 Node.js, +1 PostgreSQL, +1 REST API', 'Payments Engineering is already above sustainable capacity; time-box the assignment and pair the backup.', 82],
+  ['sc-02', 'Growth rebalance for Checkout Modernization', 'pr-02', 't-02', 0.6, '+1 React, +1 TypeScript, +1 REST API', 'Frontend Engineering is near sustainable capacity; the rebalance reduces checkout throughput for two weeks.', 74],
+  ['sc-03', 'Reliability lift for Multi-region rollout', 'pr-05', 't-08', 0.5, '+1 Kubernetes, +1 AWS, +1 Distributed Systems', 'SRE / Reliability Engineering loses a senior engineer from incident rotation for the window.', 71],
 ];
 
 // scenario_changes: [id, scenarioId, personId, changeType, allocationDeltaFte, rationale]
 export const scenarioChanges = [
-  ['sc-01-change-1', 'sc-01', 'p-06', 'add', 0.6, 'Primary payments capability for the payments 3.0 build'],
-  ['sc-01-change-2', 'sc-01', 'p-12', 'add', 0.6, 'API and billing depth for the integration surface'],
-  ['sc-01-change-3', 'sc-01', 'p-07', 'reallocate', 0.4, 'Node/API coverage from Platform Engineering (time-boxed)'],
-  ['sc-02-change-1', 'sc-02', 'p-08', 'reallocate', 0.5, 'Frontend lead for checkout modernization'],
-  ['sc-02-change-2', 'sc-02', 'p-26', 'add', 0.4, 'Checkout and analytics coverage'],
-  ['sc-03-change-1', 'sc-03', 'p-16', 'reallocate', 0.5, 'Kubernetes/reliability support for multi-region rollout'],
-  ['sc-03-change-2', 'sc-03', 'p-22', 'add', 0.4, 'Observability coverage for the new region'],
+  ['sc-01-change-1', 'sc-01', 'p-06', 'add', 0.6, 'Primary Node.js and REST API skills for the payments 3.0 build'],
+  ['sc-01-change-2', 'sc-01', 'p-12', 'add', 0.6, 'Microservices and PostgreSQL depth for the integration surface'],
+  ['sc-01-change-3', 'sc-01', 'p-07', 'reallocate', 0.4, 'AWS/Kubernetes coverage from Cloud & Infrastructure (time-boxed)'],
+  ['sc-02-change-1', 'sc-02', 'p-08', 'reallocate', 0.5, 'React and TypeScript lead for checkout modernization'],
+  ['sc-02-change-2', 'sc-02', 'p-26', 'add', 0.4, 'Checkout and Redux coverage'],
+  ['sc-03-change-1', 'sc-03', 'p-16', 'reallocate', 0.5, 'Kubernetes and AWS support for multi-region rollout'],
+  ['sc-03-change-2', 'sc-03', 'p-22', 'add', 0.4, 'Distributed Systems coverage for the new region'],
 ];
 
 // ---------------------------------------------------------------------------
 // Recognition
 // ---------------------------------------------------------------------------
-// [id, personId, projectId, knowledgeAreaId, contributionType, summary, occurredAt, visibility]
+// [id, personId, projectId, knowledgeAreaId, contributionType, summary, occurredAt, visibility, impact(JSON)]
 export const recognitions = [
-  ['rec-01', 'p-10', 'pr-10', 'k-15', 'reliability', 'Led the incident review and improved the production runbook.', '2026-08-14', 'public'],
-  ['rec-02', 'p-05', 'pr-07', 'k-01', 'knowledge_sharing', 'Paired on two Payment Service changes to build backup capability.', '2026-08-12', 'public'],
-  ['rec-03', 'p-08', 'pr-02', null, 'delivery', 'Unblocked the checkout UI validation path before integration testing.', '2026-08-10', 'public'],
-  ['rec-04', 'p-13', 'pr-01', 'k-16', 'reliability', 'Caught an API gateway rate-limit misconfig before it reached production.', '2026-08-11', 'private'],
-  ['rec-05', 'p-03', 'pr-03', 'k-03', 'knowledge_sharing', 'Documented the data lake ingestion schema, unblocking two downstream teams.', '2026-08-09', 'public'],
-  ['rec-06', 'p-14', 'pr-08', 'k-08', 'delivery', 'Reduced p95 search latency by 40% via query tuning.', '2026-08-08', 'public'],
-  ['rec-07', 'p-11', 'pr-06', 'k-14', 'delivery', 'Automated the CI flakiness, saving 8 engineer-hours weekly.', '2026-08-07', 'public'],
-  ['rec-08', 'p-16', 'pr-05', 'k-05', 'reliability', 'Completed the Kubernetes upgrade for the remaining node pools.', '2026-08-06', 'public'],
-  ['rec-09', 'p-06', 'pr-09', 'k-06', 'mentorship', 'Cross-trained the payments team on billing engine internals.', '2026-08-05', 'public'],
-  ['rec-10', 'p-09', 'pr-04', 'k-04', 'mentorship', 'Mentored two engineers through the ML inference migration.', '2026-08-04', 'private'],
-  ['rec-11', 'p-12', 'pr-07', 'k-13', 'reliability', 'Resolved a storage layer capacity incident during the night rotation.', '2026-08-03', 'public'],
-  ['rec-12', 'p-02', 'pr-02', 'k-11', 'mentorship', 'Rallied cross-team review coverage for the auth gateway contract.', '2026-08-02', 'public'],
-  ['rec-13', 'p-01', 'pr-07', 'k-01', 'knowledge_sharing', 'Ran a Payment Service architecture walkthrough for the new hires.', '2026-08-01', 'private'],
-  ['rec-14', 'p-15', 'pr-03', 'k-10', 'delivery', 'Diagnosed analytics pipeline drift and proposed a re-training schedule.', '2026-07-31', 'public'],
-  ['rec-15', 'p-07', 'pr-01', 'k-05', 'delivery', 'Shipped the feature-flag rollback tooling ahead of schedule.', '2026-07-30', 'public'],
-  ['rec-16', 'p-04', 'pr-05', 'k-15', 'reliability', 'Created runbooks for the observability stack across all regions.', '2026-07-29', 'public'],
-  ['rec-17', 'p-18', 'pr-02', 'k-02', 'delivery', 'Fixed the checkout validation regression in the test environment.', '2026-07-28', 'private'],
-  ['rec-18', 'p-19', 'pr-01', 'k-16', 'reliability', 'Resolved the API rate-limit misconfig across three regions.', '2026-07-27', 'public'],
+  ['rec-01', 'p-10', 'pr-10', 'k-15', 'reliability', 'Led the incident review and improved the production runbook.', '2026-08-14', 'public', '["+ reduced incident resolution time", "+ improved production runbook coverage"]'],
+  ['rec-02', 'p-05', 'pr-07', 'k-01', 'knowledge_sharing', 'Paired on two Payment Service changes to build backup capability.', '2026-08-12', 'public', '["+ increased Payment Service knowledge coverage", "+ reduced single-owner bus-factor"]'],
+  ['rec-03', 'p-08', 'pr-02', null, 'delivery', 'Unblocked the checkout UI validation path before integration testing.', '2026-08-10', 'public', '["+ faster path to integration testing", "+ removed a delivery blocker"]'],
+  ['rec-04', 'p-13', 'pr-01', 'k-16', 'reliability', 'Caught an API gateway rate-limit misconfig before it reached production.', '2026-08-11', 'private', '["+ prevented a production incident before rollout"]'],
+  ['rec-05', 'p-03', 'pr-03', 'k-03', 'knowledge_sharing', 'Documented the data lake ingestion schema, unblocking two downstream teams.', '2026-08-09', 'public', '["+ increased knowledge coverage for two downstream teams", "+ unblocked downstream delivery"]'],
+  ['rec-06', 'p-14', 'pr-08', 'k-08', 'delivery', 'Reduced p95 search latency by 40% via query tuning.', '2026-08-08', 'public', '["+ reduced p95 search latency 40%", "+ improved search reliability"]'],
+  ['rec-07', 'p-11', 'pr-06', 'k-14', 'delivery', 'Automated the CI flakiness, saving 8 engineer-hours weekly.', '2026-08-07', 'public', '["+ saved 8 engineer-hours weekly", "+ stabilized CI pipeline"]'],
+  ['rec-08', 'p-16', 'pr-05', 'k-05', 'reliability', 'Completed the Kubernetes upgrade for the remaining node pools.', '2026-08-06', 'public', '["+ completed multi-region rollout coverage", "+ reduced infrastructure risk"]'],
+  ['rec-09', 'p-06', 'pr-09', 'k-06', 'mentorship', 'Cross-trained the payments team on billing engine internals.', '2026-08-05', 'public', '["+ increased billing knowledge coverage", "+ reduced payments bus-factor"]'],
+  ['rec-10', 'p-09', 'pr-04', 'k-04', 'mentorship', 'Mentored two engineers through the ML inference migration.', '2026-08-04', 'private', '["+ expanded ML inference capability coverage"]'],
+  ['rec-11', 'p-12', 'pr-07', 'k-13', 'reliability', 'Resolved a storage layer capacity incident during the night rotation.', '2026-08-03', 'public', '["+ resolved a storage capacity incident", "+ reduced outage risk"]'],
+  ['rec-12', 'p-02', 'pr-02', 'k-11', 'mentorship', 'Rallied cross-team review coverage for the auth gateway contract.', '2026-08-02', 'public', '["+ increased review coverage for the auth gateway contract"]'],
+  ['rec-13', 'p-01', 'pr-07', 'k-01', 'knowledge_sharing', 'Ran a Payment Service architecture walkthrough for the new hires.', '2026-08-01', 'private', '["+ increased Payment Service knowledge coverage among new hires"]'],
+  ['rec-14', 'p-15', 'pr-03', 'k-10', 'delivery', 'Diagnosed analytics pipeline drift and proposed a re-training schedule.', '2026-07-31', 'public', '["+ improved analytics data quality", "+ enabled a re-training schedule"]'],
+  ['rec-15', 'p-07', 'pr-01', 'k-05', 'delivery', 'Shipped the feature-flag rollback tooling ahead of schedule.', '2026-07-30', 'public', '["+ shipped rollback tooling ahead of schedule", "+ reduced feature-flag rollout risk"]'],
+  ['rec-16', 'p-04', 'pr-05', 'k-15', 'reliability', 'Created runbooks for the observability stack across all regions.', '2026-07-29', 'public', '["+ improved observability coverage across regions", "+ reduced on-call resolution time"]'],
+  ['rec-17', 'p-18', 'pr-02', 'k-02', 'delivery', 'Fixed the checkout validation regression in the test environment.', '2026-07-28', 'private', '["+ fixed a checkout validation regression"]'],
+  ['rec-18', 'p-19', 'pr-01', 'k-16', 'reliability', 'Resolved the API rate-limit misconfig across three regions.', '2026-07-27', 'public', '["+ resolved rate-limit misconfig across regions", "+ reduced API outage risk"]'],
 ];

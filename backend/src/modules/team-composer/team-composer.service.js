@@ -58,13 +58,24 @@ function tradeOffFor(selected) {
     : 'No material capacity trade-off identified.';
 }
 
-function buildTeam(project, requirements, selected) {
+// Deterministic, grounded reason for why a candidate was NOT selected — this is
+// what makes the recommendation feel explainable (e.g. "Already overloaded 110%").
+function rejectionReasonFor(person) {
+  if (person.fitScore <= 0) return 'No matching capability coverage for the required skills';
+  const team = repository.findTeam(person.teamId);
+  const pressure = team ? deliveryPressure(team) : 0;
+  if (pressure > 100) return `Already overloaded ${pressure}%`;
+  return 'Lower capability fit than the selected team';
+}
+
+function buildTeam(project, requirements, selected, rejected) {
   const assessment = buildAssessment(selected, requirements);
   return {
     name: `Balanced team for ${project.name}`,
     project: { id: project.id, name: project.name },
     requiredSkills: requirements.map((requirement) => requirement.name),
     recommendedTeam: selected,
+    rejectedCandidates: rejected,
     assessment,
     rationale: assessment.matchedSkills.length
       ? `Selected for ${assessment.matchedSkills.join(', ')} coverage while accounting for current team delivery pressure.`
@@ -126,7 +137,12 @@ export async function composeForProject(projectId, { persist = false } = {}) {
   const requirements = await repository.findRequirements(projectId);
   const ranked = await rankCandidates(requirements);
   const selected = ranked.filter((person) => person.fitScore > 0).slice(0, TEAM_SIZE);
-  const team = buildTeam(project, requirements, selected);
+  const selectedIds = new Set(selected.map((person) => person.id));
+  const rejected = ranked
+    .filter((person) => !selectedIds.has(person.id))
+    .slice(0, 3)
+    .map((person) => ({ ...person, rejectionReason: rejectionReasonFor(person) }));
+  const team = buildTeam(project, requirements, selected, rejected);
   team.alternatives = buildAlternatives(ranked, selected, project, requirements);
   if (persist) {
     team.scenarioId = await persistScenario(project, team, await repository.findPrimaryTeamId(project.id));
