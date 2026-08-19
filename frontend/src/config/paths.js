@@ -8,6 +8,7 @@ export const paths = {
   knowledge: '/knowledge',
   system: (id) => `/knowledge/${id}`,
   transferPlans: '/knowledge/transfer-plans',
+  composer: '/composer',
   teams: '/teams',
   team: (id) => `/teams/${id}`,
   recognition: '/recognition',

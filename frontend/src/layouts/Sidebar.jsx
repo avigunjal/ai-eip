@@ -48,9 +48,14 @@ function SidebarContent({ onNavigate }) {
         >
           <Dashboard fontSize="small" />
         </Box>
-        <Typography sx={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.01em' }}>
-          AI-EIP
-        </Typography>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.01em' }}>
+            AI-EIP
+          </Typography>
+          <Typography sx={{ fontSize: 10.5, color: 'text.secondary', lineHeight: 1.3, whiteSpace: 'nowrap' }}>
+            Engineering Intelligence Platform
+          </Typography>
+        </Box>
         <IconButton
           onClick={onNavigate}
           aria-label="Close navigation"

@@ -13,6 +13,8 @@ const theme = createTheme({
   typography: createTypography(),
   shadows,
   shape: { borderRadius: 8 },
+  // Enterprise-felt, slightly slower drawer/modal enter (risk drawer slide).
+  transitions: { duration: { enteringScreen: 300 } },
   components,
 });
 

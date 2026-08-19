@@ -19,6 +19,11 @@ export function formatRelative(value) {
   return dayjs(value).fromNow();
 }
 
+/** Absolute time like "18 Aug 2026, 10:04 PM". */
+export function formatAbsolute(value) {
+  return dayjs(value).format('D MMM YYYY, h:mm A');
+}
+
 /** Range label from a key (7d / 30d / 90d / custom). */
 export function rangeLabel(key = DEFAULT_DATE_RANGE) {
   const match = DATE_RANGES.find((r) => r.key === key);

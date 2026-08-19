@@ -1,7 +1,7 @@
 import { Box, Button, Chip, Drawer, Typography } from '@mui/material';
-import { getProject } from '../../data/service.js';
 import { getSeverity, getRiskStatus } from '../../config/riskLabels.js';
 import StatusBadge from '../common/StatusBadge.jsx';
+import SparkleIcon from './SparkleIcon.jsx';
 import { formatRelative } from '../../config/dates.js';
 import { paths } from '../../config/paths.js';
 import { TOPBAR_HEIGHT } from '../../config/constants.js';
@@ -20,14 +20,28 @@ const EvidenceDrawer = ({ open, onClose, risk }) => {
   if (!risk) return null;
   const severity = getSeverity(risk.severity);
   const status = getRiskStatus(risk.status);
-  const project = getProject(risk.projectId);
+  const project = risk.projectName ? { id: risk.projectId, name: risk.projectName } : null;
 
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} slotProps={{ paper: { sx: { width: { xs: '100%', sm: 400 }, pt: `${TOPBAR_HEIGHT}px` } } }}>
+    <Drawer
+      anchor="right"
+      open={open}
+      onClose={onClose}
+      slotProps={{
+        root: { sx: { zIndex: (theme) => theme.zIndex.drawer + 2 } },
+        paper: {
+          sx: {
+            width: { xs: '100%', sm: 400 },
+            top: `${TOPBAR_HEIGHT}px`,
+            height: `calc(100% - ${TOPBAR_HEIGHT}px)`,
+          },
+        },
+      }}
+    >
       <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
           <Typography variant="h6" sx={{ fontSize: 18 }}>Risk evidence</Typography>
-          <StatusBadge config={severity} />
+          <StatusBadge config={severity} pulse={risk.severity === 'critical'} />
         </Box>
 
         <Typography sx={{ fontWeight: 600 }}>{risk.title}</Typography>
@@ -68,6 +82,35 @@ const EvidenceDrawer = ({ open, onClose, risk }) => {
             </Box>
           ))}
         </Box>
+
+        {/* Derivation sources — where the signal data comes from. */}
+        {(() => {
+          const sources = [...new Set((risk.signals ?? []).map((s) => s.source).filter(Boolean))];
+          return sources.length > 0 ? (
+            <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
+              <SparkleIcon sx={{ fontSize: 14, color: 'var(--primary)', flexShrink: 0 }} />
+              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+                Derived from{' '}
+                <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                  {sources.join(' · ')}
+                </Box>
+              </Typography>
+            </Box>
+          ) : null;
+        })()}
+
+        {/* Why it matters / impact / mitigation / owner */}
+        {[
+          ['Why this matters', risk.whyThisMatters],
+          ['Expected impact', risk.expectedImpact],
+          ['Suggested mitigation', risk.suggestedMitigation],
+          ['Owner', risk.ownerName],
+        ].filter(([, value]) => value).map(([label, value]) => (
+          <Box key={label}>
+            <Typography sx={{ fontWeight: 600, fontSize: 14 }}>{label}</Typography>
+            <Typography sx={{ fontSize: 13, color: 'text.secondary', mt: 0.25 }}>{value}</Typography>
+          </Box>
+        ))}
 
         <Button variant="contained" onClick={onClose} sx={{ alignSelf: 'flex-start' }}>
           Close
