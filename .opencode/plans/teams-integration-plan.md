@@ -8,7 +8,7 @@ Migrate the Teams pages from mock data to the real Express backend team endpoint
 
 ## Backend Contract (verified live)
 
-- `GET /api/teams` → `{ teams: TeamDTO[] }` (6 teams)
+- `GET /api/teams` → `{ teams: TeamDTO[] }` (9 teams)
 - `GET /api/teams/:teamId` → `{ team: TeamDTO }` (404 `{ error: { message } }` if missing)
 - TeamDTO:
   ```

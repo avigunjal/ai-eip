@@ -8,7 +8,7 @@ Migrate the Teams pages from mock data to the real Express backend team endpoint
 
 ## Backend Contract (verified live)
 
-- `GET /api/teams` → `{ teams: TeamDTO[] }` (6 teams)
+- `GET /api/teams` → `{ teams: TeamDTO[] }` (9 teams)
 - `GET /api/teams/:teamId` → `{ team: TeamDTO }` (404 `{ error: { message } }` if missing)
 - TeamDTO:
   ```
@@ -48,7 +48,7 @@ The TeamDTO contains every field the Teams pages render directly (name, capacity
 
 ## Verification
 
-- Live: `curl http://localhost:4000/api/teams` (6 teams, all have name/capacityPct/healthScore/memberIds) and `/api/teams/t-01` (Platform Engineering, cap 111, health 54).
+- Live: `curl http://localhost:4000/api/teams` (9 teams, all have name/capacityPct/healthScore/memberIds) and `/api/teams/t-01` (Payments Engineering, cap 116, health 43).
 - `npm run lint` + `npm run build` in `frontend/` both pass.
 - Grep: no `fetchTeams` / `fetchTeam` references outside `src/api/teams.js` and the two pages' new imports.
 

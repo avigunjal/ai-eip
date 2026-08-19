@@ -215,8 +215,8 @@ This yields a useful future question-answering experience—“Why is Payment Se
 
 Create coherent, cross-linked fixtures—not isolated dashboard numbers:
 
-- About **10 projects**, **18 risks**, **6 teams**, **28 people**, **12 capabilities**, **12 weeks of allocations**, **8 prevention actions**, **3 staffing scenarios**, and several knowledge areas/transfer plans.
-- Include 2 overloaded teams, 3 capability gaps, 2 Critical and 3 High project risks, and several current/overdue prevention actions.
+- About **10 projects**, **18 risks**, **9 teams**, **28 people**, **28 capabilities**, **12 weeks of allocations**, **8 prevention actions**, **3 staffing scenarios**, and several knowledge areas/transfer plans.
+- Include 3 overloaded teams, 3 capability gaps, 2 Critical and 3 High project risks, and several current/overdue prevention actions.
 - Include one strong demo narrative: **Payment Service** is revenue-critical, roughly 38% covered, dominated by one expert, lacks a capable backup, has stale documentation, and affects active checkout/PCI work.
 - IDs, names, dates, team membership, projects, expertise, evidence, risks, and actions must agree across all responses.
 - Use plausible dates relative to the demo timeframe; risk evidence should precede assessments/actions.

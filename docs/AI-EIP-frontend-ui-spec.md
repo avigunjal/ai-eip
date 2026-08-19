@@ -306,7 +306,7 @@ type Person = { id: string; name: string; initials: string; role: string; teamId
 type Recognition = { id: string; personId: string; type: 'reliability' | 'mentorship' | 'delivery' | 'knowledge_sharing'; summary: string; evidenceIds: string[]; occurredAt: string; visibility: 'public' | 'private'; };
 ```
 
-Minimum seeded fixture size: 10 projects, 6 teams, 28 people, 16 knowledge areas, 18 risks, 30 recognition/impact events, 12 weekly data points. Include varied states: at least 2 critical, 3 high, 3 single-owner systems, 2 overloaded teams, an empty filtered result, and an error state.
+Minimum seeded fixture size: 10 projects, 9 teams, 28 people, 16 knowledge areas, 18 risks, 30 recognition/impact events, 12 weekly data points. Include varied states: at least 2 critical, 3 high, 3 single-owner systems, 2 overloaded teams, an empty filtered result, and an error state.
 
 ## Interaction and state requirements
 
