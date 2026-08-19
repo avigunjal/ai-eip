@@ -23,7 +23,7 @@ import { notFoundHandler, errorHandler } from './middleware/error.middleware.js'
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: env.clientOrigin }));
+app.use(cors({ origin: env.clientOrigins, credentials: true }));
 app.use(express.json());
 app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'));
 
