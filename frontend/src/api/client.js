@@ -170,4 +170,42 @@ const patch = (path, body, options = {}) => apiClient.patch(path, body, options)
 
 export const http = Object.freeze({ get, post, patch });
 
+// ---------------------------------------------------------------------------
+// Bounded automatic retry
+// ---------------------------------------------------------------------------
+/**
+ * Default transient check for AI actions. Never retries on validation/4xx,
+ * auth, aborts, or the app's own long timeouts — those always surface
+ * immediately so users are not kept waiting on a dead-end path.
+ */
+function defaultRetryable(error) {
+  if (error.isTimeout || error.isAbort || error.isUnauthorized) return false;
+  if (error.status >= 500 && error.status < 600) return true;
+  return error.status === HttpStatus.TOO_MANY_REQUESTS || error.isNetworkError;
+}
+
+/**
+ * Retry an action a bounded number of times after transient failures so users
+ * never have to click again on a network blip, rate-limit, or server hiccup.
+ * Fails fast (re-throws immediately) on non-retryable errors.
+ *
+ * @template T
+ * @param {() => Promise<T>} action
+ * @param {{ retries?: number, baseDelayMs?: number, retryable?: (error: ApiError) => boolean }} [options]
+ * @returns {Promise<T>}
+ */
+export async function withRetry(action, { retries = 1, baseDelayMs = 1_000, retryable = defaultRetryable } = {}) {
+  let lastError;
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      return await action();
+    } catch (error) {
+      lastError = error;
+      if (!isApiError(error) || attempt >= retries || !retryable(error)) throw error;
+      await new Promise((resolve) => setTimeout(resolve, baseDelayMs * 2 ** attempt));
+    }
+  }
+  throw lastError;
+}
+
 export default apiClient;
