@@ -1,5 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import AppShell from '../layouts/AppShell.jsx';
+import RequireAuth from '../components/auth/RequireAuth.jsx';
+import Login from '../pages/Login/index.jsx';
 import NotFound from '../pages/NotFound.jsx';
 import Overview from '../pages/Overview/index.jsx';
 import Projects from '../pages/Projects/index.jsx';
@@ -21,12 +23,21 @@ import Settings from '../pages/Settings/index.jsx';
  *
  * `handle.title` drives the browser document title and the TopBar breadcrumb.
  * Every detail route is a child of AppShell so the sidebar/topbar persist.
+ * AppShell is wrapped in RequireAuth, which sends anonymous users to /login.
  * A catch-all `*` redirects to the dashboard rather than crashing.
  */
 const router = createBrowserRouter([
   {
+    path: '/login',
+    element: <Login />,
+  },
+  {
     path: '/',
-    element: <AppShell />,
+    element: (
+      <RequireAuth>
+        <AppShell />
+      </RequireAuth>
+    ),
     errorElement: <NotFound />,
     children: [
       { index: true, element: <Overview />, handle: { title: 'Overview' } },

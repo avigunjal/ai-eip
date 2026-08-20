@@ -13,22 +13,40 @@ import {
 import Person from '@mui/icons-material/Person';
 import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
+import { useAuthStore } from '../../store/authStore.js';
 
-const user = { name: 'Alex Chen', role: 'Engineering Manager', initials: 'AC', color: '#2563EB' };
+const FALLBACK_USER = { name: 'Alex Chen', role: 'Engineering Manager' };
+
+const initialsOf = (name) =>
+  String(name || '')
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() || 'U';
 
 /**
  * User avatar that opens a profile menu. Keyboard accessible: the avatar acts
- * as a button and the menu is focus-managed by MUI.
+ * as a button and the menu is focus-managed by MUI. Reflects the signed-in
+ * user from the auth store; "Sign out" returns the app to the login gate.
  */
 const AvatarMenu = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const user = useAuthStore((s) => s.user) ?? FALLBACK_USER;
+  const logout = useAuthStore((s) => s.logout);
 
   const handleKey = (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       setAnchorEl(event.currentTarget);
     }
+  };
+
+  const handleSignOut = () => {
+    setAnchorEl(null);
+    logout();
   };
 
   return (
@@ -44,12 +62,12 @@ const AvatarMenu = () => {
           width: 32,
           height: 32,
           fontSize: 13,
-          bgcolor: user.color,
+          bgcolor: 'primary.main',
           cursor: 'pointer',
           '&:focus-visible': { outline: '2px solid var(--primary)', outlineOffset: '2px' },
         }}
       >
-        {user.initials}
+        {initialsOf(user.name)}
       </Avatar>
       <Menu
         anchorEl={anchorEl}
@@ -71,7 +89,7 @@ const AvatarMenu = () => {
           <ListItemIcon><Settings fontSize="small" /></ListItemIcon>
           <ListItemText>Settings</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => setAnchorEl(null)}>
+        <MenuItem onClick={handleSignOut}>
           <ListItemIcon><Logout fontSize="small" /></ListItemIcon>
           <ListItemText>Sign out</ListItemText>
         </MenuItem>

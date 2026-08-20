@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getToken } from '../auth/token.js';
 
 /**
  * Axios HTTP transport for the AI-EIP API.
@@ -108,13 +109,24 @@ function normalizeError(error) {
 
   const { status, data } = error.response;
   const payload = data?.error;
-  return new ApiError({
+  const normalized = new ApiError({
     status,
     message: payload?.message ?? defaultMessageForStatus(status),
     code: payload?.code ?? `HTTP_${status}`,
     details: payload,
     cause: error,
   });
+
+  // A 401 from a guarded endpoint means the session is no longer valid.
+  // The auth store listens for this and returns the app to the login gate.
+  // Login/status probes may 401 legitimately (wrong password) — never treat
+  // those as a session loss.
+  const isAuthProbe = /\/auth\/(login|status)/.test(String(error.config?.url ?? ''));
+  if (status === HttpStatus.UNAUTHORIZED && !isAuthProbe && typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('aieip:auth:expired'));
+  }
+
+  return normalized;
 }
 
 /**
@@ -154,12 +166,12 @@ apiClient.interceptors.response.use(
   (error) => Promise.reject(normalizeError(error)),
 );
 
-// Attach auth tokens here once the backend requires them, e.g.:
-// apiClient.interceptors.request.use((config) => {
-//   const token = getAuthToken();
-//   if (token) config.headers.Authorization = `Bearer ${token}`;
-//   return config;
-// });
+// Attach the signed token to every request so guarded endpoints stay open.
+apiClient.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
 // ---------------------------------------------------------------------------
 // HTTP helpers
