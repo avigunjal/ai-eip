@@ -25,7 +25,9 @@ const AvatarGroup = ({ people = [], max = 4, size = 28, sx }) => (
   >
     {people.map((person) => (
       <Tooltip key={person.id} title={person.name}>
-        <Avatar sx={{ bgcolor: person.avatarColor }}>{person.initials}</Avatar>
+        <Avatar sx={{ bgcolor: person.avatarColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {person.initials}
+        </Avatar>
       </Tooltip>
     ))}
   </MuiAvatarGroup>

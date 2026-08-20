@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Box, Grid, MenuItem, TextField } from '@mui/material';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import AISubtitle from '../../components/ui/AISubtitle.jsx';
@@ -31,6 +31,7 @@ import { useUrlFilters } from '../../hooks/useUrlFilters.js';
 const Projects = () => {
   const { values, set, clear } = useUrlFilters(['search', 'status']);
   const { data: projects = [], loading, error, retry } = useData(fetchProjects);
+  const navigate = useNavigate();
   const { t } = useAiTerms();
 
   if (loading) return <LoadingState variant="grid" sx={{ mt: 3 }} />;
@@ -98,7 +99,7 @@ const Projects = () => {
       <Box sx={{ mt: 2 }}>
         <DataTable
           columns={[
-            { key: 'name', label: 'Project', sortable: true, render: (r) => <Link to={paths.project(r.id)} style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>{r.name}</Link> },
+            { key: 'name', label: 'Project', sortable: true, render: (r) => <Link to={paths.project(r.id)} onClick={(e) => e.stopPropagation()} style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>{r.name}</Link> },
             { key: 'status', label: 'Status', render: (r) => <StatusBadge config={getProjectStatus(r.status)} /> },
             { key: 'healthScore', label: 'Health', sortable: true },
             { key: 'deliveryConfidence', label: 'Confidence', sortable: true },
@@ -106,7 +107,7 @@ const Projects = () => {
             { key: 'topDriver', label: 'Driver' },
           ]}
           rows={filtered}
-          onRowClick={(r) => (window.location.href = paths.project(r.id))}
+          onRowClick={(r) => navigate(paths.project(r.id))}
           emptyTitle="No projects match"
           emptyDescription="Try clearing your filters."
         />
