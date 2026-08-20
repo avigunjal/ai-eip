@@ -11,12 +11,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import Dashboard from '@mui/icons-material/Dashboard';
 import Person2Outlined from '@mui/icons-material/Person2Outlined';
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useAuthStore } from '../../store/authStore.js';
+import SparkleIcon from '../../components/ui/SparkleIcon.jsx';
 
 /**
  * Lightweight sign-in page. Shown only when the backend requires auth
@@ -117,7 +117,7 @@ const Login = () => {
               boxShadow: '0 6px 16px rgba(37, 99, 235, 0.28)',
             }}
           >
-            <Dashboard fontSize="medium" />
+            <SparkleIcon sx={{ fontSize: 28, color: '#FFFFFF' }} />
           </Box>
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={{ fontWeight: 700, fontSize: 19, letterSpacing: '-0.01em', lineHeight: 1.2 }}>

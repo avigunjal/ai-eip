@@ -11,7 +11,6 @@ import {
   Avatar,
   Divider,
 } from '@mui/material';
-import Dashboard from '@mui/icons-material/Dashboard';
 import HelpOutlineOutlined from '@mui/icons-material/HelpOutlineOutlined';
 import Close from '@mui/icons-material/Close';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -19,6 +18,7 @@ import { sidebarLinks, workspace, iconMap } from '../routes/sitemap.js';
 import { useUiStore } from '../store/uiStore.js';
 import { SIDEBAR_WIDTH } from '../config/constants.js';
 import AvatarMenu from '../components/ui/AvatarMenu.jsx';
+import SparkleIcon from '../components/ui/SparkleIcon.jsx';
 
 function SidebarContent({ onNavigate }) {
   return (
@@ -42,11 +42,12 @@ function SidebarContent({ onNavigate }) {
             width: 32,
             height: 32,
             borderRadius: '10px',
-            bgcolor: 'primary.main',
-            color: 'primary.contrastText',
+            background: 'linear-gradient(135deg, var(--primary) 0%, var(--violet) 100%)',
+            color: '#FFFFFF',
+            boxShadow: '0 4px 12px rgba(37, 99, 235, 0.28)',
           }}
         >
-          <Dashboard fontSize="small" />
+          <SparkleIcon sx={{ fontSize: 18, color: '#FFFFFF' }} />
         </Box>
         <Box sx={{ minWidth: 0 }}>
           <Typography sx={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.01em' }}>
