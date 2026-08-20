@@ -30,7 +30,7 @@ const AnalyzingPanel = () => (
     }}
   >
     <Typography sx={{ display: 'flex', alignItems: 'center', gap: 0.75, fontSize: 13, fontWeight: 600 }}>
-      <SparkleIcon sx={{ fontSize: 15, color: 'var(--primary)' }} />
+      <SparkleIcon sx={{ fontSize: 15, color: 'var(--ai)' }} />
       Analyzing evidence…
     </Typography>
     {ANALYZING_STEPS.map((step, idx) => (
@@ -40,7 +40,7 @@ const AnalyzingPanel = () => (
       </Box>
     ))}
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, ...revealSx(620) }}>
-      <SparkleIcon sx={{ fontSize: 15, color: 'var(--primary)' }} />
+      <SparkleIcon sx={{ fontSize: 15, color: 'var(--ai)' }} />
       <Typography sx={{ fontSize: 13, fontWeight: 600 }}>Generating explanation…</Typography>
     </Box>
   </Box>

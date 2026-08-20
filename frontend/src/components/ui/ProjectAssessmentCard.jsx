@@ -31,7 +31,7 @@ const ConfidenceBar = ({ value }) => (
       <LinearProgress
         variant="determinate"
         value={value ?? 0}
-        sx={{ height: 6, borderRadius: 4, bgcolor: 'action.hover', '& .MuiLinearProgress-bar': { bgcolor: 'var(--violet)' } }}
+        sx={{ height: 6, borderRadius: 4, bgcolor: 'action.hover', '& .MuiLinearProgress-bar': { bgcolor: 'var(--ai)' } }}
       />
     </Box>
     <Typography component="span" sx={{ fontSize: 13, fontWeight: 700, color: 'text.primary' }}>
@@ -78,8 +78,8 @@ const ProjectAssessmentCard = ({ deterministic, ai, view, aiStatus, regenerating
           <Box
             sx={{
               width: 34, height: 34, borderRadius: 'var(--radius-control)', display: 'grid', placeItems: 'center',
-              bgcolor: showAi ? 'var(--violet-lighter)' : 'var(--primary-lighter)',
-              color: showAi ? 'var(--violet)' : 'var(--primary)',
+              bgcolor: showAi ? 'var(--ai-lighter)' : 'var(--primary-lighter)',
+              color: showAi ? 'var(--ai)' : 'var(--primary)',
             }}
           >
             {showAi ? <AutoAwesome sx={{ fontSize: 18 }} /> : <BarChart sx={{ fontSize: 18 }} />}

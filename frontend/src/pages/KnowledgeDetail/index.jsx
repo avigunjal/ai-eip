@@ -110,7 +110,7 @@ const KnowledgeDetail = () => {
           {area.name} is a {area.riskLevel === 'critical' ? 'critical single-expert dependency' : 'concentrated-knowledge area'}. The dominant expert holds {area.dominantExpertShare}% of recent contribution and incident-resolution knowledge{area.expertise.some((x) => x.level === 'capable') ? '' : '; no confirmed backup can independently support the service'}.
         </Typography>
         <Typography sx={{ mt: 1.5, display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', fontSize: 13, color: 'text.secondary' }}>
-          <SparkleIcon sx={{ fontSize: 15, color: 'var(--primary)', flexShrink: 0 }} />
+          <SparkleIcon sx={{ fontSize: 15, color: 'var(--ai)', flexShrink: 0 }} />
           <Box component="span" sx={{ fontWeight: 700, color: 'text.primary' }}>{t('confidence')} 87%</Box>
           <Box component="span" sx={{ opacity: 0.55 }}>·</Box>
           <Box component="span" sx={{ fontWeight: 600 }}>Based on</Box>
@@ -141,7 +141,7 @@ const KnowledgeDetail = () => {
           const sources = [...new Set((area.evidence ?? []).map((ev) => SOURCE_LABEL[ev.source] ?? ev.source).filter(Boolean))];
           return (
             <Typography sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, fontSize: 13, color: 'text.secondary', mb: 1.5 }}>
-              <SparkleIcon sx={{ fontSize: 15, color: 'var(--primary)', flexShrink: 0 }} />
+              <SparkleIcon sx={{ fontSize: 15, color: 'var(--ai)', flexShrink: 0 }} />
               {t('detectedConcentration')}{' '}
               <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
                 {sources.length ? sources.join(' · ') : 'recorded engineering signals'}

@@ -88,7 +88,7 @@ const EvidenceDrawer = ({ open, onClose, risk }) => {
           const sources = [...new Set((risk.signals ?? []).map((s) => s.source).filter(Boolean))];
           return sources.length > 0 ? (
             <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
-              <SparkleIcon sx={{ fontSize: 14, color: 'var(--primary)', flexShrink: 0 }} />
+              <SparkleIcon sx={{ fontSize: 14, color: 'var(--ai)', flexShrink: 0 }} />
               <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
                 Derived from{' '}
                 <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>

@@ -48,7 +48,7 @@ const AiStatusCard = ({ signals = 0, sources = [], updatedLabel = 'just now', sx
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-        <SparkleIcon sx={{ fontSize: 16, color: 'var(--primary)' }} />
+        <SparkleIcon sx={{ fontSize: 16, color: 'var(--ai)' }} />
         <Typography sx={{ fontWeight: 700, fontSize: 15 }}>{t('analysisEngine')}</Typography>
         <Box sx={{ ml: 'auto' }}>
           <LiveDot />

@@ -98,7 +98,7 @@ const AiExplanationPanel = ({ insight, explanation }) => (
     }}
   >
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-      <SparkleIcon sx={{ fontSize: 15, color: 'var(--primary)' }} />
+      <SparkleIcon sx={{ fontSize: 15, color: 'var(--ai)' }} />
       <Typography
         sx={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--primary)' }}
       >
@@ -159,17 +159,17 @@ const InsightCard = ({ insight, onSave, onDismiss, saved, actions, onExplain, ex
         transition: 'transform 150ms ease, box-shadow 150ms ease, outline-color 150ms ease',
         ...(aiExplanation
           ? {
-              outlineColor: 'color-mix(in srgb, var(--primary) 50%, transparent)',
-              boxShadow: '0 0 0 1px var(--primary-lighter), 0 6px 20px rgba(37, 99, 235, 0.14), var(--shadow-card)',
+              outlineColor: 'color-mix(in srgb, var(--ai) 50%, transparent)',
+              boxShadow: '0 0 0 1px var(--ai-lighter), 0 6px 20px rgba(107, 92, 231, 0.14), var(--shadow-card)',
             }
           : {}),
         '&:hover': {
           transform: 'translateY(-2px)',
           boxShadow: aiExplanation
-            ? '0 0 0 1px var(--primary-lighter), 0 10px 26px rgba(37, 99, 235, 0.22), var(--shadow-card)'
+            ? '0 0 0 1px var(--ai-lighter), 0 10px 26px rgba(107, 92, 231, 0.22), var(--shadow-card)'
             : 'var(--shadow-float)',
-          outlineColor: 'color-mix(in srgb, var(--primary) 35%, transparent)',
-          '& .ai-observation-sparkle': { color: 'var(--primary)' },
+          outlineColor: 'color-mix(in srgb, var(--ai) 35%, transparent)',
+          '& .ai-observation-sparkle': { color: 'var(--ai)' },
         },
       }}
     >
@@ -178,10 +178,10 @@ const InsightCard = ({ insight, onSave, onDismiss, saved, actions, onExplain, ex
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
           <SparkleIcon
             className="ai-observation-sparkle"
-            sx={{ fontSize: 15, color: 'var(--teal)', transition: 'color 150ms ease' }}
+            sx={{ fontSize: 15, color: 'var(--ai)', transition: 'color 150ms ease' }}
           />
           <Typography
-            sx={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--teal)' }}
+            sx={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--ai)' }}
           >
             {t('insight')}
           </Typography>
@@ -258,7 +258,7 @@ const InsightCard = ({ insight, onSave, onDismiss, saved, actions, onExplain, ex
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap' }}>
           <Button
             size="small"
-            startIcon={<SparkleIcon sx={{ fontSize: 16 }} />}
+            startIcon={<SparkleIcon sx={{ fontSize: 16, color: 'var(--ai)' }} />}
             endIcon={open ? <ExpandLess /> : <ExpandMore />}
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
