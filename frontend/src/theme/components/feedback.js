@@ -29,6 +29,7 @@ export default {
       paper: {
         borderRadius: 'var(--radius-card)',
         boxShadow: 'var(--shadow-float)',
+        backgroundColor: 'var(--surface-elevated)',
       },
     },
   },
@@ -40,6 +41,8 @@ export default {
       root: {
         borderRadius: 'var(--radius-control)',
         fontWeight: 500,
+        backgroundColor: 'var(--surface-elevated)',
+        color: 'var(--text)',
       },
     },
   },

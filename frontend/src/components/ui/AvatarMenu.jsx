@@ -62,7 +62,8 @@ const AvatarMenu = () => {
           width: 32,
           height: 32,
           fontSize: 13,
-          bgcolor: 'primary.main',
+          bgcolor: 'var(--header-avatar-bg)',
+          color: 'var(--header-avatar-text)',
           cursor: 'pointer',
           '&:focus-visible': { outline: '2px solid var(--primary)', outlineOffset: '2px' },
         }}

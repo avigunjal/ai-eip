@@ -13,21 +13,28 @@ export default {
   MuiAppBar: {
     defaultProps: { color: 'inherit', elevation: 0 },
     styleOverrides: {
-      root: ({ theme }) => ({
+      root: {
         boxShadow: 'none',
-        backgroundColor: theme.palette.background.paper,
-        borderBottom: `1px solid ${theme.palette.divider}`,
-      }),
+        backgroundColor: 'var(--header-bg)',
+        color: 'var(--header-text)',
+        borderBottom: '1px solid var(--header-border)',
+      },
     },
   },
   MuiDrawer: {
     styleOverrides: {
       paper: {
         boxShadow: 'none',
+        backgroundColor: 'var(--surface-elevated)',
       },
       docked: {
         '& .MuiPaper-root': { boxShadow: 'none' },
       },
+    },
+  },
+  MuiPopover: {
+    styleOverrides: {
+      paper: { backgroundColor: 'var(--surface-elevated)' },
     },
   },
   MuiCard: {

@@ -36,6 +36,7 @@ export default {
         borderRadius: 'var(--radius-control)',
         boxShadow: 'var(--shadow-float)',
         border: `1px solid ${theme.palette.divider}`,
+        backgroundColor: 'var(--surface-elevated)',
       }),
     },
   },

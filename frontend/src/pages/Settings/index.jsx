@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import { fetchAiSettings, updateAiSettings } from '../../api/ai.js';
 import { useAiStore } from '../../store/aiStore.js';
+import { useThemeStore } from '../../store/themeStore.js';
 import { useToast } from '../../hooks/useToast.js';
 
 /**
@@ -86,8 +87,8 @@ const AiSettingsSection = () => {
                   size="small"
                   variant="outlined"
                   sx={{
-                    color: settings.enabled ? 'var(--violet)' : 'text.secondary',
-                    borderColor: settings.enabled ? 'var(--violet)' : 'divider',
+                    color: settings.enabled ? 'var(--ai)' : 'text.secondary',
+                    borderColor: settings.enabled ? 'var(--ai)' : 'divider',
                     fontWeight: 600,
                   }}
                   label={settings.enabled ? '● AI Enabled' : '○ AI Disabled'}
@@ -107,6 +108,83 @@ const AiSettingsSection = () => {
           </>
         )
       )}
+    </Box>
+  );
+};
+
+const THEMES = [
+  {
+    id: 'moss',
+    label: 'Warm moss',
+    caption: 'Default. Earthy canvas, moss brand, warm surfaces.',
+    swatches: ['#F7F3EE', '#708061', '#6B5CE7', '#C7655B'],
+  },
+  {
+    id: 'classic',
+    label: 'Classic',
+    caption: 'Original light look with the blue/violet brand.',
+    swatches: ['#FFFFFF', '#2563EB', '#7C5CE0', '#D14343'],
+  },
+];
+
+/**
+ * Theme switcher. Persists to localStorage and rebuilds the MUI theme +
+ * CSS token set via the theme store.
+ */
+const ThemeSettingsSection = () => {
+  const variant = useThemeStore((s) => s.variant);
+  const setVariant = useThemeStore((s) => s.setVariant);
+
+  return (
+    <Box>
+      <Typography sx={{ color: 'text.secondary', mt: 1, maxWidth: 560 }}>
+        Switch between the new warm moss look and the original classic theme.
+        Your choice is saved on this device and applies to the whole app.
+      </Typography>
+
+      <Grid container spacing={2} sx={{ mt: 1, maxWidth: 720 }}>
+        {THEMES.map((t) => {
+          const selected = variant === t.id;
+          return (
+            <Grid item key={t.id} xs={12} sm={6}>
+              <Box
+                role="radio"
+                aria-checked={selected}
+                tabIndex={0}
+                onClick={() => setVariant(t.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setVariant(t.id);
+                  }
+                }}
+                sx={{
+                  p: 2.5,
+                  cursor: 'pointer',
+                  outline: '1px solid',
+                  outlineColor: selected ? 'var(--primary)' : 'divider',
+                  borderRadius: 'var(--radius-card)',
+                  bgcolor: selected ? 'var(--primary-lighter)' : 'background.paper',
+                  boxShadow: selected ? 'var(--shadow-float)' : 'none',
+                  '&:hover': { outlineColor: 'var(--primary)' },
+                  '&:focus-visible': { outline: 'var(--focus-ring)', outlineOffset: '2px' },
+                }}
+              >
+                <Box sx={{ display: 'flex', gap: 1, mb: 1.5 }}>
+                  {t.swatches.map((c) => (
+                    <Box key={c} sx={{ width: 22, height: 22, borderRadius: '6px', bgcolor: c, outline: '1px solid rgba(0,0,0,0.08)' }} />
+                  ))}
+                </Box>
+                <Typography sx={{ fontWeight: 600, fontSize: 15 }}>
+                  {t.label}
+                  {t.id === 'moss' && <Chip label="Default" size="small" sx={{ ml: 1, height: 18, fontSize: 10.5 }} />}
+                </Typography>
+                <Typography sx={{ color: 'text.secondary', fontSize: 13, mt: 0.5 }}>{t.caption}</Typography>
+              </Box>
+            </Grid>
+          );
+        })}
+      </Grid>
     </Box>
   );
 };
@@ -136,6 +214,7 @@ const Settings = () => {
       hints: ['Member list + role assignment', 'Invite flow'],
     },
     { title: 'AI', render: <AiSettingsSection /> },
+    { title: 'Appearance', render: <ThemeSettingsSection /> },
   ];
   const section = sections[tab];
 

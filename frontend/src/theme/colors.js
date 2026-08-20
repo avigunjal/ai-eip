@@ -1,29 +1,98 @@
 // Color scales for the MUI theme.
-// Brand/status values are the AI-EIP spec tokens (source of truth in
-// styles/tokens.css); chart scales follow the Aurora Free palette.
+// Brand/status values mirror styles/tokens.css (source of truth); chart scales
+// follow the Aurora Free palette and stay identical across themes.
+//
+// Two variant token sets exist — `mossTokens` (default) and `classicTokens`
+// (the original pre-moss look). The MUI palette is built from the active set
+// by theme/palette.js; raw CSS (Recharts, status colors, inline var(--...))
+// resolves the same values from styles/tokens.css via data-theme.
 
-export const token = {
+export const mossTokens = {
+  canvas: '#F0EEE9',
+  surface: '#F7F3EE',
+  surfaceSubtle: '#E9E6DF',
+  surfaceSidebar: '#E7E4DD',
+  surfaceElevated: '#FBF9F6',
+  border: '#DDD9D1',
+  borderStrong: '#C9C4BA',
+  text: '#252722',
+  textMuted: '#6B6D67',
+  textDisabled: '#8A8982',
+  primary: '#708061',
+  primaryLight: '#708061',
+  primaryHover: '#5D6D50',
+  primaryDark: '#4C5A42',
+  primaryDarker: '#3E4A36',
+  primaryLighter: '#E8EBE1',
+  teal: '#159A8A',
+  amber: '#B8894F',
+  red: '#C7655B',
+  violet: '#7658D6',
+  info: '#0DA6D6',
+  success: '#5F8065',
+  ai: '#6B5CE7',
+  aiLight: '#8F7FEF',
+  aiDark: '#4E43B8',
+  aiDarker: '#3B328C',
+  aiLighter: '#EEF0FF',
+  successLight: '#7A9A7F',
+  successDark: '#4C6650',
+  warningLight: '#C9A476',
+  warningDark: '#8F6E41',
+  errorLight: '#C98B84',
+  errorDark: '#934B44',
+  infoLight: '#5CC4E6',
+  infoDark: '#0B84AB',
+  tealLighter: '#E6F6F3',
+  amberLighter: '#F7EFE1',
+  redLighter: '#F7E9E7',
+  violetLighter: '#F0ECFB',
+  infoLighter: '#E5F6FB',
+  successLighter: '#E9EFE7',
+};
+
+export const classicTokens = {
   canvas: '#F7F9FC',
   surface: '#FFFFFF',
   surfaceSubtle: '#F1F5F9',
+  surfaceSidebar: '#FFFFFF',
+  surfaceElevated: '#FFFFFF',
   border: '#E3E8EF',
   borderStrong: '#CBD5E1',
   text: '#172033',
   textMuted: '#687386',
   textDisabled: '#94A3B8',
   primary: '#2563EB',
+  primaryLight: '#7DA3F2',
   primaryHover: '#1D4ED8',
+  primaryDark: '#1E3A8A',
+  primaryDarker: '#1E3A8A',
   primaryLighter: '#EAEEFD',
   teal: '#0F9F8A',
   amber: '#D88A12',
   red: '#D14343',
   violet: '#7C5CE0',
   info: '#0DA6D6',
+  success: '#0F9F8A',
+  ai: '#7C5CE0',
+  aiLight: '#A98EF0',
+  aiDark: '#5B3FBF',
+  aiDarker: '#452F93',
+  aiLighter: '#F0ECFB',
+  successLight: '#4CC3AE',
+  successDark: '#0B7A6B',
+  warningLight: '#E6A84B',
+  warningDark: '#B26E0B',
+  errorLight: '#E47777',
+  errorDark: '#AD3434',
+  infoLight: '#5CC4E6',
+  infoDark: '#0B84AB',
   tealLighter: '#E6F6F3',
   amberLighter: '#FBF1E3',
   redLighter: '#FBE9E9',
   violetLighter: '#F0ECFB',
   infoLighter: '#E5F6FB',
+  successLighter: '#E6F6F3',
 };
 
 export const grey = {

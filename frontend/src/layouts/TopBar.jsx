@@ -61,6 +61,7 @@ const TopBar = () => {
         <IconButton
           onClick={toggleMobileNav}
           aria-label="Open navigation"
+          color="inherit"
           sx={{ display: { md: 'none' }, mr: 0.5 }}
         >
           <MenuIcon />
@@ -70,23 +71,23 @@ const TopBar = () => {
         <Breadcrumbs
           aria-label="breadcrumb"
           separator={<ChevronRight fontSize="small" />}
-          sx={{ display: { xs: 'none', md: 'block' } }}
+          sx={{ display: { xs: 'none', md: 'block' }, '& .MuiBreadcrumbs-separator': { color: 'var(--header-text)' } }}
         >
           <Typography
             component={Link}
             to={paths.root}
-            sx={{ fontSize: 14, color: 'text.secondary', textDecoration: 'none', '&:hover': { color: 'primary.main' } }}
+            sx={{ fontSize: 14, color: 'var(--header-text-muted)', textDecoration: 'none', '&:hover': { color: 'var(--header-text)' } }}
           >
             AI-EIP
           </Typography>
           {!isOverview && segments.length > 0 && (
-            <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'text.primary' }}>
+            <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'var(--header-text)' }}>
               {pageTitle}
             </Typography>
           )}
         </Breadcrumbs>
 
-        <Typography sx={{ fontSize: 14, fontWeight: 600, display: { md: 'none' } }}>
+        <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'var(--header-text)', display: { md: 'none' } }}>
           {pageTitle}
         </Typography>
 
@@ -121,7 +122,7 @@ const TopBar = () => {
         </Button>
 
         {/* Right actions */}
-        <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <DateRangePicker value={values.range || DEFAULT_DATE_RANGE} onChange={(key) => set('range', key)} />
           <NotificationBell />
           <AvatarMenu />

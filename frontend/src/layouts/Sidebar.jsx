@@ -42,9 +42,9 @@ function SidebarContent({ onNavigate }) {
             width: 32,
             height: 32,
             borderRadius: '10px',
-            background: 'linear-gradient(135deg, var(--primary) 0%, var(--violet) 100%)',
+            background: 'var(--brand-gradient)',
             color: '#FFFFFF',
-            boxShadow: '0 4px 12px rgba(37, 99, 235, 0.28)',
+            boxShadow: 'var(--brand-shadow)',
           }}
         >
           <SparkleIcon sx={{ fontSize: 18, color: '#FFFFFF' }} />
@@ -166,6 +166,7 @@ const Sidebar = () => {
             boxSizing: 'border-box',
             borderRight: '1px solid',
             borderColor: 'divider',
+            backgroundColor: 'var(--surface-sidebar)',
           },
         }}
       >
@@ -178,7 +179,7 @@ const Sidebar = () => {
         open={mobileNavOpen}
         onClose={closeMobileNav}
         ModalProps={{ keepMounted: true }}
-        sx={{ display: { xs: 'block', md: 'none' }, '& .MuiDrawer-paper': { width: SIDEBAR_WIDTH } }}
+        sx={{ display: { xs: 'block', md: 'none' }, '& .MuiDrawer-paper': { width: SIDEBAR_WIDTH, backgroundColor: 'var(--surface-sidebar)' } }}
       >
         <SidebarContent onNavigate={closeMobileNav} />
       </Drawer>

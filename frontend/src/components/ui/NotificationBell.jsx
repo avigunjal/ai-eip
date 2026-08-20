@@ -26,7 +26,11 @@ const NotificationBell = () => {
 
   return (
     <>
-      <IconButton aria-label="Notifications" onClick={(e) => setAnchor(e.currentTarget)}>
+      <IconButton
+        aria-label="Notifications"
+        onClick={(e) => setAnchor(e.currentTarget)}
+        sx={{ color: 'var(--header-text)', mx: 0.5 }}
+      >
         <Badge badgeContent={unread} color="error">
           <NotificationsNone />
         </Badge>

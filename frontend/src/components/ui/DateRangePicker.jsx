@@ -22,7 +22,7 @@ const DateRangePicker = ({ value = '30d', onChange }) => {
         variant="outlined"
         startIcon={<CalendarMonth />}
         onClick={(e) => setAnchor(e.currentTarget)}
-        sx={{ minHeight: 40, color: 'text.secondary', borderColor: 'divider', textTransform: 'none' }}
+        sx={{ minHeight: 40, color: 'var(--header-text)', borderColor: 'color-mix(in srgb, var(--header-text) 35%, transparent)', textTransform: 'none', '&:hover': { borderColor: 'color-mix(in srgb, var(--header-text) 60%, transparent)', bgcolor: 'color-mix(in srgb, var(--header-text) 8%, transparent)' } }}
       >
         {rangeLabel(value)}
       </Button>

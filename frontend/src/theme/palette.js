@@ -1,54 +1,57 @@
-import { blue, green, grey, lightBlue, orange, purple, red, token } from './colors.js';
+import { blue, green, grey, lightBlue, orange, purple, red } from './colors.js';
 
 /**
- * MUI palette derived from the AI-EIP CSS-variable tokens.
+ * Builds the MUI palette from an active token set (moss or classic).
  * `background.default` is the canvas, `background.paper` the card surface.
- * Aurora-style `chGrey/chRed/chBlue/...` scales are exposed for charts.
+ * `secondary` is the AI accent — reserved for AI functionality so it stays
+ * visually recognizable across the product. Aurora-style `chGrey/chRed/...`
+ * scales are exposed for charts (identical in both themes).
  */
-const palette = {
+const createPalette = (t) => ({
   mode: 'light',
   common: { black: '#000000', white: '#ffffff' },
   primary: {
-    lighter: token.primaryLighter,
-    light: '#7DA3F2',
-    main: token.primary,
-    dark: token.primaryHover,
-    darker: '#1E3A8A',
+    lighter: t.primaryLighter,
+    light: t.primaryLight,
+    main: t.primaryHover,
+    dark: t.primaryDark,
+    darker: t.primaryDarker,
     contrastText: '#FFFFFF',
   },
   secondary: {
-    lighter: token.violetLighter,
-    light: '#A98EF0',
-    main: token.violet,
-    dark: '#5B3FBF',
+    lighter: t.aiLighter,
+    light: t.aiLight,
+    main: t.ai,
+    dark: t.aiDark,
+    darker: t.aiDarker,
     contrastText: '#FFFFFF',
   },
   success: {
-    lighter: token.tealLighter,
-    light: '#4CC3AE',
-    main: token.teal,
-    dark: '#0B7A6B',
+    lighter: t.successLighter,
+    light: t.successLight,
+    main: t.success,
+    dark: t.successDark,
     contrastText: '#FFFFFF',
   },
   warning: {
-    lighter: token.amberLighter,
-    light: '#E6A84B',
-    main: token.amber,
-    dark: '#B26E0B',
+    lighter: t.amberLighter,
+    light: t.warningLight,
+    main: t.amber,
+    dark: t.warningDark,
     contrastText: '#FFFFFF',
   },
   error: {
-    lighter: token.redLighter,
-    light: '#E47777',
-    main: token.red,
-    dark: '#AD3434',
+    lighter: t.redLighter,
+    light: t.errorLight,
+    main: t.red,
+    dark: t.errorDark,
     contrastText: '#FFFFFF',
   },
   info: {
-    lighter: token.infoLighter,
-    light: '#5CC4E6',
-    main: token.info,
-    dark: '#0B84AB',
+    lighter: t.infoLighter,
+    light: t.infoLight,
+    main: t.info,
+    dark: t.infoDark,
     contrastText: '#FFFFFF',
   },
   neutral: {
@@ -60,14 +63,14 @@ const palette = {
     contrastText: '#FFFFFF',
   },
   text: {
-    primary: token.text,
-    secondary: token.textMuted,
-    disabled: token.textDisabled,
+    primary: t.text,
+    secondary: t.textMuted,
+    disabled: t.textDisabled,
   },
-  divider: token.border,
+  divider: t.border,
   background: {
-    default: token.canvas,
-    paper: token.surface,
+    default: t.canvas,
+    paper: t.surface,
   },
   action: {
     active: grey[600],
@@ -87,6 +90,6 @@ const palette = {
   chGreen: green,
   chLightBlue: lightBlue,
   chPurple: purple,
-};
+});
 
-export default palette;
+export default createPalette;

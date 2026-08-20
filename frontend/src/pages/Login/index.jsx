@@ -70,7 +70,7 @@ const Login = () => {
           width: 420,
           height: 420,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(37, 99, 235, 0.08), transparent 70%)',
+          background: 'radial-gradient(circle, var(--blob-primary), transparent 70%)',
           pointerEvents: 'none',
         }}
       />
@@ -83,7 +83,7 @@ const Login = () => {
           width: 420,
           height: 420,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(124, 92, 224, 0.10), transparent 70%)',
+          background: 'radial-gradient(circle, var(--blob-secondary), transparent 70%)',
           pointerEvents: 'none',
         }}
       />
@@ -112,9 +112,9 @@ const Login = () => {
               width: 52,
               height: 52,
               borderRadius: '16px',
-              background: 'linear-gradient(135deg, var(--primary) 0%, var(--violet) 100%)',
+              background: 'var(--brand-gradient)',
               color: '#FFFFFF',
-              boxShadow: '0 6px 16px rgba(37, 99, 235, 0.28)',
+              boxShadow: 'var(--brand-shadow-lg)',
             }}
           >
             <SparkleIcon sx={{ fontSize: 28, color: '#FFFFFF' }} />
