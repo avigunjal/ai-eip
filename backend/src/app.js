@@ -18,6 +18,8 @@ import teamComposerRoutes from './modules/team-composer/team-composer.routes.js'
 import recognitionRoutes from './modules/recognition/recognition.routes.js';
 import insightRoutes from './modules/insight/insight.routes.js';
 import aiRoutes from './modules/ai/ai.routes.js';
+import authRoutes from './modules/auth/auth.routes.js';
+import { requireAuth } from './modules/auth/auth.middleware.js';
 import { notFoundHandler, errorHandler } from './middleware/error.middleware.js';
 
 const app = express();
@@ -27,8 +29,12 @@ app.use(cors({ origin: env.clientOrigins, credentials: true }));
 app.use(express.json());
 app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'));
 
-// Health check
+// Health check (always public)
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
+
+// Auth (login + status are public; everything after requireAuth is guarded)
+app.use('/api/auth', authRoutes);
+app.use('/api', requireAuth);
 
 // Feature routes
 app.use('/api/dashboard', dashboardRoutes);

@@ -17,10 +17,19 @@ function str(name, fallback) {
   return value == null ? fallback : value.trim();
 }
 
+const authPassword = str('AUTH_PASSWORD', '');
+
 export const env = {
   port: Number(process.env.PORT) || 4000,
   nodeEnv: process.env.NODE_ENV || 'development',
   clientOrigins: parseOrigins(process.env.CLIENT_ORIGINS || process.env.CLIENT_ORIGIN),
+  // Lightweight auth. The API stays fully open until AUTH_PASSWORD is set;
+  // tokens are HMAC-signed with AUTH_TOKEN_SECRET (falls back to the password)
+  // and expire after AUTH_TOKEN_TTL_HOURS. AUTH_USER is the single allowed login.
+  authUser: str('AUTH_USER', 'admin'),
+  authPassword,
+  authTokenSecret: str('AUTH_TOKEN_SECRET', authPassword),
+  authTokenTtlHours: Number(process.env.AUTH_TOKEN_TTL_HOURS) || 72,
   // Local default. Tomorrow, set DATABASE_URL to the Supabase connection string
   // and replace the adapter without changing HTTP routes or service contracts.
   databaseUrl: str('DATABASE_URL', 'sqlite:./data/ai-eip.db'),
