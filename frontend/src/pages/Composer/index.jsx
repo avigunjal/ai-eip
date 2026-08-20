@@ -454,7 +454,7 @@ const Composer = () => {
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                <SparkleIcon sx={{ fontSize: 15, color: 'var(--primary)' }} />
+                <SparkleIcon sx={{ fontSize: 15, color: 'var(--ai)' }} />
                 <Typography sx={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--primary)' }}>
                   {t('recommendation')}
                 </Typography>
@@ -513,9 +513,9 @@ const Composer = () => {
                             fontSize: 10,
                             fontWeight: 600,
                             borderRadius: 999,
-                            bgcolor: 'var(--violet-lighter)',
-                            color: 'var(--violet)',
-                            border: '1px solid color-mix(in srgb, var(--violet) 30%, transparent)',
+                            bgcolor: 'var(--ai-lighter)',
+                            color: 'var(--ai)',
+                            border: '1px solid color-mix(in srgb, var(--ai) 30%, transparent)',
                             '& .MuiChip-label': { px: 0.75 },
                           }}
                         />
@@ -599,7 +599,7 @@ const Composer = () => {
               </Box>
               {busy ? (
                 <Button size="small" disabled startIcon={<CircularProgress size={14} />} sx={{ textTransform: 'none' }}>
-                  Working…
+                  Analyzing…
                 </Button>
               ) : aiView ? (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
