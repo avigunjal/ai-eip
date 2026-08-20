@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 import Sidebar from './Sidebar.jsx';
 import TopBar from './TopBar.jsx';
 import CommandPalette from '../components/ui/CommandPalette.jsx';
+import { useUiStore } from '../store/uiStore.js';
 import { useAiStore } from '../store/aiStore.js';
 import { CONTENT_MAX_WIDTH, SIDEBAR_WIDTH, TOPBAR_HEIGHT } from '../config/constants.js';
 
@@ -12,12 +13,27 @@ import { CONTENT_MAX_WIDTH, SIDEBAR_WIDTH, TOPBAR_HEIGHT } from '../config/const
  * scrolling, max-width content region. Desktop uses a permanent rail; mobile
  * uses a temporary drawer opened from the top bar. The command palette is
  * mounted here (inside the router tree) so it can call useNavigate().
+ *
+ * ⌘K / Ctrl+K opens the command palette from anywhere.
  */
 const AppShell = () => {
   const loadAiSettings = useAiStore((s) => s.loadAiSettings);
+  const openCommandPalette = useUiStore((s) => s.openCommandPalette);
+
   useEffect(() => {
     loadAiSettings();
   }, [loadAiSettings]);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        openCommandPalette();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [openCommandPalette]);
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>

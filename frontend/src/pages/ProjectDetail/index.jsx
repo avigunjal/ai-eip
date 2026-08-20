@@ -18,8 +18,9 @@ import { useData } from '../../hooks/useData.js';
 import { useToast } from '../../hooks/useToast.js';
 import { useAiTerms } from '../../hooks/useAiTerms.js';
 import { useActionStore } from '../../store/actionStore.js';
+import { useAiEnabled } from '../../store/aiStore.js';
 import { fetchProject, fetchProjectRisks } from '../../api/projects.js';
-import { getProjectAssessment, explainProjectAnalysis, regenerateProjectAnalysis, fetchAiSettings } from '../../api/ai.js';
+import { getProjectAssessment, explainProjectAnalysis, regenerateProjectAnalysis } from '../../api/ai.js';
 import { withRetry } from '../../api/client.js';
 import { mapProjectOwners } from '../../api/projects.adapter.js';
 import { getProjectStatus, getSeverity } from '../../config/riskLabels.js';
@@ -44,7 +45,6 @@ const ProjectDetail = () => {
   const { projectId } = useParams();
   const { data: project, loading, error, retry } = useData(() => fetchProject(projectId), [projectId]);
   const { data: risks = [], loading: risksLoading, error: risksError } = useData(() => fetchProjectRisks(projectId), [projectId]);
-  const { data: aiSettings } = useData(fetchAiSettings, []);
   const { data: assessment } = useData(() => getProjectAssessment(projectId), [projectId]);
   const [tab, setTab] = useState(0);
   const [aiState, setAiState] = useState({ status: 'idle', analysis: null, regenerating: false });
@@ -56,8 +56,9 @@ const ProjectDetail = () => {
   // LLM call; the header offers "View AI Assessment" instead of "Explain with AI".
   const aiAnalysis = aiState.analysis ?? assessment?.ai ?? null;
   const aiStatus = aiState.status === 'idle' && aiAnalysis ? 'success' : aiState.status;
-  // If the settings fetch fails, default to the current behavior (AI on).
-  const aiEnabled = aiSettings?.enabled ?? true;
+  // Global AI settings come from the shared store (loaded once at shell mount),
+  // not a per-page fetch — avoids a duplicate /api/ai/settings request.
+  const aiEnabled = useAiEnabled();
   const { t } = useAiTerms();
   const hasAi = Boolean(aiAnalysis);
   const busy = aiStatus === 'loading' || aiState.regenerating;

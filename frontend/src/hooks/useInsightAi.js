@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useData } from './useData.js';
-import { explainInsight, regenerateInsightExplanation, fetchAiSettings, fetchInsightExplanations } from '../api/ai.js';
+import { explainInsight, regenerateInsightExplanation, fetchInsightExplanations } from '../api/ai.js';
 import { withRetry } from '../api/client.js';
+import { useAiEnabled } from '../store/aiStore.js';
 import { useToast } from './useToast.js';
 
 /**
@@ -13,7 +14,7 @@ import { useToast } from './useToast.js';
  */
 export function useInsightAi() {
   const { data: cachedList = [] } = useData(fetchInsightExplanations, []);
-  const { data: aiSettings } = useData(fetchAiSettings, []);
+  const aiEnabled = useAiEnabled();
   const [explanations, setExplanations] = useState(() => new Map());
   const [explainingId, setExplainingId] = useState(null);
   const [regeneratingId, setRegeneratingId] = useState(null);
@@ -71,7 +72,7 @@ export function useInsightAi() {
   };
 
   return {
-    aiEnabled: aiSettings?.enabled ?? true,
+    aiEnabled,
     explanations: effectiveExplanations,
     explainingId,
     regeneratingId,

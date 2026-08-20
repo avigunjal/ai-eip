@@ -6,9 +6,12 @@ import {
   IconButton,
   Box,
   Typography,
+  Button,
   Breadcrumbs,
+  Chip,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import SearchIcon from '@mui/icons-material/Search';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import { useUiStore } from '../store/uiStore.js';
 import { paths } from '../config/paths.js';
@@ -20,15 +23,15 @@ import DateRangePicker from '../components/ui/DateRangePicker.jsx';
 import { useUrlFilters } from '../hooks/useUrlFilters.js';
 
 /**
- * Fixed top bar: breadcrumb (desktop) and contextual actions (date range,
- * notifications, avatar). Stays visually stable while page content scrolls
- * independently.
+ * Fixed top bar: breadcrumb (desktop), ⌘K global search, and contextual
+ * actions (date range, notifications, avatar). Stays visually stable while
+ * page content scrolls independently.
  *
  * The page title is resolved from the matched route's `handle.title` (set in
  * router.jsx), so the browser tab + breadcrumb stay in sync on navigation.
  */
 const TopBar = () => {
-  const { toggleMobileNav } = useUiStore();
+  const { toggleMobileNav, openCommandPalette } = useUiStore();
   const { pathname } = useLocation();
   const { values, set } = useUrlFilters(['range']);
 
@@ -55,7 +58,11 @@ const TopBar = () => {
       }}
     >
       <Toolbar sx={{ px: { xs: 1.5, sm: 2.5, md: 4 }, gap: 1 }}>
-        <IconButton onClick={toggleMobileNav} aria-label="Open navigation" sx={{ display: { md: 'none' } }}>
+        <IconButton
+          onClick={toggleMobileNav}
+          aria-label="Open navigation"
+          sx={{ display: { md: 'none' }, mr: 0.5 }}
+        >
           <MenuIcon />
         </IconButton>
 
@@ -63,7 +70,7 @@ const TopBar = () => {
         <Breadcrumbs
           aria-label="breadcrumb"
           separator={<ChevronRight fontSize="small" />}
-          sx={{ display: { xs: 'none', md: 'block' }, flexShrink: 0 }}
+          sx={{ display: { xs: 'none', md: 'block' } }}
         >
           <Typography
             component={Link}
@@ -79,14 +86,42 @@ const TopBar = () => {
           )}
         </Breadcrumbs>
 
-        <Typography
-          sx={{ fontSize: 14, fontWeight: 600, display: { md: 'none' }, flexShrink: 0, whiteSpace: 'nowrap' }}
-        >
+        <Typography sx={{ fontSize: 14, fontWeight: 600, display: { md: 'none' } }}>
           {pageTitle}
         </Typography>
 
+        {/* Global search (⌘K) */}
+        <Button
+          onClick={openCommandPalette}
+          startIcon={<SearchIcon />}
+          aria-label="Search projects, systems, teams, people"
+          sx={{
+            ml: { md: 2 },
+            flex: 1,
+            maxWidth: { md: 420 },
+            minHeight: 40,
+            justifyContent: 'flex-start',
+            color: 'text.secondary',
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+            px: 1.5,
+            '&:hover': { bgcolor: 'action.hover', borderColor: 'divider' },
+          }}
+        >
+          <Typography component="span" sx={{ flex: 1, textAlign: 'left', fontSize: 14, fontWeight: 400, color: 'text.disabled' }}>
+            Search projects, systems, teams, people…
+          </Typography>
+          <Chip
+            label="⌘K"
+            size="small"
+            variant="outlined"
+            sx={{ height: 20, fontSize: 11, borderColor: 'divider', color: 'text.secondary' }}
+          />
+        </Button>
+
         {/* Right actions */}
-        <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1.5, flexShrink: 0 }}>
+        <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <DateRangePicker value={values.range || DEFAULT_DATE_RANGE} onChange={(key) => set('range', key)} />
           <NotificationBell />
           <AvatarMenu />

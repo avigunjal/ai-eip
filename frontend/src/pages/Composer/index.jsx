@@ -40,11 +40,12 @@ import { fetchProjects, fetchProjectRisks } from '../../api/projects.js';
 import { fetchPeople } from '../../api/people.js';
 import { fetchKnowledgeAreas } from '../../api/knowledge.js';
 import { fetchComposerTeams, fetchRecommendations, createScenario } from '../../api/teamComposer.js';
-import { explainComposition, getCompositionAssessment, regenerateCompositionExplanation, fetchAiSettings } from '../../api/ai.js';
+import { explainComposition, getCompositionAssessment, regenerateCompositionExplanation } from '../../api/ai.js';
 import { withRetry } from '../../api/client.js';
 import { useData } from '../../hooks/useData.js';
 import { useToast } from '../../hooks/useToast.js';
 import { useAiTerms } from '../../hooks/useAiTerms.js';
+import { useAiEnabled } from '../../store/aiStore.js';
 import { modelLabel } from '../../config/modelLabel.js';
 import { formatRelative } from '../../config/dates.js';
 import { paths } from '../../config/paths.js';
@@ -70,9 +71,9 @@ const Composer = () => {
   const [aiState, setAiState] = useState({ status: 'idle', view: 'deterministic', explanation: null, meta: null });
   const [creatingScenario, setCreatingScenario] = useState(false);
   const toast = useToast();
-  // If the settings fetch fails, default to the current behavior (AI on).
-  const { data: aiSettings } = useData(fetchAiSettings, []);
-  const aiEnabled = aiSettings?.enabled ?? true;
+  // Global AI settings come from the shared store (loaded once at shell mount),
+  // not a per-page fetch — avoids a duplicate /api/ai/settings request.
+  const aiEnabled = useAiEnabled();
   const { t } = useAiTerms();
 
   const projectsQuery = useData(fetchProjects);
