@@ -26,6 +26,7 @@ import ArrowForward from '@mui/icons-material/ArrowForward';
 import AutoAwesome from '@mui/icons-material/AutoAwesome';
 import Refresh from '@mui/icons-material/Refresh';
 import SaveAlt from '@mui/icons-material/SaveAlt';
+import PictureAsPdf from '@mui/icons-material/PictureAsPdf';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import AiDisclaimer from '../../components/common/AiDisclaimer.jsx';
 import Surface from '../../components/styled/Surface.jsx';
@@ -50,6 +51,8 @@ import { modelLabel } from '../../config/modelLabel.js';
 import { formatRelative } from '../../config/dates.js';
 import { paths } from '../../config/paths.js';
 import { SUSTAINABLE_CAPACITY } from '../../config/constants.js';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 /**
  * AI Composer — composes an engineering team for a selected project using the
@@ -164,6 +167,223 @@ const Composer = () => {
     } finally {
       setCreatingScenario(false);
     }
+  };
+
+  const handleDownloadPdf = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 16;
+    let y = 20;
+
+    // Title
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(112, 128, 97); // brand primary
+    doc.text('AI Team Composition Report', margin, y);
+
+    // Subtitle
+    y += 10;
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Project: ${project.name}`, margin, y);
+    y += 6;
+    doc.text(`Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, margin, y);
+    y += 6;
+    doc.text(`Team: ${team?.name ?? 'N/A'}`, margin, y);
+
+    // Horizontal line
+    y += 8;
+    doc.setDrawColor(112, 128, 97);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageWidth - margin, y);
+
+    // KPI Section
+    y += 10;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(40, 40, 40);
+    doc.text('Key Metrics', margin, y);
+
+    y += 8;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const kpiData = [
+      ['Team Capacity', `${team?.capacityPct ?? '–'}%`, afterCapacity != null ? `→ ${afterCapacity}%` : ''],
+      ['Skill Coverage', `${coverage}%`, ''],
+      ['Open High/Critical Risks', String(riskExposure), ''],
+      ['Single-Owner Systems', String(singleOwnerAreas.length), ''],
+      ['FTE Added', fteDelta.toFixed(1), ''],
+    ];
+
+    doc.autoTable({
+      startY: y,
+      head: [['Metric', 'Current', 'Projected']],
+      body: kpiData,
+      theme: 'grid',
+      headStyles: { fillColor: [112, 128, 97], textColor: 255, fontStyle: 'bold' },
+      styles: { fontSize: 9, cellPadding: 3 },
+      columnStyles: { 0: { fontStyle: 'bold', cellWidth: 50 }, 1: { cellWidth: 30 }, 2: { cellWidth: 30 } },
+      margin: { left: margin, right: margin },
+    });
+    y = doc.lastAutoTable.finalY + 10;
+
+    // Recommendation Summary
+    y += 2;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(40, 40, 40);
+    doc.text('Recommendation Summary', margin, y);
+
+    y += 8;
+    summaryChecks.forEach((check) => {
+      doc.setFontSize(10);
+      doc.setFont('helvetica', check.ok ? 'bold' : 'normal');
+      doc.setTextColor(check.ok ? [95, 128, 101] : [184, 137, 79]); // teal : amber
+      const icon = check.ok ? '✓ ' : '⚠ ';
+      doc.text(`${icon}${check.label}`, margin + 4, y);
+      y += 6;
+    });
+
+    y += 4;
+    doc.setDrawColor(200, 200, 200);
+    doc.line(margin, y, pageWidth - margin, y);
+
+    // Recommended Team
+    y += 8;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(40, 40, 40);
+    doc.text(`Recommended Team (${composition.length} people)`, margin, y);
+
+    y += 6;
+    if (composition.length > 0) {
+      const teamData = composition.map((person, idx) => [
+        String(idx + 1),
+        person.name,
+        person.role,
+        `${person.matchedSkills?.length ?? 0} skills`,
+        `${person.availabilityFte?.toFixed(1) ?? 0} FTE`,
+        typeof person.fitScore === 'number' ? `${person.fitScore}%` : '–',
+      ]);
+
+      doc.autoTable({
+        startY: y,
+        head: [['#', 'Name', 'Role', 'Matching Skills', 'Availability', 'Fit Score']],
+        body: teamData,
+        theme: 'striped',
+        headStyles: { fillColor: [112, 128, 97], textColor: 255, fontStyle: 'bold' },
+        styles: { fontSize: 9, cellPadding: 3 },
+        columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 45 }, 2: { cellWidth: 35 }, 3: { cellWidth: 30 }, 4: { cellWidth: 25 }, 5: { cellWidth: 25 } },
+        margin: { left: margin, right: margin },
+      });
+      y = doc.lastAutoTable.finalY + 10;
+    } else {
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text('No team members recommended', margin, y);
+      y += 10;
+    }
+
+    // Decision Impact
+    y += 2;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(40, 40, 40);
+    doc.text('Decision Impact (Projected Before → After)', margin, y);
+
+    y += 8;
+    const impactData = decisionImpact.map((row) => [
+      row.label,
+      row.before,
+      row.after,
+      row.improved ? 'Improved' : 'No change',
+    ]);
+
+    doc.autoTable({
+      startY: y,
+      head: [['Metric', 'Before', 'After', 'Status']],
+      body: impactData,
+      theme: 'grid',
+      headStyles: { fillColor: [112, 128, 97], textColor: 255, fontStyle: 'bold' },
+      styles: { fontSize: 9, cellPadding: 3 },
+      columnStyles: { 0: { fontStyle: 'bold', cellWidth: 50 }, 1: { cellWidth: 30 }, 2: { cellWidth: 30 }, 3: { cellWidth: 35 } },
+      margin: { left: margin, right: margin },
+    });
+    y = doc.lastAutoTable.finalY + 10;
+
+    // Rationale
+    y += 2;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(40, 40, 40);
+    doc.text('Rationale', margin, y);
+
+    y += 8;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(60, 60, 60);
+    rationale.forEach((r) => {
+      const lines = doc.splitTextToSize(`• ${r}`, pageWidth - 2 * margin);
+      doc.text(lines, margin + 4, y);
+      y += lines.length * 5 + 2;
+    });
+
+    // AI Assessment (if available)
+    if (aiView && aiState.explanation) {
+      y += 4;
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 8;
+
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(40, 40, 40);
+      doc.text('AI Assessment', margin, y);
+
+      y += 8;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(60, 60, 60);
+      const aiPoints = [
+        aiState.explanation.whyThisTeam,
+        aiState.explanation.tradeOffs && `Trade-off: ${aiState.explanation.tradeOffs}`,
+        aiState.explanation.expectedImpact,
+      ].filter(Boolean);
+
+      aiPoints.forEach((point) => {
+        const lines = doc.splitTextToSize(`• ${point}`, pageWidth - 2 * margin);
+        doc.text(lines, margin + 4, y);
+        y += lines.length * 5 + 2;
+      });
+
+      if (aiState.explanation.confidence) {
+        y += 4;
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(112, 128, 97);
+        doc.text(`Confidence: ${aiState.explanation.confidence}%`, margin, y);
+      }
+
+      if (aiState.meta?.model) {
+        y += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Model: ${modelLabel(aiState.meta.model)}`, margin, y);
+        doc.text(`Generated: ${formatRelative(aiState.meta.generatedAt)}`, margin, y + 5);
+      }
+    }
+
+    // Footer
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text('AI-EIP — Engineering Intelligence Platform', pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+      doc.text(`Page ${i} of ${pageCount}`, pageWidth - margin, doc.internal.pageSize.getHeight() - 10, { align: 'right' });
+    }
+
+    doc.save(`AI-Team-Composition-${project.name.replace(/\s+/g, '-')}.pdf`);
   };
 
   const recommendationQuery = useData(
@@ -352,6 +572,15 @@ const Composer = () => {
                   <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
                 ))}
               </TextField>
+              <Button
+                variant="outlined"
+                startIcon={<PictureAsPdf />}
+                disabled={!recommendation || composition.length === 0}
+                onClick={handleDownloadPdf}
+                sx={{ textTransform: 'none', height: 40 }}
+              >
+                Export PDF
+              </Button>
               <Button
                 variant="contained"
                 startIcon={creatingScenario ? <CircularProgress size={16} /> : <SaveAlt />}
