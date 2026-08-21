@@ -225,7 +225,7 @@ function defaultRetryable(error) {
  * @param {{ retries?: number, baseDelayMs?: number, retryable?: (error: ApiError) => boolean }} [options]
  * @returns {Promise<T>}
  */
-export async function withRetry(action, { retries = 1, baseDelayMs = 1_000, retryable = defaultRetryable } = {}) {
+export async function withRetry(action, { retries = 2, baseDelayMs = 1_000, retryable = defaultRetryable } = {}) {
   let lastError;
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     try {

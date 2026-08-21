@@ -55,7 +55,7 @@ const PersonProfile = () => {
           </Box>
         </Grid>
         <Grid item xs={6} md={3}>
-          <Box sx={{ height: '100%', outline: '1px solid', outlineColor: 'divider', borderRadius: 'var(--radius-card)', p: 3, bgcolor: 'background.paper' }}>
+          <Box sx={{ height: '100%', outline: '1px solid', outlineColor: 'divider', borderRadius: 'var(--radius-card)', p: 3, bgcolor: 'background.paper', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
             <Typography sx={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'text.secondary' }}>Expertise</Typography>
             <Box sx={{ mt: 1 }}><AvatarGroup people={[person]} max={1} size={32} /></Box>
           </Box>

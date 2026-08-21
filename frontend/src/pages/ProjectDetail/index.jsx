@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import { Box, Button, Chip, Grid, Tab, Tabs, Typography } from '@mui/material';
 import StarBorder from '@mui/icons-material/StarBorder';
 import Star from '@mui/icons-material/Star';
@@ -14,6 +14,7 @@ import DataTable from '../../components/ui/DataTable.jsx';
 import ProjectAssessmentCard from '../../components/ui/ProjectAssessmentCard.jsx';
 import LoadingState from '../../components/common/LoadingState.jsx';
 import ErrorState from '../../components/common/ErrorState.jsx';
+import EvidenceDrawer from '../../components/ui/EvidenceDrawer.jsx';
 import { useData } from '../../hooks/useData.js';
 import { useToast } from '../../hooks/useToast.js';
 import { useAiTerms } from '../../hooks/useAiTerms.js';
@@ -51,6 +52,9 @@ const ProjectDetail = () => {
   const [view, setView] = useState('deterministic');
   const { isWatched, toggleWatch } = useActionStore();
   const toast = useToast();
+
+  const [selectedRisk, setSelectedRisk] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // The cached AI analysis (from the page-load GET) is surfaced without any
   // LLM call; the header offers "View AI Assessment" instead of "Explain with AI".
@@ -166,7 +170,7 @@ const ProjectDetail = () => {
         <Grid item xs={6} md={3}><MetricCard label="Delivery confidence" value={`${project.deliveryConfidence}%`} /></Grid>
         <Grid item xs={6} md={3}><MetricCard label="Open risks" value={risks?.length ?? 0} /></Grid>
         <Grid item xs={6} md={3}>
-          <Box sx={{ height: '100%', outline: '1px solid', outlineColor: 'divider', borderRadius: 'var(--radius-card)', p: 3, bgcolor: 'background.paper' }}>
+          <Box sx={{ height: '100%', outline: '1px solid', outlineColor: 'divider', borderRadius: 'var(--radius-card)', p: 3, bgcolor: 'background.paper', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
             <Typography sx={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'text.secondary' }}>Owners</Typography>
             <Box sx={{ mt: 1.5 }}><AvatarGroup people={people} max={4} /></Box>
           </Box>
@@ -225,17 +229,24 @@ const ProjectDetail = () => {
             ) : risksError ? (
               <Typography sx={{ color: 'var(--red)' }}>Couldn't load risks.</Typography>
             ) : (
-              <DataTable
-                columns={[
-                  { key: 'title', label: 'Risk', render: (r) => <Link to={paths.risks} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>{r.title}</Link> },
-                  { key: 'severity', label: 'Severity', render: (r) => <StatusBadge config={getSeverity(r.severity)} /> },
-                  { key: 'confidence', label: 'Confidence', sortable: true },
-                  { key: 'trend', label: 'Trend' },
-                ]}
-                rows={risks}
-                emptyTitle="No open risks"
-                emptyDescription="This project has no tracked risks."
-              />
+              <>
+                <DataTable
+                  columns={[
+                    { key: 'title', label: 'Risk', render: (r) => r.title },
+                    { key: 'severity', label: 'Severity', render: (r) => <StatusBadge config={getSeverity(r.severity)} /> },
+                    { key: 'confidence', label: 'Confidence', sortable: true },
+                    { key: 'trend', label: 'Trend' },
+                  ]}
+                  rows={risks}
+                  emptyTitle="No open risks"
+                  emptyDescription="This project has no tracked risks."
+                  onRowClick={(risk) => {
+                    setSelectedRisk(risk);
+                    setDrawerOpen(true);
+                  }}
+                />
+                <EvidenceDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} risk={selectedRisk} />
+              </>
             )
           )}
 

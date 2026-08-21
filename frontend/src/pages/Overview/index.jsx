@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { Box, Chip, Grid, Typography } from '@mui/material';
+import { Box, Button, Chip, Grid, Typography } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import HealthAndSafety from '@mui/icons-material/HealthAndSafety';
 import WarningAmber from '@mui/icons-material/WarningAmber';
@@ -153,24 +153,33 @@ const Overview = () => {
               ) : insightsError ? (
                 <Typography sx={{ fontSize: 13, color: 'var(--red)' }}>Couldn't load insights.</Typography>
               ) : insights.length ? (
-                insights.map((ins) => (
-                  <InsightCard
-                    key={ins.id}
-                    insight={ins}
-                    saved={isSaved(ins.id)}
-                    onSave={() => handleSave(ins.id)}
-                    onDismiss={() => handleDismiss(ins.id)}
-                    onExplain={() => handleExplain(ins.id)}
-                    onRegenerate={() => handleRegenerate(ins.id)}
-                    explaining={explainingId === ins.id}
-                    regenerating={regeneratingId === ins.id}
-                    aiEnabled={aiEnabled}
-                    aiExplanation={explanations.get(ins.id)?.explanation ?? null}
-                    aiMeta={explanations.get(ins.id)?.explanationMeta ?? null}
-                    showAiLabel={ins.id === insights[0]?.id}
-                    defaultOpen={ins.id === insights[0]?.id}
-                  />
-                ))
+                <>
+                  {insights.slice(0, 2).map((ins) => (
+                    <InsightCard
+                      key={ins.id}
+                      insight={ins}
+                      saved={isSaved(ins.id)}
+                      onSave={() => handleSave(ins.id)}
+                      onDismiss={() => handleDismiss(ins.id)}
+                      onExplain={() => handleExplain(ins.id)}
+                      onRegenerate={() => handleRegenerate(ins.id)}
+                      explaining={explainingId === ins.id}
+                      regenerating={regeneratingId === ins.id}
+                      aiEnabled={aiEnabled}
+                      aiExplanation={explanations.get(ins.id)?.explanation ?? null}
+                      aiMeta={explanations.get(ins.id)?.explanationMeta ?? null}
+                      showAiLabel={ins.id === insights[0]?.id}
+                      defaultOpen={ins.id === insights[0]?.id}
+                    />
+                  ))}
+                  {insights.length > 2 && (
+                    <Box sx={{ mt: 2, textAlign: 'center' }}>
+                      <Button variant="outlined" size="large" component={Link} to={paths.insights}>
+                        View all {insights.length} insights
+                      </Button>
+                    </Box>
+                  )}
+                </>
               ) : (
                 <EmptyState
                   icon={LightbulbOutlined}

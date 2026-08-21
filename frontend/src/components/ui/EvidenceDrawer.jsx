@@ -31,7 +31,7 @@ const EvidenceDrawer = ({ open, onClose, risk }) => {
         root: { sx: { zIndex: (theme) => theme.zIndex.drawer + 2 } },
         paper: {
           sx: {
-            width: { xs: '100%', sm: 400 },
+            width: { xs: '100%', sm: 560 },
             top: `${TOPBAR_HEIGHT}px`,
             height: `calc(100% - ${TOPBAR_HEIGHT}px)`,
           },
