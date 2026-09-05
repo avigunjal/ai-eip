@@ -407,6 +407,82 @@ export const evidence = [
       [`kev-${areaId}-docs`, 'knowledge_area', areaId, 'docs', `${name} runbook and architecture documentation are owned by a single engineer.`, '2026-08-10', null],
       [`kev-${areaId}-jira`, 'knowledge_area', areaId, 'jira', `Only the primary expert has led ${name} changes and releases this quarter.`, '2026-08-08', null],
     ]),
+  // Person-attributed evidence: the attribution layer for recognition. Each
+  // public recognition gets one primary row (entity_type 'person') whose
+  // entity_id is the recognized person. Statements are concrete and cite the
+  // person by name so awards never claim unverifiable contributions.
+  ['pev-rec-01', 'person', 'p-10', 'incident', 'Michael Miller led the incident review and rewrote the production runbook, cutting resolution time for the rollout.', '2026-08-14', 'https://hitachi.atlassian.net/browse/REL-118'],
+  ['pev-rec-02', 'person', 'p-05', 'docs', 'Priya Iyer paired on two Payment Service changes and is now the named backup for the payment runbook.', '2026-08-12', 'https://wiki.hitachi/runbooks/payment'],
+  ['pev-rec-03', 'person', 'p-08', 'github', 'Sophia Davis unblocked the checkout UI validation path and merged the fix ahead of integration testing.', '2026-08-10', 'https://github.com/hitachi/checkout'],
+  ['pev-rec-05', 'person', 'p-03', 'docs', 'Rohan Patel documented the data lake ingestion schema, unblocking two downstream teams.', '2026-08-09', 'https://wiki.hitachi/architecture/datalake'],
+  ['pev-rec-06', 'person', 'p-14', 'github', 'Sarah Anderson reduced p95 search latency by 40% through query tuning.', '2026-08-08', 'https://github.com/hitachi/search'],
+  ['pev-rec-07', 'person', 'p-11', 'github', 'Riya Kumar automated CI flakiness, saving 8 engineer-hours weekly.', '2026-08-07', 'https://github.com/hitachi/ci'],
+  ['pev-rec-08', 'person', 'p-16', 'incident', 'Ryan Thomas completed the Kubernetes upgrade for the remaining node pools.', '2026-08-06', 'https://hitachi.atlassian.net/browse/INFRA-92'],
+  ['pev-rec-09', 'person', 'p-06', 'docs', 'James Brown cross-trained the payments team on billing engine internals.', '2026-08-05', 'https://wiki.hitachi/architecture/billing'],
+  ['pev-rec-11', 'person', 'p-12', 'incident', 'David Wilson resolved a storage layer capacity incident during the night rotation.', '2026-08-03', 'https://status.hitachi.io'],
+  ['pev-rec-12', 'person', 'p-02', 'planning', 'Emma Johnson rallied cross-team review coverage for the auth gateway contract.', '2026-08-02', 'https://hitachi.atlassian.net/browse/AUTH-51'],
+  ['pev-rec-14', 'person', 'p-15', 'github', 'Ananya Gupta diagnosed analytics pipeline drift and proposed a re-training schedule.', '2026-07-31', 'https://github.com/hitachi/analytics'],
+  ['pev-rec-15', 'person', 'p-07', 'github', 'Vikram Singh shipped the feature-flag rollback tooling ahead of schedule.', '2026-07-30', 'https://github.com/hitachi/featureflags'],
+  ['pev-rec-16', 'person', 'p-04', 'docs', 'Olivia Williams created observability runbooks for the stack across all regions.', '2026-07-29', 'https://wiki.hitachi/runbooks/observability'],
+  ['pev-rec-18', 'person', 'p-19', 'incident', 'Sanjay Patel resolved the API rate-limit misconfiguration across three regions.', '2026-07-27', 'https://status.hitachi.io'],
+  ['pev-rec-19', 'person', 'p-10', 'incident', 'Michael Miller resolved the multi-region rollout incident, restoring the service within 22 minutes.', '2026-07-10', 'https://status.hitachi.io'],
+  ['pev-rec-20', 'person', 'p-10', 'github', 'Michael Miller automated region health checks for the observability stack ahead of the rollout.', '2026-06-08', 'https://github.com/hitachi/observability'],
+  ['pev-rec-21', 'person', 'p-01', 'docs', 'Aarav Sharma led the Payment Service 3.0 architecture walkthrough across three delivery teams.', '2026-08-13', 'https://wiki.hitachi/architecture/payment'],
+  ['pev-rec-22', 'person', 'p-01', 'incident', 'Aarav Sharma cut payment retry failure noise by 62% with runbook-driven retry tuning.', '2026-08-09', 'https://hitachi.atlassian.net/browse/REL-122'],
+  ['pev-rec-23', 'person', 'p-19', 'jira', 'Sanjay Patel unblocked the rate-limit migration for two additional API regions.', '2026-08-05', 'https://hitachi.atlassian.net/browse/REL-120'],
+  ['pev-rec-24', 'person', 'p-11', 'docs', 'Riya Kumar extended CI cleanup to the notification pipeline, saving 3 engineer-hours weekly.', '2026-08-03', 'https://wiki.hitachi/dev/ci'],
+  ['pev-rec-25', 'person', 'p-06', 'planning', 'James Brown ran weekly brown-bag sessions on incident runbooks for the billing squad.', '2026-08-03', 'https://wiki.hitachi/dev/brownbags'],
+];
+
+// ---------------------------------------------------------------------------
+// Recognition ↔ evidence links
+// ---------------------------------------------------------------------------
+// [recognitionId, evidenceId, role] — one primary (person-attributed) plus one
+// supporting (knowledge-area context) piece per public recognition. Existing
+// knowledge-area evidence is referenced as supporting context, never moved.
+export const recognitionEvidence = [
+  ['rec-01', 'pev-rec-01', 'primary'],
+  ['rec-01', 'kev-k-15-gh', 'supporting'],
+  ['rec-02', 'pev-rec-02', 'primary'],
+  ['rec-02', 'kev-ps-1', 'supporting'],
+  ['rec-03', 'pev-rec-03', 'primary'],
+  ['rec-03', 'kev-k-02-jira', 'supporting'],
+  ['rec-05', 'pev-rec-05', 'primary'],
+  ['rec-05', 'kev-k-03-gh', 'supporting'],
+  ['rec-06', 'pev-rec-06', 'primary'],
+  ['rec-06', 'kev-k-08-jira', 'supporting'],
+  ['rec-07', 'pev-rec-07', 'primary'],
+  ['rec-07', 'kev-k-14-inc', 'supporting'],
+  ['rec-08', 'pev-rec-08', 'primary'],
+  ['rec-08', 'kev-k-05-docs', 'supporting'],
+  ['rec-09', 'pev-rec-09', 'primary'],
+  ['rec-09', 'kev-k-06-gh', 'supporting'],
+  ['rec-11', 'pev-rec-11', 'primary'],
+  ['rec-11', 'kev-k-13-gh', 'supporting'],
+  ['rec-12', 'pev-rec-12', 'primary'],
+  ['rec-12', 'kev-k-11-gh', 'supporting'],
+  ['rec-14', 'pev-rec-14', 'primary'],
+  ['rec-14', 'kev-k-10-gh', 'supporting'],
+  ['rec-15', 'pev-rec-15', 'primary'],
+  ['rec-15', 'kev-k-05-gh', 'supporting'],
+  ['rec-16', 'pev-rec-16', 'primary'],
+  ['rec-16', 'kev-k-15-jira', 'supporting'],
+  ['rec-18', 'pev-rec-18', 'primary'],
+  ['rec-18', 'kev-k-16-gh', 'supporting'],
+  ['rec-19', 'pev-rec-19', 'primary'],
+  ['rec-19', 'kev-k-05-inc', 'supporting'],
+  ['rec-20', 'pev-rec-20', 'primary'],
+  ['rec-20', 'kev-k-15-docs', 'supporting'],
+  ['rec-21', 'pev-rec-21', 'primary'],
+  ['rec-21', 'kev-ps-2', 'supporting'],
+  ['rec-22', 'pev-rec-22', 'primary'],
+  ['rec-22', 'kev-ps-1', 'supporting'],
+  ['rec-23', 'pev-rec-23', 'primary'],
+  ['rec-23', 'kev-k-16-inc', 'supporting'],
+  ['rec-24', 'pev-rec-24', 'primary'],
+  ['rec-24', 'kev-k-14-docs', 'supporting'],
+  ['rec-25', 'pev-rec-25', 'primary'],
+  ['rec-25', 'kev-k-06-docs', 'supporting'],
 ];
 
 // ---------------------------------------------------------------------------
@@ -453,4 +529,11 @@ export const recognitions = [
   ['rec-16', 'p-04', 'pr-05', 'k-15', 'reliability', 'Created runbooks for the observability stack across all regions.', '2026-07-29', 'public', '["+ improved observability coverage across regions", "+ reduced on-call resolution time"]'],
   ['rec-17', 'p-18', 'pr-02', 'k-02', 'delivery', 'Fixed the checkout validation regression in the test environment.', '2026-07-28', 'private', '["+ fixed a checkout validation regression"]'],
   ['rec-18', 'p-19', 'pr-01', 'k-16', 'reliability', 'Resolved the API rate-limit misconfig across three regions.', '2026-07-27', 'public', '["+ resolved rate-limit misconfig across regions", "+ reduced API outage risk"]'],
+  ['rec-19', 'p-10', 'pr-05', 'k-05', 'reliability', 'Resolved the multi-region rollout incident and restored service within 22 minutes.', '2026-07-10', 'public', '["+ restored service within 22 minutes", "+ reduced multi-region outage risk"]'],
+  ['rec-20', 'p-10', 'pr-10', 'k-15', 'delivery', 'Automated region health checks for the observability stack ahead of the rollout.', '2026-06-08', 'public', '["+ automated region health checks", "+ cut observability toil"]'],
+  ['rec-21', 'p-01', 'pr-07', 'k-01', 'knowledge_sharing', 'Led the Payment Service 3.0 architecture walkthrough across three delivery teams.', '2026-08-13', 'public', '["+ aligned three delivery teams on Payment Service 3.0", "+ widened architecture knowledge coverage"]'],
+  ['rec-22', 'p-01', 'pr-07', 'k-01', 'reliability', 'Reduced payment retry failure noise by 62% via runbook-driven retry tuning.', '2026-08-09', 'public', '["+ reduced payment retry failures 62%", "+ lowered runbook discovery time"]'],
+  ['rec-23', 'p-19', 'pr-01', 'k-16', 'reliability', 'Unblocked the rate-limit migration for two additional API regions.', '2026-08-05', 'public', '["+ unblocked rate-limit migration for two regions", "+ reduced API outage risk"]'],
+  ['rec-24', 'p-11', 'pr-06', 'k-14', 'delivery', 'Extended CI cleanup to the notification pipeline, saving 3 engineer-hours weekly.', '2026-08-03', 'public', '["+ saved 3 engineer-hours weekly", "+ stabilized notification pipeline"]'],
+  ['rec-25', 'p-06', 'pr-09', 'k-06', 'mentorship', 'Ran weekly brown-bag sessions on incident runbooks to raise billing squad ownership awareness.', '2026-08-03', 'public', '["+ increased incident ownership awareness", "+ raised runbook confidence"]'],
 ];

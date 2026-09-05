@@ -10,6 +10,7 @@ import {
   capabilities, teamCapabilityCoverage, projectRequirements,
   knowledgeAreas, knowledgeAreaProjects, knowledgeExpertise, transferPlans, transferActions,
   risks, preventionActions, evidence, staffingScenarios, scenarioChanges, recognitions,
+  recognitionEvidence,
 } from './seedData.js';
 
 // --- deterministic helpers --------------------------------------------------
@@ -75,7 +76,7 @@ export function seed() {
   const run = db.transaction(() => {
     // Delete in foreign-key-safe order (children before parents).
     const tables = [
-      'scenario_changes', 'staffing_scenarios', 'recognition', 'evidence',
+      'scenario_changes', 'staffing_scenarios', 'recognition_evidence', 'recognition', 'evidence',
       'prevention_actions', 'risks', 'transfer_actions', 'knowledge_transfer_plans',
       'knowledge_expertise', 'knowledge_area_projects', 'knowledge_areas',
       'allocations', 'project_requirements', 'team_capability_coverage',
@@ -113,7 +114,10 @@ export function seed() {
     insertRows('evidence', 7, evidence);
     insertRows('staffing_scenarios', 8, staffingScenarios);
     insertRows('scenario_changes', 6, scenarioChanges);
-    insertRows('recognition', 9, recognitions);
+    // Seeded recognitions are pre-approved showcase records (approval_status,
+    // approved_at, approved_by). Composer-created records start 'recommended'.
+    insertRows('recognition', 12, recognitions, (row) => [...row, 'approved', row[6], 'demo']);
+    insertRows('recognition_evidence', 4, recognitionEvidence, (row) => [...row, new Date().toISOString()]);
   });
   run();
   return {
@@ -124,6 +128,7 @@ export function seed() {
     knowledgeAreas: knowledgeAreas.length,
     risks: risks.length,
     recognition: recognitions.length,
+    recognitionEvidence: recognitionEvidence.length,
     allocations: allocations.length,
   };
 }

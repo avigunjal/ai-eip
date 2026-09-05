@@ -1,8 +1,8 @@
 /**
  * Recognition award taxonomy — a UI-level distinction layered on top of the
- * existing backend contribution types. The backend has no award-level model
- * yet (Phase 2); mapping records to levels is derived in recognitionAdapter.js
- * and can later be replaced by real awarded data.
+ * backend contribution types. The backend eligibility engine decides each
+ * person's highest qualified level (mutually exclusive, evaluated highest →
+ * lowest); the frontend only maps those keys to presentation metadata.
  */
 
 export const AWARD_LEVELS = {
@@ -51,12 +51,6 @@ export const AWARD_LEVELS = {
 
 /** Display order: lowest milestone → highest. */
 export const AWARD_LEVEL_ORDER = ['monthly', 'quarterly', 'eminence', 'league'];
-
-/**
- * How many people occupy each ranking bucket when deriving award levels from
- * recognition counts (top of the list → league). Remaining people fall to monthly.
- */
-export const AWARD_BUCKET_SIZES = { league: 1, eminence: 2, quarterly: 3 };
 
 /** Existing backend contribution types as UI "contribution dimensions". */
 export const CONTRIBUTION_DIMENSIONS = [

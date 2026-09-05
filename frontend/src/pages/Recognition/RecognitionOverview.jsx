@@ -13,7 +13,7 @@ import TopContributors from './components/TopContributors.jsx';
  * Desktop: KPI strip, hero + philosophy, category cards, then recent
  * recognition (left) next to trends + top contributors (right).
  */
-const RecognitionOverview = ({ derived, onNavigate }) => {
+const RecognitionOverview = ({ derived, onNavigate, onApproved, onOpenDetail }) => {
   if (derived.isEmpty) {
     return (
       <EmptyState
@@ -48,7 +48,7 @@ const RecognitionOverview = ({ derived, onNavigate }) => {
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, lg: 8 }}>
-          <RecentRecognitionList items={items} />
+          <RecentRecognitionList items={items} onApproved={onApproved} onOpenDetail={onOpenDetail} />
         </Grid>
         <Grid size={{ xs: 12, lg: 4 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

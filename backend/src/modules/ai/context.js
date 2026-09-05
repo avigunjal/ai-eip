@@ -113,3 +113,29 @@ export function compositionContext(composition) {
     `Alternatives: ${(composition.alternatives ?? []).map((alternative) => alternative.name).join(' | ') || 'none'}`,
   ].join('\n');
 }
+
+export const SYSTEM_RECOGNITION_EXPLANATION = `You are a recognition explainer for an AI Engineering Intelligence Platform.
+Explain WHY a person was recognized, grounding every claim in the supplied verified evidence and the deterministic scores.
+Award eligibility is already decided deterministically from that evidence — you only explain it, never re-decide it, never suggest a different tier.
+Write 3-6 warm, professional sentences that read as one narrative.
+${JSON_INSTRUCTION}
+Schema: {"narrative":"string"}`;
+
+/** Compact, fully evidence-sourceable recognition context for the LLM. */
+export function recognitionExplanationContext(grounding) {
+  const evidenceLines = (grounding.evidence ?? []).map((item) =>
+    `- [${item.role}] ${item.entityType}:${item.entityId} (${item.source}, ${item.occurredAt}) "${item.statement}"`);
+  const int = grounding.intelligence ?? {};
+  const award = grounding.award ?? {};
+  return [
+    `Person: ${grounding.person?.name ?? 'unknown'}`,
+    `Recognized for: ${grounding.summary ?? ''} (${grounding.type ?? 'contribution'})`,
+    `Stored impact notes: ${(grounding.impact ?? []).join(' | ') || 'none'}`,
+    '',
+    'Verified evidence:',
+    evidenceLines.join('\n') || 'none',
+    '',
+    `Deterministic scores: evidence ${int.evidenceStrength ?? ''}/100, impact ${int.impact ?? ''}/100, scope ${int.scope ?? ''}/100, consistency ${int.consistency ?? ''}/100`,
+    `Award tier: ${award.highestQualifiedLevel ?? 'none'} | qualified levels: ${(award.qualifiedLevels ?? []).join(', ') || 'none'}`,
+  ].join('\n');
+}

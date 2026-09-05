@@ -8,7 +8,7 @@ import { AWARD_LEVELS } from './data/awardLevels.js';
  * Shared award view used by all four award tabs (spec section 5). Shows the
  * award's description plus the recognitions of people at that award level.
  */
-const RecognitionAwardsView = ({ levelKey, items }) => {
+const RecognitionAwardsView = ({ levelKey, items, onApproved, onOpenDetail }) => {
   const level = AWARD_LEVELS[levelKey] ?? AWARD_LEVELS.monthly;
   const filtered = items.filter((r) => r.awardLevel === levelKey);
   const recipients = new Set(filtered.map((r) => r.personId)).size;
@@ -34,7 +34,7 @@ const RecognitionAwardsView = ({ levelKey, items }) => {
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           {filtered.map((item) => (
-            <RecognitionItem key={item.id} item={item} />
+            <RecognitionItem key={item.id} item={item} onApproved={onApproved} onOpenDetail={onOpenDetail} />
           ))}
         </Box>
       )}

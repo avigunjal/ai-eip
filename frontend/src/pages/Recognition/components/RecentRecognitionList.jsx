@@ -8,7 +8,7 @@ import RecognitionItem from './RecognitionItem.jsx';
  * Recent Recognition list (spec section 10) — the main lower-left surface.
  * Renders the latest public recognition rows with their evidence metadata.
  */
-const RecentRecognitionList = ({ items, limit = 6 }) => (
+const RecentRecognitionList = ({ items, limit = 6, onApproved, onOpenDetail }) => (
   <Surface sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2, height: '100%' }}>
     <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1 }}>
       <Box>
@@ -31,7 +31,7 @@ const RecentRecognitionList = ({ items, limit = 6 }) => (
     ) : (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         {items.slice(0, limit).map((item) => (
-          <RecognitionItem key={item.id} item={item} />
+          <RecognitionItem key={item.id} item={item} onApproved={onApproved} onOpenDetail={onOpenDetail} />
         ))}
       </Box>
     )}

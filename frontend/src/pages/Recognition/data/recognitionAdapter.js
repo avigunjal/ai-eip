@@ -1,22 +1,17 @@
 /**
- * Temporary UI-derived recognition insights.
+ * Recognition insights derived from the live `/api/recognition/feed` DTO.
  *
- * Until the Recognition Intelligence backend exists (spec section 17), every
- * aggregate shown on the page — KPIs, award levels, trends, top contributors —
- * is derived here from the live `/api/recognition/feed` DTO and the mock people
- * fixtures. All values stay honest: they are computed from the public feed
- * (never fabricated), so they change when the underlying data changes. Swap this
- * module for real award/evidence data in the next phase.
+ * Award eligibility arrives from the backend deterministic eligibility engine
+ * (per-person `award.highestQualifiedLevel`, evaluated highest → lowest with
+ * mutual exclusion). Evidence counts now reflect real linked evidence rows.
+ * Everything else — KPIs, trends, contributors — is derived here from the same
+ * public feed. All values stay honest: computed from live data, never fabricated.
  */
 import dayjs from 'dayjs';
-import {
-  AWARD_BUCKET_SIZES,
-  AWARD_LEVELS,
-  AWARD_LEVEL_ORDER,
-} from './awardLevels.js';
+import { AWARD_LEVELS, AWARD_LEVEL_ORDER } from './awardLevels.js';
 
-/** A recognition with a full evidence bundle scores 100. */
-const EVIDENCE_REFERENCE = 3;
+/** A fully-specified evidence bundle is one primary + one supporting piece. */
+const EVIDENCE_REFERENCE = 2;
 
 const isPublic = (r) => r.visibility === 'public';
 
@@ -37,26 +32,6 @@ function personMeta(embedded, peopleById) {
         initials: initialsOf(embedded?.name),
         avatarColor: 'var(--primary)',
       };
-}
-
-/**
- * Deterministic ranking rule: the person with the most recognition gets the
- * League; the next 2 get Eminence; the next 3 get Quarterly; everyone else
- * gets Monthly. Ties break on person id so the mapping is stable between loads.
- */
-function assignAwardLevels(rankedIds) {
-  const levelFor = new Map();
-  let cursor = 0;
-  for (const [level, size] of Object.entries(AWARD_BUCKET_SIZES)) {
-    for (let i = 0; i < size && cursor < rankedIds.length; i += 1, cursor += 1) {
-      levelFor.set(rankedIds[cursor], level);
-    }
-  }
-  while (cursor < rankedIds.length) {
-    levelFor.set(rankedIds[cursor], 'monthly');
-    cursor += 1;
-  }
-  return levelFor;
 }
 
 function buildTrends(items, now = dayjs()) {
@@ -116,18 +91,13 @@ export function buildRecognitionInsights(feed = [], people = []) {
     };
   }
 
-  // Award levels: rank people by public recognition count.
-  const counts = new Map();
-  publicItems.forEach((r) => counts.set(r.personId, (counts.get(r.personId) ?? 0) + 1));
-  const rankedIds = [...counts.entries()]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .map(([personId]) => personId);
-  const levelForPerson = assignAwardLevels(rankedIds);
-
+  // Award levels: each person's highest qualified level, as decided by the
+  // backend eligibility engine (mutually exclusive, highest → lowest). The
+  // same level is stamped on every contribution of that person.
   const items = publicItems.map((r) => ({
     ...r,
     person: personMeta(r.person, peopleById),
-    awardLevel: levelForPerson.get(r.personId) ?? 'monthly',
+    awardLevel: r.award?.highestQualifiedLevel ?? null,
   }));
 
   // Deterministic "demo now": the latest event in the feed, so the KPI delta
@@ -155,7 +125,7 @@ export function buildRecognitionInsights(feed = [], people = []) {
   const priorProjects = uniqueProjectsOf(prior);
 
   const avgEvidence = items.length
-    ? items.reduce((sum, r) => sum + (r.evidenceIds?.length ?? 0), 0) / items.length
+    ? items.reduce((sum, r) => sum + (r.evidence?.length ?? 0), 0) / items.length
     : 0;
   const evidenceScore = Math.min(100, Math.round((avgEvidence / EVIDENCE_REFERENCE) * 100));
 
@@ -186,12 +156,14 @@ export function buildRecognitionInsights(feed = [], people = []) {
       label: 'Average Evidence Score',
       value: `${evidenceScore}%`,
       detail: 'avg evidence per recognition',
-      help: `How well recognitions are backed by evidence. Each recognition is scored against a full ${EVIDENCE_REFERENCE}-piece evidence bundle (\`number of evidence items ÷ ${EVIDENCE_REFERENCE} × 100\`). Evidence links are currently synthesized from the feed and will be replaced by real evidence in the next phase.`,
+      help: `How well recognitions are backed by verified evidence. Each recognition is scored against a full ${EVIDENCE_REFERENCE}-piece evidence bundle — one primary (person-attributed) plus one supporting (\`number of evidence items ÷ ${EVIDENCE_REFERENCE} × 100\`). Links come from the live \`recognition_evidence\` join table.`,
     },
   ];
 
+  // Recipients by highest qualified level (distinct people, server-mediated).
+  const recipientLevels = new Map(items.filter((r) => r.awardLevel).map((r) => [r.personId, r.awardLevel]));
   const recipients = new Map(AWARD_LEVEL_ORDER.map((key) => [key, 0]));
-  levelForPerson.forEach((level) => recipients.set(level, (recipients.get(level) ?? 0) + 1));
+  recipientLevels.forEach((level) => recipients.set(level, (recipients.get(level) ?? 0) + 1));
   const awardLevels = AWARD_LEVEL_ORDER.map((key) => ({
     ...AWARD_LEVELS[key],
     recipients: recipients.get(key) ?? 0,

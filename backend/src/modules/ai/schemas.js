@@ -75,3 +75,12 @@ export const COMPOSITION_EXPLANATION_SCHEMA = {
     },
   },
 };
+
+export const RECOGNITION_EXPLANATION_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['narrative'],
+  properties: {
+    narrative: { type: 'string' },
+  },
+};

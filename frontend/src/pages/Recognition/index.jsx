@@ -8,6 +8,7 @@ import RecognitionTabs from './components/RecognitionTabs.jsx';
 import RecognitionOverview from './RecognitionOverview.jsx';
 import RecognitionAwardsView from './RecognitionAwardsView.jsx';
 import RecognitionComposer from './components/RecognitionComposer.jsx';
+import RecognitionDetailPanel from './components/RecognitionDetailPanel.jsx';
 import { useRecognitionData } from './hooks/useRecognitionData.js';
 
 /**
@@ -19,6 +20,7 @@ const Recognition = () => {
   const { derived, loading, error, retry } = useRecognitionData();
   const [tab, setTab] = useState('overview');
   const [composerOpen, setComposerOpen] = useState(false);
+  const [detailItem, setDetailItem] = useState(null);
 
   if (loading) return <LoadingState variant="grid" sx={{ mt: 3 }} />;
   if (error) return <ErrorState onRetry={retry} />;
@@ -38,15 +40,22 @@ const Recognition = () => {
       <RecognitionTabs value={tab} onChange={setTab} />
 
       {tab === 'overview' ? (
-        <RecognitionOverview derived={derived} onNavigate={setTab} />
+        <RecognitionOverview derived={derived} onNavigate={setTab} onApproved={retry} onOpenDetail={setDetailItem} />
       ) : (
-        <RecognitionAwardsView levelKey={tab} items={derived.items} />
+        <RecognitionAwardsView levelKey={tab} items={derived.items} onApproved={retry} onOpenDetail={setDetailItem} />
       )}
 
       <RecognitionComposer
         open={composerOpen}
         onClose={() => setComposerOpen(false)}
         onSubmitted={retry}
+      />
+
+      <RecognitionDetailPanel
+        key={detailItem?.id ?? 'none'}
+        item={detailItem}
+        onClose={() => setDetailItem(null)}
+        onApproved={retry}
       />
     </Box>
   );

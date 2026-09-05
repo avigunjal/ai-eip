@@ -23,14 +23,17 @@ import {
   SYSTEM_ANALYZE,
   SYSTEM_INSIGHTS,
   SYSTEM_COMPOSITION,
+  SYSTEM_RECOGNITION_EXPLANATION,
   projectContext,
   insightsContext,
   compositionContext,
+  recognitionExplanationContext,
 } from './context.js';
 import {
   PROJECT_ANALYSIS_SCHEMA,
   INSIGHT_EXPLANATION_SCHEMA,
   COMPOSITION_EXPLANATION_SCHEMA,
+  RECOGNITION_EXPLANATION_SCHEMA,
 } from './schemas.js';
 
 registerProvider('openrouter', () => createOpenRouterProvider({ apiKey: env.openrouterApiKey, model: env.openrouterModel }));
@@ -230,6 +233,12 @@ function coerceCompositionExplanation(content) {
     expectedImpact: typeof explanation.expectedImpact === 'string' ? explanation.expectedImpact.trim() : null,
     confidence: groundedConfidence(explanation.confidence),
   };
+}
+
+function coerceRecognitionExplanation(content) {
+  if (!content || typeof content !== 'object') return null;
+  const narrative = typeof content.narrative === 'string' ? content.narrative.trim() : '';
+  return narrative ? { narrative } : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -759,4 +768,80 @@ export async function regenerateCompositionExplanation(projectId) {
   // Failed: restore the previous valid explanation and report the error.
   if (previous) cache.set(key, { at: Date.now(), value: previous });
   throw new AppError(502, 'AI regeneration failed; the previous explanation is still available.');
+}
+// ---------------------------------------------------------------------------
+// Use case 4 — recognition explanation ("Why was this person recognized?")
+// ---------------------------------------------------------------------------
+// Deterministic narrative always; the LLM only rewords the same evidence into
+// a warm explanation and NEVER re-decides the award. Mirrors use case 1:
+// deterministic + cached AI, in-flight dedupe, deterministic fallback on any
+// provider failure.
+
+const RECOGNITION_EXPLANATION_TTL_MS = 30 * 60 * 1000;
+
+function deterministicRecognitionExplanation(grounding) {
+  const person = grounding.person?.name ?? 'This person';
+  const primary = (grounding.evidence ?? []).find((item) => item.role === 'primary');
+  const int = grounding.intelligence ?? {};
+  const tier = grounding.award?.highestQualifiedLevel ?? null;
+
+  const parts = [`${person} was recognized for ${grounding.summary ?? 'a verified contribution'}.`];
+  if (primary) {
+    parts.push(`The record links a verified ${primary.source} source stating: "${primary.statement}"`);
+  }
+  if (typeof int.evidenceStrength === 'number') {
+    parts.push(
+      `Across ${int.contributions ?? 1} verified contribution(s), the deterministic assessment scores evidence strength ${int.evidenceStrength}/100, impact ${int.impact}/100, scope ${int.scope}/100 and consistency ${int.consistency}/100 (overall ${int.score}/100, ${int.confidence} confidence).`,
+    );
+  }
+  if (tier) {
+    parts.push(`This meets the conditions for the ${tier} award: ${(grounding.award?.basis?.[0] ?? 'an evidence-backed eligibility tier')}`);
+  }
+  return parts.join(' ');
+}
+
+/**
+ * Explain a recognition. Always returns the deterministic narrative; `ai` is
+ * the cached/LLM flavored narrative or null when AI is disabled/unavailable.
+ */
+export async function getRecognitionExplanation(grounding) {
+  const id = grounding?.id;
+  const deterministic = {
+    source: 'deterministic',
+    generatedAt: new Date().toISOString(),
+    narrative: deterministicRecognitionExplanation(grounding ?? {}),
+  };
+  if (!id) return { deterministic, ai: null };
+
+  const key = `recognition-explanation:${id}`;
+  const cached = getCached(key, RECOGNITION_EXPLANATION_TTL_MS);
+  if (cached !== undefined) return { deterministic, ai: cached };
+
+  return runOnce(key, async () => {
+    const provider = isAIEnabled() ? getLLMProvider() : null;
+    if (!provider) return { deterministic, ai: null };
+    try {
+      const outcome = await completeWithRetry(
+        provider,
+        SYSTEM_RECOGNITION_EXPLANATION,
+        recognitionExplanationContext(grounding),
+        { maxTokens: 1024, schema: RECOGNITION_EXPLANATION_SCHEMA },
+        coerceRecognitionExplanation,
+      );
+      if (!outcome) return { deterministic, ai: null };
+      const value = {
+        source: 'llm',
+        provider: provider.name,
+        model: outcome.model,
+        generatedAt: new Date().toISOString(),
+        narrative: outcome.coerced.narrative,
+      };
+      cache.set(key, { at: Date.now(), value });
+      return { deterministic, ai: value };
+    } catch (error) {
+      if (!(error instanceof ProviderError)) throw error;
+      console.warn(`[ai] recognition explanation failed (${error.code}) for ${id}.`);
+      return { deterministic, ai: null };
+    }
+  });
 }
