@@ -1,154 +1,53 @@
 import { useState } from 'react';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem, TextField, Typography } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import PageHeader from '../../components/common/PageHeader.jsx';
-import MetricCard from '../../components/common/MetricCard.jsx';
-import AvatarGroup from '../../components/common/AvatarGroup.jsx';
-import EmptyState from '../../components/common/EmptyState.jsx';
-import { getPeople } from '../../data/service.js';
-import { fetchRecognitionFeed, createRecognition } from '../../api/recognition.js';
-import { useData } from '../../hooks/useData.js';
-import { useAiTerms } from '../../hooks/useAiTerms.js';
 import LoadingState from '../../components/common/LoadingState.jsx';
 import ErrorState from '../../components/common/ErrorState.jsx';
-import { formatRelative } from '../../config/dates.js';
-import { useActionStore } from '../../store/actionStore.js';
-import { useToast } from '../../hooks/useToast.js';
-
-const TYPE_LABEL = {
-  reliability: 'Reliability',
-  mentorship: 'Mentorship',
-  delivery: 'Delivery',
-  knowledge_sharing: 'Knowledge sharing',
-};
+import RecognitionTabs from './components/RecognitionTabs.jsx';
+import RecognitionOverview from './RecognitionOverview.jsx';
+import RecognitionAwardsView from './RecognitionAwardsView.jsx';
+import RecognitionComposer from './components/RecognitionComposer.jsx';
+import { useRecognitionData } from './hooks/useRecognitionData.js';
 
 /**
- * Recognition — impact feed emphasizing evidence and context (not a leaderboard),
- * plus a recognition composer modal.
- *
- * REMAINING (extend later):
- *  - impact composition bars (count by type) as a Recharts chart
- *  - collaboration network (desktop only)
- *  - link each recognition to its evidence (`evidenceIds`)
+ * Recognition — premium, evidence-driven milestone experience. Navigation tabs
+ * lead to the Overview dashboard or an award-filtered view; the composer keeps
+ * the existing backend contract (personId + type + summary).
  */
 const Recognition = () => {
-  const { data: feed = [], loading, error, retry } = useData(fetchRecognitionFeed);
-  const people = getPeople();
-  const { markRecognized, unmarkRecognized } = useActionStore();
-  const toast = useToast();
-  const { t } = useAiTerms();
-  const [open, setOpen] = useState(false);
-  const [composer, setComposer] = useState({ personId: '', type: 'delivery', summary: '' });
+  const { derived, loading, error, retry } = useRecognitionData();
+  const [tab, setTab] = useState('overview');
+  const [composerOpen, setComposerOpen] = useState(false);
 
-  if (loading) return <LoadingState />;
+  if (loading) return <LoadingState variant="grid" sx={{ mt: 3 }} />;
   if (error) return <ErrorState onRetry={retry} />;
 
-  const personOf = (id) => people.find((p) => p.id === id);
-  const visible = feed.filter((r) => r.visibility === 'public');
-
-  const handleSubmit = async () => {
-    try {
-      const draftId = `draft-${Date.now()}`;
-      markRecognized(draftId);
-      await createRecognition({ personId: composer.personId, type: composer.type, summary: composer.summary });
-      toast('Recognition sent', { actionLabel: 'Undo', action: () => unmarkRecognized(draftId) });
-      setOpen(false);
-      setComposer({ personId: '', type: 'delivery', summary: '' });
-      retry();
-    } catch (err) {
-      toast(err.message ?? 'Could not send recognition');
-    }
-  };
-
-  const counts = {
-    reliability: feed.filter((r) => r.type === 'reliability').length,
-    mentorship: feed.filter((r) => r.type === 'mentorship').length,
-    delivery: feed.filter((r) => r.type === 'delivery').length,
-  };
-
   return (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <PageHeader
         title="Recognition"
-        subtitle="Impact feed, recognition highlights, and contribution analytics."
+        subtitle="Celebrating real impact. Powered by engineering signals, verified with evidence."
         actions={
-          <Button variant="contained" startIcon={<Add />} onClick={() => setOpen(true)}>
-            New recognition
+          <Button variant="contained" startIcon={<Add />} onClick={() => setComposerOpen(true)}>
+            Nominate / Create Recognition
           </Button>
         }
       />
 
-      <Grid container spacing={3} sx={{ mt: 3 }}>
-        <Grid item xs={6} sm={3}><MetricCard label="Total events" value={feed.length} /></Grid>
-        <Grid item xs={6} sm={3}><MetricCard label="Reliability" value={counts.reliability} /></Grid>
-        <Grid item xs={6} sm={3}><MetricCard label="Mentorship" value={counts.mentorship} /></Grid>
-        <Grid item xs={6} sm={3}><MetricCard label="Delivery" value={counts.delivery} /></Grid>
-      </Grid>
+      <RecognitionTabs value={tab} onChange={setTab} />
 
-      <Box sx={{ mt: 3, p: 3, outline: '1px solid', outlineColor: 'divider', borderRadius: 'var(--radius-card)', bgcolor: 'background.paper' }}>
-        <Typography sx={{ fontWeight: 600 }}>Impact feed</Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 2 }}>
-          {visible.length === 0 && <EmptyState title="No public recognition yet" />}
-          {visible.map((r) => {
-            const p = personOf(r.personId);
-            return (
-              <Box key={r.id} sx={{ display: 'flex', gap: 1.5, p: 2, outline: '1px solid', outlineColor: 'divider', borderRadius: 'var(--radius-card)' }}>
-                {p && <AvatarGroup people={[p]} max={1} size={36} />}
-                <Box sx={{ minWidth: 0 }}>
-                  <Typography sx={{ fontWeight: 600, fontSize: 14 }}>
-                    {r.person?.name ?? p?.name ?? 'Team member'}
-                    <Typography component="span" sx={{ color: 'text.secondary', fontWeight: 400, ml: 1 }}>
-                      {TYPE_LABEL[r.type]} · {formatRelative(r.occurredAt)}
-                    </Typography>
-                  </Typography>
-                  <Typography sx={{ color: 'text.secondary', fontSize: 14, mt: 0.25 }}>{r.summary}</Typography>
-                  {r.impact?.length > 0 && (
-                    <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid', borderTopColor: 'divider' }}>
-                      <Typography sx={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'text.secondary' }}>
-                        {t('detected')} impact
-                      </Typography>
-                      <Box component="ul" sx={{ m: 0, mt: 0.25, pl: 2 }}>
-                        {r.impact.map((line) => (
-                          <Typography component="li" key={line} sx={{ fontSize: 13, color: 'text.secondary', '& + &': { mt: 0.25 } }}>
-                            {line}
-                          </Typography>
-                        ))}
-                      </Box>
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-            );
-          })}
-        </Box>
-      </Box>
+      {tab === 'overview' ? (
+        <RecognitionOverview derived={derived} onNavigate={setTab} />
+      ) : (
+        <RecognitionAwardsView levelKey={tab} items={derived.items} />
+      )}
 
-      {/* Recognition composer */}
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Send recognition</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-          <TextField
-            select label="Person" value={composer.personId} onChange={(e) => setComposer({ ...composer, personId: e.target.value })}
-          >
-            {people.map((p) => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
-          </TextField>
-          <TextField
-            select label="Type" value={composer.type} onChange={(e) => setComposer({ ...composer, type: e.target.value })}
-          >
-            {Object.entries(TYPE_LABEL).map(([k, v]) => <MenuItem key={k} value={k}>{v}</MenuItem>)}
-          </TextField>
-          <TextField
-            label="What did they do?" multiline minRows={3} value={composer.summary}
-            onChange={(e) => setComposer({ ...composer, summary: e.target.value })}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" disabled={!composer.personId || !composer.summary.trim()} onClick={handleSubmit}>
-            Send
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <RecognitionComposer
+        open={composerOpen}
+        onClose={() => setComposerOpen(false)}
+        onSubmitted={retry}
+      />
     </Box>
   );
 };
