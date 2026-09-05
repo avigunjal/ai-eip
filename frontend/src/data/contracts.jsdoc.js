@@ -26,7 +26,7 @@
  */
 
 /**
- * @typedef {'reliability'|'mentorship'|'delivery'|'knowledge_sharing'} ContributionType
+ * @typedef {'reliability'|'mentorship'|'delivery'|'knowledge_sharing'|'innovation'} ContributionType
  */
 
 /**
@@ -122,11 +122,14 @@
  * @typedef {{
  *   id: string;
  *   personId: string;
+ *   projectId?: string;
+ *   knowledgeAreaId?: string;
  *   type: ContributionType;
  *   summary: string;
  *   evidenceIds: string[];
  *   occurredAt: string;
  *   visibility: 'public' | 'private';
+ *   relatedWork?: string;
  * }} Recognition
  */
 

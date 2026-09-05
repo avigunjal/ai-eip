@@ -432,6 +432,9 @@ export const evidence = [
   ['pev-rec-23', 'person', 'p-19', 'jira', 'Sanjay Patel unblocked the rate-limit migration for two additional API regions.', '2026-08-05', 'https://hitachi.atlassian.net/browse/REL-120'],
   ['pev-rec-24', 'person', 'p-11', 'docs', 'Riya Kumar extended CI cleanup to the notification pipeline, saving 3 engineer-hours weekly.', '2026-08-03', 'https://wiki.hitachi/dev/ci'],
   ['pev-rec-25', 'person', 'p-06', 'planning', 'James Brown ran weekly brown-bag sessions on incident runbooks for the billing squad.', '2026-08-03', 'https://wiki.hitachi/dev/brownbags'],
+  ['pev-rec-p01', 'person', 'p-02', 'planning', 'Emma Johnson coordinated peer-review sign-off for the auth gateway contract before the integration freeze.', '2026-08-13', 'https://hitachi.atlassian.net/browse/AUTH-51'],
+  ['pev-rec-p02', 'person', 'p-06', 'docs', 'James Brown documented the billing incident-runbook drill outcomes and updated two runbooks.', '2026-08-12', 'https://wiki.hitachi/runbooks/billing'],
+  ['pev-rec-p03', 'person', 'p-01', 'incident', 'Aarav Sharma resolved the cross-region payment retry storm in 28 minutes during peak load.', '2026-08-11', 'https://status.hitachi.io'],
 ];
 
 // ---------------------------------------------------------------------------
@@ -483,6 +486,12 @@ export const recognitionEvidence = [
   ['rec-24', 'kev-k-14-docs', 'supporting'],
   ['rec-25', 'pev-rec-25', 'primary'],
   ['rec-25', 'kev-k-06-docs', 'supporting'],
+  ['rec-p-01', 'pev-rec-p01', 'primary'],
+  ['rec-p-01', 'kev-k-11-gh', 'supporting'],
+  ['rec-p-02', 'pev-rec-p02', 'primary'],
+  ['rec-p-02', 'kev-k-06-jira', 'supporting'],
+  ['rec-p-03', 'pev-rec-p03', 'primary'],
+  ['rec-p-03', 'kev-ps-1', 'supporting'],
 ];
 
 // ---------------------------------------------------------------------------
@@ -510,6 +519,8 @@ export const scenarioChanges = [
 // Recognition
 // ---------------------------------------------------------------------------
 // [id, personId, projectId, knowledgeAreaId, contributionType, summary, occurredAt, visibility, impact(JSON)]
+// Pending rows carry a trailing 'recommended' marker — the mapper in seed.js
+// turns those into recommended (queued) records instead of pre-approved ones.
 export const recognitions = [
   ['rec-01', 'p-10', 'pr-10', 'k-15', 'reliability', 'Led the incident review and improved the production runbook.', '2026-08-14', 'public', '["+ reduced incident resolution time", "+ improved production runbook coverage"]'],
   ['rec-02', 'p-05', 'pr-07', 'k-01', 'knowledge_sharing', 'Paired on two Payment Service changes to build backup capability.', '2026-08-12', 'public', '["+ increased Payment Service knowledge coverage", "+ reduced single-owner bus-factor"]'],
@@ -536,4 +547,10 @@ export const recognitions = [
   ['rec-23', 'p-19', 'pr-01', 'k-16', 'reliability', 'Unblocked the rate-limit migration for two additional API regions.', '2026-08-05', 'public', '["+ unblocked rate-limit migration for two regions", "+ reduced API outage risk"]'],
   ['rec-24', 'p-11', 'pr-06', 'k-14', 'delivery', 'Extended CI cleanup to the notification pipeline, saving 3 engineer-hours weekly.', '2026-08-03', 'public', '["+ saved 3 engineer-hours weekly", "+ stabilized notification pipeline"]'],
   ['rec-25', 'p-06', 'pr-09', 'k-06', 'mentorship', 'Ran weekly brown-bag sessions on incident runbooks to raise billing squad ownership awareness.', '2026-08-03', 'public', '["+ increased incident ownership awareness", "+ raised runbook confidence"]'],
+  // Pending recommendations for the governance queue — one per target tier.
+  // Existing at-tier people, so each recommendation reflects the person's full
+  // verified history plus the new contribution, never an invented persona.
+  ['rec-p-01', 'p-02', 'pr-02', 'k-11', 'mentorship', 'Coordinated peer-review sign-off for the auth gateway contract ahead of the integration freeze.', '2026-08-13', 'public', '["+ secured cross-team review coverage before the freeze"]', 'recommended', 'JIRA AUTH-114'],
+  ['rec-p-02', 'p-06', 'pr-09', 'k-06', 'knowledge_sharing', 'Drove the billing squad incident-runbook drill and closed two documentation gaps.', '2026-08-12', 'public', '["+ increased incident-runbook ownership", "+ closed two runbook gaps"]', 'recommended', 'Runbook: billing-incident-drill.md'],
+  ['rec-p-03', 'p-01', 'pr-07', 'k-01', 'reliability', 'Resolved a cross-region payment retry storm during peak load, restoring service within 28 minutes.', '2026-08-11', 'public', '["+ restored service within 28 minutes", "+ cut retry storm recovery time 45%"]', 'recommended', 'PR #482 · payments-retry-tuning'],
 ];

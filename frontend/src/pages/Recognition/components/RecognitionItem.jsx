@@ -98,7 +98,7 @@ const RecognitionItem = ({ item, onApproved, onOpenDetail }) => {
               }}
             />
           ) : null}
-          {needsReview && (
+          {needsReview ? (
             <Chip
               size="small"
               label="Pending review"
@@ -111,7 +111,20 @@ const RecognitionItem = ({ item, onApproved, onOpenDetail }) => {
                 '& .MuiChip-label': { px: 1.1 },
               }}
             />
-          )}
+          ) : item.approvalStatus === 'approved' ? (
+            <Chip
+              size="small"
+              label="Approved"
+              sx={{
+                height: 24,
+                fontSize: 11.5,
+                fontWeight: 700,
+                bgcolor: 'var(--success-lighter)',
+                color: 'success.main',
+                '& .MuiChip-label': { px: 1.1 },
+              }}
+            />
+          ) : null}
           <Box component="span" sx={{ color: 'text.secondary', fontSize: 13 }}>
             {DIMENSION_LABEL[item.type]} · {formatRelative(item.occurredAt)}
           </Box>

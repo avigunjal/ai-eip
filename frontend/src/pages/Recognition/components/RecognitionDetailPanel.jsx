@@ -6,10 +6,15 @@ import {
   Button,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   Drawer,
   IconButton,
   LinearProgress,
+  TextField,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -20,8 +25,9 @@ import Insights from '@mui/icons-material/Insights';
 import Analytics from '@mui/icons-material/Analytics';
 import MilitaryTech from '@mui/icons-material/MilitaryTech';
 import FactCheck from '@mui/icons-material/FactCheck';
+import Block from '@mui/icons-material/Block';
 import CheckCircle from '@mui/icons-material/CheckCircle';
-import { approveRecognition, fetchRecognitionDetail, fetchRecognitionExplanation } from '../../../api/recognition.js';
+import { approveRecognition, fetchRecognitionDetail, fetchRecognitionExplanation, rejectRecognition } from '../../../api/recognition.js';
 import { AWARD_LEVELS } from '../data/awardLevels.js';
 import { DIMENSION_LABEL, SOURCE_LABEL } from '../data/recognitionLabels.js';
 import { formatDate, formatRelative } from '../../../config/dates.js';
@@ -60,8 +66,19 @@ const StatusPill = ({ status }) => {
     return <Chip size="small" label="Approved" sx={{ bgcolor: 'var(--success-lighter)', color: 'success.main', fontWeight: 700, height: 24, fontSize: 11.5 }} />;
   if (status === 'rejected')
     return <Chip size="small" label="Rejected" sx={{ bgcolor: 'var(--red-lighter)', color: 'error.main', fontWeight: 700, height: 24, fontSize: 11.5 }} />;
-  return <Chip size="small" label="Pending review" sx={{ bgcolor: 'var(--amber-lighter)', color: 'var(--amber)', fontWeight: 700, height: 24, fontSize: 11.5 }} />;
+  return <Chip size="small" label="Awaiting Human Review" sx={{ bgcolor: 'var(--amber-lighter)', color: 'var(--amber)', fontWeight: 700, height: 24, fontSize: 11.5 }} />;
 };
+
+const RecommendedPill = () => (
+  <Chip
+    size="small"
+    label="Recommended"
+    icon={<CheckCircle sx={{ fontSize: 13, color: 'inherit' }} />}
+    sx={{ height: 24, fontSize: 11.5, fontWeight: 700, bgcolor: 'var(--violet-lighter)', color: 'var(--violet)', '& .MuiChip-icon': { color: 'inherit' } }}
+  />
+);
+
+const CONFIDENCE_LABEL = { high: 'High', medium: 'Medium', low: 'Low' };
 
 const Section = ({ step, icon, title, helper, children }) => (
   <Box>
@@ -182,14 +199,18 @@ const RecognitionDetailPanel = ({ item, onClose, onApproved }) => {
   const id = item?.id;
   const [detail, setDetail] = useState(item ?? null);
   const [detailError, setDetailError] = useState(false);
-  const [approving, setApproving] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [confirm, setConfirm] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
   const [ai, setAi] = useState({ status: 'idle', result: null });
 
   useEffect(() => {
     if (!id) return;
     setDetail(item);
     setDetailError(false);
-    setApproving(false);
+    setBusy(false);
+    setConfirm(null);
+    setRejectReason('');
     setAi({ status: 'idle', result: null });
     let cancelled = false;
     fetchRecognitionDetail(id)
@@ -216,11 +237,17 @@ const RecognitionDetailPanel = ({ item, onClose, onApproved }) => {
   const evidence = source.evidence ?? [];
   const impact = source.impact ?? [];
   const status = source.approvalStatus ?? 'recommended';
+  const isPending = status === 'recommended';
+  const confidence = CONFIDENCE_LABEL[intelligence?.confidence] ?? null;
 
-  const handleApprove = async () => {
-    setApproving(true);
+  const runDecision = async (kind) => {
+    setBusy(true);
     try {
-      await approveRecognition(id, 'approved');
+      if (kind === 'approve') {
+        await approveRecognition(id, 'approved');
+      } else {
+        await rejectRecognition(id, rejectReason.trim() || null);
+      }
       const recognition = await fetchRecognitionDetail(id);
       setDetail(recognition);
       setDetailError(false);
@@ -228,7 +255,9 @@ const RecognitionDetailPanel = ({ item, onClose, onApproved }) => {
     } catch {
       setDetailError(true);
     } finally {
-      setApproving(false);
+      setBusy(false);
+      setConfirm(null);
+      setRejectReason('');
     }
   };
 
@@ -263,7 +292,9 @@ const RecognitionDetailPanel = ({ item, onClose, onApproved }) => {
           <Box>
             <Typography sx={{ fontWeight: 700, fontSize: 16 }}>Why this recognition?</Typography>
             <Typography sx={{ color: 'text.secondary', fontSize: 12.5, mt: 0.25 }}>
-              An evidence-driven decision trail, decided by verified signals — not AI.
+              {isPending
+                ? 'An evidence-driven recommendation. Final decision is made by a human.'
+                : 'An evidence-driven decision trail, decided by verified signals — not AI.'}
             </Typography>
           </Box>
           <IconButton size="small" onClick={onClose} aria-label="Close">
@@ -286,6 +317,7 @@ const RecognitionDetailPanel = ({ item, onClose, onApproved }) => {
               </Link>
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.75 }}>
+              {isPending && <RecommendedPill />}
               {level && (
                 <Chip
                   size="small"
@@ -306,6 +338,18 @@ const RecognitionDetailPanel = ({ item, onClose, onApproved }) => {
 
         <Section step="01" icon={<Description sx={{ fontSize: 17, color: 'var(--primary)' }} />} title="Contribution">
           <Typography sx={{ color: 'text.secondary', fontSize: 14, lineHeight: 1.6 }}>{source.summary}</Typography>
+          {(source.project || source.knowledgeArea || source.relatedWork) && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1 }}>
+              <Typography sx={{ fontSize: 11.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, color: 'text.secondary' }}>
+                Related context
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {source.project && <Chip size="small" label={source.project.name} />}
+                {source.knowledgeArea && <Chip size="small" label={`${source.knowledgeArea.name} (System)`} />}
+                {source.relatedWork && <Chip size="small" label={source.relatedWork} />}
+              </Box>
+            </Box>
+          )}
         </Section>
 
         <Section
@@ -360,6 +404,11 @@ const RecognitionDetailPanel = ({ item, onClose, onApproved }) => {
         <Section step="05" icon={<MilitaryTech sx={{ fontSize: 17, color: 'var(--primary)' }} />} title="Award Qualification" helper="Qualification is decided by transparent deterministic conditions.">
           {level ? (
             <>
+              {isPending && (
+                <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: 'text.primary' }}>
+                  Highest deterministic qualification: {level.shortLabel}
+                </Typography>
+              )}
               {basis.map((line) => (
                 <CheckRow key={line}>{line}</CheckRow>
               ))}
@@ -367,6 +416,21 @@ const RecognitionDetailPanel = ({ item, onClose, onApproved }) => {
                 <Typography sx={{ fontSize: 12, color: 'text.secondary', mt: 0.5 }}>
                   Qualified for: {qualifiedLevels.map((key) => AWARD_LEVELS[key]?.shortLabel ?? key).join(' · ')}
                 </Typography>
+              )}
+              {isPending && (
+                <Box
+                  sx={{
+                    mt: 0.75,
+                    p: 1.5,
+                    borderRadius: 'var(--radius-control)',
+                    bgcolor: 'var(--violet-lighter)',
+                    border: '1px solid color-mix(in srgb, var(--violet) 30%, transparent)',
+                  }}
+                >
+                  <Typography sx={{ fontSize: 12.5, color: 'text.secondary', lineHeight: 1.5 }}>
+                    This is a recommendation based on verified evidence. Final recognition requires human approval.
+                  </Typography>
+                </Box>
               )}
             </>
           ) : (
@@ -376,35 +440,88 @@ const RecognitionDetailPanel = ({ item, onClose, onApproved }) => {
           )}
         </Section>
 
-        <Section step="06" icon={<FactCheck sx={{ fontSize: 17, color: 'var(--primary)' }} />} title="Governance" helper="The final decision stays with humans.">
+        <Section
+          step="06"
+          icon={<FactCheck sx={{ fontSize: 17, color: 'var(--primary)' }} />}
+          title="Human Decision"
+          helper={
+            isPending
+              ? 'This recommendation has not yet been approved.'
+              : 'The final decision stays with humans.'
+          }
+        >
           {status === 'approved' ? (
             <>
               <CheckRow>Approved</CheckRow>
               <Typography sx={{ fontSize: 12.5, color: 'text.secondary' }}>
-                Approved by {source.approvedBy ?? 'Admin'}
+                Approved by {source.approvedBy ?? 'Administrator'}
                 {source.approvedAt ? ` on ${formatDate(source.approvedAt)}` : ''}
               </Typography>
             </>
           ) : status === 'rejected' ? (
-            <Typography sx={{ fontSize: 13, color: 'error.main', lineHeight: 1.5 }}>Rejected</Typography>
+            <>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75 }}>
+                <Block sx={{ fontSize: 16, color: 'error.main', mt: 0.2, flexShrink: 0 }} />
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: 'error.main' }}>Rejected</Typography>
+                  <Typography sx={{ fontSize: 12.5, color: 'text.secondary' }}>
+                    Rejected by {source.rejectedBy ?? 'Administrator'}
+                    {source.rejectedAt ? ` on ${formatDate(source.rejectedAt)}` : ''}
+                  </Typography>
+                  {source.rejectedReason && (
+                    <Typography sx={{ fontSize: 12.5, color: 'text.secondary', mt: 0.25 }}>
+                      Reason: {source.rejectedReason}
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+            </>
           ) : (
             <>
-              <Typography sx={{ fontSize: 13, color: 'var(--amber)', fontWeight: 600, lineHeight: 1.5 }}>Pending human approval</Typography>
-              <Button
-                variant="contained"
-                startIcon={approving ? null : <FactCheck sx={{ fontSize: 16 }} />}
-                disabled={approving}
-                onClick={handleApprove}
-                sx={{ alignSelf: 'flex-start', textTransform: 'none', fontWeight: 700, borderRadius: '999px', mt: 0.5 }}
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 'var(--radius-control)',
+                  bgcolor: 'var(--amber-lighter)',
+                  border: '1px solid color-mix(in srgb, var(--amber) 35%, transparent)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0.5,
+                }}
               >
-                {approving ? (
-                  <>
-                    Approving… <CircularProgress size={14} sx={{ ml: 1, color: 'inherit' }} />
-                  </>
-                ) : (
-                  'Approve Recognition'
+                <Typography sx={{ fontSize: 13, color: 'var(--amber)', fontWeight: 700 }}>Awaiting human review</Typography>
+                <Typography sx={{ fontSize: 12.5, color: 'text.secondary', lineHeight: 1.5 }}>
+                  This recommendation has not yet been approved. Approving publishes it to the public feed;
+                  rejecting records the decision and keeps it out of the public surface.
+                </Typography>
+                {confidence && (
+                  <Typography sx={{ fontSize: 12.5, color: 'text.secondary', fontWeight: 600 }}>
+                    Confidence: {confidence}
+                  </Typography>
                 )}
-              </Button>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
+                <Button
+                  variant="contained"
+                  color="success"
+                  startIcon={busy ? null : <CheckCircle sx={{ fontSize: 16 }} />}
+                  disabled={busy}
+                  onClick={() => setConfirm('approve')}
+                  sx={{ alignSelf: 'flex-start', textTransform: 'none', fontWeight: 700, borderRadius: '999px' }}
+                >
+                  Approve Recognition
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={busy ? null : <Block sx={{ fontSize: 16 }} />}
+                  disabled={busy}
+                  onClick={() => setConfirm('reject')}
+                  sx={{ alignSelf: 'flex-start', textTransform: 'none', fontWeight: 700, borderRadius: '999px' }}
+                >
+                  Reject
+                </Button>
+              </Box>
             </>
           )}
         </Section>
@@ -417,7 +534,9 @@ const RecognitionDetailPanel = ({ item, onClose, onApproved }) => {
             <Typography sx={{ fontWeight: 700, fontSize: 14 }}>AI Explanation</Typography>
           </Box>
           <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 1 }}>
-            AI summarizes the verified evidence and decision basis. It does not determine the outcome.
+            {isPending
+              ? 'AI explains why the system recommended this recognition. Final approval remains with a human reviewer.'
+              : 'AI summarizes the verified evidence and decision basis. It does not determine the outcome.'}
           </Typography>
 
           {ai.status === 'idle' && (
@@ -481,6 +600,48 @@ const RecognitionDetailPanel = ({ item, onClose, onApproved }) => {
           )}
         </Box>
       </Box>
+
+      <Dialog open={confirm !== null} onClose={() => (busy ? null : setConfirm(null))} fullWidth maxWidth="xs">
+        <DialogTitle>
+          {confirm === 'approve'
+            ? `Approve ${person.name}?`
+            : `Reject recommendation for ${person.name}?`}
+        </DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, pt: 2 }}>
+          {confirm === 'approve' ? (
+            <Typography sx={{ fontSize: 13.5, color: 'text.secondary', lineHeight: 1.6 }}>
+              Publishing this recognition means it becomes public and the award ({level?.shortLabel ?? '—'}) is
+              part of the official decision trail. This cannot be undone from the public surface.
+            </Typography>
+          ) : (
+            <>
+              <Typography sx={{ fontSize: 13.5, color: 'text.secondary', lineHeight: 1.6 }}>
+                Rejected recommendations never appear publicly. Optionally record why.
+              </Typography>
+              <TextField
+                label="Reason (optional)"
+                multiline
+                minRows={2}
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+              />
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirm(null)} disabled={busy}>Cancel</Button>
+          <Button
+            variant="contained"
+            color={confirm === 'approve' ? 'success' : 'error'}
+            disabled={busy}
+            startIcon={busy ? <CircularProgress size={14} sx={{ color: 'inherit' }} /> : null}
+            onClick={() => runDecision(confirm)}
+            sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '999px' }}
+          >
+            {busy ? 'Working…' : confirm === 'approve' ? 'Approve' : 'Reject'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Drawer>
   );
 };

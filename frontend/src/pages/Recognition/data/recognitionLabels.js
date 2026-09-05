@@ -8,6 +8,7 @@ export const DIMENSION_LABEL = {
   mentorship: 'Mentorship',
   delivery: 'Delivery',
   knowledge_sharing: 'Knowledge Sharing',
+  innovation: 'Innovation',
 };
 
 export const SOURCE_LABEL = {

@@ -20,11 +20,14 @@ const THRESHOLDS = {
   leagueMinMonths: 2,
 };
 
-// Public, approved, has at least one primary person-attributed evidence.
-function isVerified(item) {
+// Public, has at least one primary person-attributed evidence. `statuses`
+// scopes which approval states count: 'approved' for the public feed, and
+// 'approved' + 'recommended' for governance evaluation (recommended items are
+// evaluated but never surface in the public feed).
+function isVerified(item, statuses = ['approved']) {
   return (
     item.visibility === 'public' &&
-    item.approvalStatus === 'approved' &&
+    statuses.includes(item.approvalStatus) &&
     (item.evidence ?? []).some((evidence) => evidence.role === 'primary' && evidence.entityType === 'person')
   );
 }
@@ -74,8 +77,9 @@ const BASIS = {
 };
 
 // Returns { highestQualifiedLevel, qualifiedLevels, basis } for one person.
-export function evaluateAwards(personItems, anchor) {
-  const items = personItems.filter(isVerified);
+export function evaluateAwards(personItems, anchor, options = {}) {
+  const statuses = options.statuses ?? ['approved'];
+  const items = personItems.filter((item) => isVerified(item, statuses));
   const intelligence = intelligenceFor(items, anchor);
 
   const qualified = LEVELS.filter((level) => {

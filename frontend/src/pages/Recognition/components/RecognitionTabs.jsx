@@ -3,9 +3,10 @@ import { RECOGNITION_TABS } from '../data/awardLevels.js';
 
 /**
  * Horizontal recognition navigation (spec section 5). Overview is the default;
- * each award tab is wired to a filtered award view.
+ * each award tab is wired to a filtered award view; the Governance Queue tab
+ * carries a live pending count badge.
  */
-const RecognitionTabs = ({ value, onChange, sx }) => (
+const RecognitionTabs = ({ value, onChange, sx, badges = {} }) => (
   <Box sx={{ borderBottom: '1px solid', borderColor: 'divider', ...sx }}>
     <Tabs
       value={value}
@@ -26,9 +27,42 @@ const RecognitionTabs = ({ value, onChange, sx }) => (
         '& .MuiTabs-indicator': { backgroundColor: 'var(--primary)', height: 3 },
       }}
     >
-      {RECOGNITION_TABS.map((tab) => (
-        <Tab key={tab.key} value={tab.key} label={tab.label} />
-      ))}
+      {RECOGNITION_TABS.map((tab) => {
+        const count = badges[tab.key] ?? 0;
+        return (
+          <Tab
+            key={tab.key}
+            value={tab.key}
+            label={
+              count > 0 ? (
+                <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+                  {tab.label}
+                  <Box
+                    component="span"
+                    sx={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minWidth: 20,
+                      height: 20,
+                      px: 0.6,
+                      borderRadius: '999px',
+                      bgcolor: 'var(--primary)',
+                      color: '#fff',
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {count}
+                  </Box>
+                </Box>
+              ) : (
+                tab.label
+              )
+            }
+          />
+        );
+      })}
     </Tabs>
   </Box>
 );

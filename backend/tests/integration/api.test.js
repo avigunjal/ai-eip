@@ -11,7 +11,7 @@ import { listPeople } from '../../src/modules/person/person.service.js';
 import { composeForProject } from '../../src/modules/team-composer/team-composer.service.js';
 import { getProjectById } from '../../src/modules/project/project.service.js';
 import { listInsights } from '../../src/modules/insight/insight.service.js';
-import { getFeed } from '../../src/modules/recognition/recognition.service.js';
+import { getFeed, getGovernanceQueue, getRecognition, approveRecognition, rejectRecognition, createRecognition } from '../../src/modules/recognition/recognition.service.js';
 import { analyzeProject, getProjectAssessment, explainInsights, explainInsight, getInsightExplanations, explainComposition, getCompositionAssessment, getSettings, updateSettings, regenerateInsightExplanation, regenerateCompositionExplanation, regenerateProjectAnalysis, ANALYSIS_CACHE_TTL_MS } from '../../src/modules/ai/ai.service.js';
 import { isAiEnabled, setAiEnabled } from '../../src/modules/ai/ai.settings.js';
 import { registerProvider, ProviderError } from '../../src/modules/ai/llm.provider.js';
@@ -137,6 +137,126 @@ test('recognition feed returns only seeded contribution context', async () => {
   assert.ok(['public', 'private'].includes(first.visibility));
   assert.ok(Array.isArray(first.impact), 'recognition exposes AI detected impact');
   assert.ok(first.impact.every((line) => line.startsWith('+')), 'impact lines read as positive deltas');
+});
+
+test('governance queue lists pending recommendations, labeled as such, with evidence', async () => {
+  seed();
+  const { items, total } = await getGovernanceQueue();
+  assert.equal(total, 3);
+  for (const item of items) {
+    assert.equal(item.approvalStatus, 'recommended');
+    assert.equal(item.visibility, 'public');
+    assert.ok(item.award, 'each queue item carries a recommended award');
+    assert.ok(
+      ['monthly', 'quarterly', 'eminence', 'league'].includes(item.award.highestQualifiedLevel),
+      'recommended award is one of the deterministic levels',
+    );
+    assert.ok(['high', 'medium', 'low'].includes(item.confidence), 'queue exposes a confidence level');
+    assert.ok(item.award.intelligence, 'recommendation exposes the deterministic intelligence trail');
+    assert.ok(item.evidence.length >= 2, 'recommendations are evidence-backed');
+    assert.ok(item.evidence.some((piece) => piece.role === 'primary' && piece.entityType === 'person'));
+  }
+  const levels = new Set(items.map((item) => item.award.highestQualifiedLevel));
+  assert.deepEqual(levels, new Set(['monthly', 'quarterly', 'eminence']), 'queue spans exactly monthly, quarterly, eminence');
+});
+
+test('pending recommendations never leak into the public feed', async () => {
+  const feed = await getFeed();
+  assert.equal(feed.length, 25, 'the three pending items are absent from the feed');
+  assert.ok(feed.every((item) => item.approvalStatus === 'approved'));
+  assert.ok(feed.every((item) => item.approvedBy === 'Engineering Leadership'));
+  assert.ok(!feed.some((item) => item.id.startsWith('rec-p')));
+});
+
+test('public feed scoring is anchor-isolated from pending recommendations', async () => {
+  const before = (await getFeed()).find((item) => item.id === 'rec-22');
+  const beforeAward = before.award.highestQualifiedLevel;
+  const beforeStrength = before.award.intelligence.evidenceStrength;
+  try {
+    db.prepare("UPDATE recognition SET occurred_at = '2026-09-01' WHERE id = 'rec-p-03'").run();
+    const after = await getFeed();
+    assert.ok(!after.some((item) => item.id === 'rec-p-03'), 'a pending item never enters the feed');
+    const afterAward = after.find((item) => item.id === 'rec-22').award;
+    assert.equal(afterAward.highestQualifiedLevel, beforeAward, 'the public anchor ignores pending dates');
+    assert.equal(afterAward.intelligence.evidenceStrength, beforeStrength, 'windows and recency ignore pending dates');
+  } finally {
+    db.prepare("UPDATE recognition SET occurred_at = '2026-08-11' WHERE id = 'rec-p-03'").run();
+  }
+});
+
+test('approving a pending recommendation persists the reviewer decision and publishes it', async () => {
+  const result = await approveRecognition('rec-p-01', 'approved', 'Engineering Leadership');
+  assert.equal(result.status, 'approved');
+  assert.equal(result.approvedBy, 'Engineering Leadership');
+  assert.ok(result.approvedAt);
+
+  const { items } = await getGovernanceQueue();
+  assert.equal(items.length, 2, 'an approved item leaves the queue');
+  assert.ok(!items.some((item) => item.id === 'rec-p-01'));
+
+  const rec = await getRecognition('rec-p-01');
+  assert.equal(rec.approvalStatus, 'approved');
+  assert.equal(rec.approvedBy, 'Engineering Leadership');
+  assert.ok(rec.approvedAt);
+  assert.match(rec.award.highestQualifiedLevel, /^(monthly|quarterly|eminence|league)$/, 'approved items keep their decision trail');
+
+  const feed = await getFeed();
+  assert.equal(feed.length, 26);
+  assert.ok(feed.some((item) => item.id === 'rec-p-01'), 'an approved item enters the public feed');
+});
+
+test('rejecting a pending recommendation records the decision and never publishes it', async () => {
+  const reason = 'Duplicates the review coverage already recognized last sprint';
+  const result = await rejectRecognition('rec-p-02', 'Engineering Leadership', reason);
+  assert.equal(result.status, 'rejected');
+  assert.equal(result.rejectedBy, 'Engineering Leadership');
+  assert.equal(result.reason, reason);
+
+  const { items } = await getGovernanceQueue();
+  assert.ok(!items.some((item) => item.id === 'rec-p-02'), 'a rejected item leaves the queue');
+
+  const rec = await getRecognition('rec-p-02');
+  assert.equal(rec.approvalStatus, 'rejected');
+  assert.equal(rec.rejectedBy, 'Engineering Leadership');
+  assert.equal(rec.rejectedReason, reason);
+  assert.ok(rec.rejectedAt);
+
+  const feed = await getFeed();
+  assert.ok(!feed.some((item) => item.id === 'rec-p-02'), 'a rejected recognition never enters the public feed');
+});
+
+test('rejecting a non-pending recognition is refused', async () => {
+  await assert.rejects(() => rejectRecognition('rec-01', 'Engineering Leadership'), /pending/i);
+  await assert.rejects(() => rejectRecognition('missing-id', 'Engineering Leadership'), /not found/i);
+});
+
+test('a nomination accepts an innovation type and related context, then routes to the queue', async () => {
+  seed();
+  const created = await createRecognition({
+    personId: 'p-03',
+    projectId: 'pr-03',
+    knowledgeAreaId: 'k-03',
+    type: 'innovation',
+    summary: 'Proposed and shipped a cache-aware retry backoff that removed a recurring checkout stall.',
+    relatedWork: 'PR #101 · checkout-backoff',
+  });
+  assert.equal(created.approvalStatus, 'recommended', 'a nomination always starts as a recommendation');
+
+  const rec = await getRecognition(created.id);
+  assert.equal(rec.type, 'innovation');
+  assert.equal(rec.project.id, 'pr-03', 'project context is joined back');
+  assert.equal(rec.project.name.length > 0, true);
+  assert.equal(rec.knowledgeArea.id, 'k-03', 'system context is joined back');
+  assert.equal(rec.relatedWork, 'PR #101 · checkout-backoff');
+
+  const { items, total } = await getGovernanceQueue();
+  assert.equal(total, 4, 'the nomination enters the governance queue');
+  assert.ok(items.some((item) => item.id === created.id));
+
+  const feed = await getFeed();
+  assert.equal(feed.length, 25, 'a pending nomination is never public');
+  assert.ok(!feed.some((item) => item.id === created.id));
+  seed();
 });
 
 test('people expose career, competency, and capacity detail', async () => {

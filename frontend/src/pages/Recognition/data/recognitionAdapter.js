@@ -45,6 +45,7 @@ function buildTrends(items, now = dayjs()) {
       delivery: 0,
       mentorship: 0,
       knowledge_sharing: 0,
+      innovation: 0,
     };
   });
   const byKey = new Map(months.map((m) => [m.key, m]));

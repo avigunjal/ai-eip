@@ -58,6 +58,7 @@ export const CONTRIBUTION_DIMENSIONS = [
   { key: 'delivery', label: 'Delivery', color: '#708061' },
   { key: 'mentorship', label: 'Mentorship', color: '#0da6d6' },
   { key: 'knowledge_sharing', label: 'Knowledge Sharing', color: '#7658d6' },
+  { key: 'innovation', label: 'Innovation', color: '#e07a2f' },
 ];
 
 /** Tab labels for the navigation (spec section 5). */
@@ -67,4 +68,5 @@ export const RECOGNITION_TABS = [
     key,
     label: key === 'league' ? 'League Extraordinaire (Yearly)' : AWARD_LEVELS[key].title,
   })),
+  { key: 'governance', label: 'Governance Queue' },
 ];

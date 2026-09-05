@@ -114,9 +114,23 @@ export function seed() {
     insertRows('evidence', 7, evidence);
     insertRows('staffing_scenarios', 8, staffingScenarios);
     insertRows('scenario_changes', 6, scenarioChanges);
-    // Seeded recognitions are pre-approved showcase records (approval_status,
-    // approved_at, approved_by). Composer-created records start 'recommended'.
-    insertRows('recognition', 12, recognitions, (row) => [...row, 'approved', row[6], 'demo']);
+    // Seeded recognitions are pre-approved showcase records (approval_status
+    // 'approved', approved_by 'Engineering Leadership'). Rows whose 10th
+    // element is the 'recommended' marker are seeded as pending recommendations
+    // for the governance queue (11th element, when present, is the related
+    // work reference captured by the composer). Composer-created records stay
+    // 'recommended'.
+    insertRows('recognition', 16, recognitions, (row) => {
+      const pending = row[9] === 'recommended';
+      return [
+        ...row.slice(0, 9),
+        pending ? 'recommended' : 'approved',
+        pending ? null : row[6],
+        pending ? null : 'Engineering Leadership',
+        null, null, null,
+        row[10] ?? null,
+      ];
+    });
     insertRows('recognition_evidence', 4, recognitionEvidence, (row) => [...row, new Date().toISOString()]);
   });
   run();

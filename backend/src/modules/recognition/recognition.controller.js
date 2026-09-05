@@ -8,6 +8,10 @@ export const getFeed = asyncHandler(async (_req, res) => {
   res.json({ feed: await recognitionService.getFeed() });
 });
 
+export const getGovernanceQueue = asyncHandler(async (_req, res) => {
+  res.json(await recognitionService.getGovernanceQueue());
+});
+
 export const getRecognition = asyncHandler(async (req, res) => {
   const recognition = await recognitionService.getRecognition(req.params.id);
   if (!recognition) {
@@ -36,5 +40,12 @@ export const approveRecognition = asyncHandler(async (req, res) => {
   const actor = req.user?.sub ?? 'admin';
   const status = req.body?.status ?? 'approved';
   const result = await recognitionService.approveRecognition(req.params.id, status, actor);
+  res.json({ recognition: result });
+});
+
+export const rejectRecognition = asyncHandler(async (req, res) => {
+  const actor = req.user?.sub ?? 'admin';
+  const reason = req.body?.reason?.trim() || null;
+  const result = await recognitionService.rejectRecognition(req.params.id, actor, reason);
   res.json({ recognition: result });
 });

@@ -8,8 +8,10 @@ import { authEnabled, verifyToken, bearerToken } from './auth.service.js';
 export function requireAuth(req, _res, next) {
   if (!authEnabled()) return next();
   const token = bearerToken(req.headers.authorization);
-  if (!verifyToken(token)) {
+  const username = verifyToken(token);
+  if (!username) {
     return next(new AppError(401, 'Authentication required'));
   }
+  req.user = { sub: username };
   return next();
 }

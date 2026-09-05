@@ -51,3 +51,24 @@ export async function fetchRecognitionDetail(id) {
 export async function fetchRecognitionExplanation(id) {
   return http.get(`/recognition/${id}/explanation`);
 }
+
+/**
+ * Human review queue — pending recommendations with their recommended award,
+ * confidence and evidence. Never contains approved (public) or rejected items.
+ * @returns {Promise<{items: Recognition[], total: number}>}
+ */
+export async function fetchGovernanceQueue() {
+  return http.get('/recognition/governance');
+}
+
+/**
+ * Reject a pending recommendation. Rejection is permanent for the public
+ * surface (auditable in the record, never published).
+ * @param {string} id
+ * @param {string} [reason]
+ * @returns {Promise<{id: string, status: string, rejectedAt: string|null, rejectedBy: string|null, reason: string|null}>}
+ */
+export async function rejectRecognition(id, reason) {
+  const { recognition } = await http.post(`/recognition/${id}/reject`, { reason: reason ?? null });
+  return recognition;
+}
