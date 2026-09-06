@@ -65,7 +65,7 @@ export function mapDashboardOverview(dto) {
   return {
     kpis: {
       health: { value: summary.health ?? 0, delta: 0 },
-      projectsAtRisk: { value: summary.projectsAtRisk ?? 0, detail: 'require action this week' },
+      projectsAtRisk: { value: summary.projectsAtRisk ?? 0, detail: 'require attention this week' },
       knowledgeConcentration: { value: summary.criticalKnowledgeRisks ?? 0, detail: 'critical knowledge risks' },
       teamCapacity: { value: `${summary.highestTeamPressure ?? 0}%`, detail: 'highest team pressure' },
       recognizedImpact: { value: '+14%', delta: 14 },

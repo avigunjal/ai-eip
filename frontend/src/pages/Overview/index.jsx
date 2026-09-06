@@ -69,14 +69,14 @@ const Overview = () => {
 
   const kpiCards = [
     { label: 'Engineering health', value: kpis.health.value, delta: kpis.health.delta, icon: <HealthAndSafety color="success" /> },
-    { label: 'Projects at risk', value: kpis.projectsAtRisk.value, detail: kpis.projectsAtRisk.detail, icon: <WarningAmber color="warning" /> },
+    { label: 'Projects requiring attention', value: kpis.projectsAtRisk.value, detail: kpis.projectsAtRisk.detail, icon: <WarningAmber color="warning" /> },
     {
       label: 'Knowledge concentration',
       value: kpis.knowledgeConcentration.value,
       detail: kpis.knowledgeConcentration.detail,
       icon: <WorkspacePremium color="primary" />,
       chain: singleOwners.map((a) => (
-        <Chip key={a.id} size="small" component={Link} to={paths.system(a.id)} clickable label={a.name} variant="outlined" />
+        <Chip key={a.id} size="small" component={Link} to={paths.decision('payment-backup')} clickable label={a.name} variant="outlined" />
       )),
     },
     { label: 'Team capacity', value: kpis.teamCapacity.value, detail: kpis.teamCapacity.detail, icon: <Speed color="info" /> },
@@ -93,7 +93,7 @@ const Overview = () => {
     <Box>
       <PageHeader
         title="Engineering overview"
-        subtitle="A clear view of delivery health, expertise, and impact."
+        subtitle="A connected view of engineering health, expertise, risk, and impact."
       />
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 3 }}>
@@ -109,8 +109,8 @@ const Overview = () => {
         {/* Engineering relationships — interactive relationship graph */}
         {chain && (
           <ChartCard
-            title="Engineering relationships"
-            subtitle={`How ${chain.project.name} connects teams, people, skills, systems, and risk.`}
+            title="Engineering intelligence map"
+            subtitle="How critical engineering entities connect — from projects to people, systems, expertise, and risk."
             data={relationshipRows(chain)}
             dataColumns={[{ key: 'type', label: 'Type' }, { key: 'name', label: 'Name' }]}
           >
@@ -118,9 +118,9 @@ const Overview = () => {
           </ChartCard>
         )}
 
-        {/* Health trend + insights */}
+        {/* AI analysis section — strict 2-column: health trend + analysis engine */}
         <Grid container spacing={3}>
-          <Grid item size={{ xs: 12, lg: 3.6 }}>
+          <Grid item size={{ xs: 12, lg: 4 }}>
             <ChartCard
               title="Engineering health trend"
               subtitle="Average project health, last 12 weeks"
@@ -140,57 +140,62 @@ const Overview = () => {
             </ChartCard>
           </Grid>
 
-          <Grid item size={{ xs: 12, lg: 8.4 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {!insightsLoading && !insightsError && (
-                <AiStatusCard
-                  signals={insights.reduce((n, ins) => n + ins.why.evidence.length, 0)}
-                  sources={collectSources(insights)}
-                />
-              )}
-              {insightsLoading ? (
-                <LoadingState sx={{ p: 2.5 }} />
-              ) : insightsError ? (
-                <Typography sx={{ fontSize: 13, color: 'var(--red)' }}>Couldn't load insights.</Typography>
-              ) : insights.length ? (
-                <>
-                  {insights.slice(0, 2).map((ins) => (
-                    <InsightCard
-                      key={ins.id}
-                      insight={ins}
-                      saved={isSaved(ins.id)}
-                      onSave={() => handleSave(ins.id)}
-                      onDismiss={() => handleDismiss(ins.id)}
-                      onExplain={() => handleExplain(ins.id)}
-                      onRegenerate={() => handleRegenerate(ins.id)}
-                      explaining={explainingId === ins.id}
-                      regenerating={regeneratingId === ins.id}
-                      aiEnabled={aiEnabled}
-                      aiExplanation={explanations.get(ins.id)?.explanation ?? null}
-                      aiMeta={explanations.get(ins.id)?.explanationMeta ?? null}
-                      showAiLabel={ins.id === insights[0]?.id}
-                      defaultOpen={ins.id === insights[0]?.id}
-                    />
-                  ))}
-                  {insights.length > 2 && (
-                    <Box sx={{ mt: 2, textAlign: 'center' }}>
-                      <Button variant="outlined" size="large" component={Link} to={paths.insights}>
-                        View all {insights.length} insights
-                      </Button>
-                    </Box>
-                  )}
-                </>
-              ) : (
-                <EmptyState
-                  icon={LightbulbOutlined}
-                  title="No insights yet"
-                  description="Insights will appear here as signals are analyzed."
-                  sx={{ py: 4 }}
-                />
-              )}
-            </Box>
+          <Grid item size={{ xs: 12, lg: 8 }}>
+            {!insightsLoading && !insightsError ? (
+              <AiStatusCard
+                signals={insights.reduce((n, ins) => n + ins.why.evidence.length, 0)}
+                sources={collectSources(insights)}
+              />
+            ) : insightsLoading ? (
+              <LoadingState sx={{ height: 240 }} />
+            ) : (
+              <Typography sx={{ fontSize: 13, color: 'var(--red)' }}>Couldn't load signals.</Typography>
+            )}
           </Grid>
         </Grid>
+
+        {/* AI prioritized insights */}
+        {insightsLoading ? (
+          <LoadingState sx={{ p: 2.5 }} />
+        ) : insightsError ? (
+          <Typography sx={{ fontSize: 13, color: 'var(--red)' }}>Couldn't load insights.</Typography>
+        ) : insights.length ? (
+          <>
+            {prioritizedInsights(insights).slice(0, 2).map((ins) => (
+              <InsightCard
+                key={ins.id}
+                insight={ins}
+                saved={isSaved(ins.id)}
+                onSave={() => handleSave(ins.id)}
+                onDismiss={() => handleDismiss(ins.id)}
+                onExplain={() => handleExplain(ins.id)}
+                onRegenerate={() => handleRegenerate(ins.id)}
+                explaining={explainingId === ins.id}
+                regenerating={regeneratingId === ins.id}
+                aiEnabled={aiEnabled}
+                aiExplanation={explanations.get(ins.id)?.explanation ?? null}
+                aiMeta={explanations.get(ins.id)?.explanationMeta ?? null}
+                showAiLabel={ins.id === prioritizedInsights(insights)[0]?.id}
+                defaultOpen={ins.id === prioritizedInsights(insights)[0]?.id}
+              />
+            ))}
+            {insights.length > 2 && (
+              <Box sx={{ mt: 2, textAlign: 'center' }}>
+                <Button variant="outlined" size="large" component={Link} to={paths.insights}>
+                  View all {insights.length} insights
+                </Button>
+              </Box>
+            )}
+          </>
+        ) : (
+          <EmptyState
+            icon={LightbulbOutlined}
+            title="No insights yet"
+            description="Insights will appear here as signals are analyzed."
+            sx={{ py: 4 }}
+          />
+        )}
+
 
         {/* AI-prioritized projects */}
         <ChartCard
@@ -225,6 +230,17 @@ function relationshipRows(chain) {
     ...chain.systems.map((s) => ({ type: 'System', name: s.name })),
     ...chain.risks.map((r) => ({ type: 'Risk', name: r.title })),
   ];
+}
+
+/**
+ * Place the Payment Service knowledge-concentration insight first so it opens
+ * the Dashboard → Decision Intelligence narrative (§14, §22). Other insights
+ * keep their existing deterministic order behind it.
+ */
+function prioritizedInsights(insights) {
+  const payment = insights.find((ins) => /payment service/i.test(ins.title || ''));
+  if (!payment) return insights;
+  return [payment, ...insights.filter((ins) => ins.id !== payment.id)];
 }
 
 export default Overview;
