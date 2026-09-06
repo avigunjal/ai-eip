@@ -10,7 +10,7 @@ import {
   capabilities, teamCapabilityCoverage, projectRequirements,
   knowledgeAreas, knowledgeAreaProjects, knowledgeExpertise, transferPlans, transferActions,
   risks, preventionActions, evidence, staffingScenarios, scenarioChanges, recognitions,
-  recognitionEvidence,
+  recognitionEvidence, financialAssumptions,
 } from './seedData.js';
 
 // --- deterministic helpers --------------------------------------------------
@@ -81,7 +81,7 @@ export function seed() {
       'knowledge_expertise', 'knowledge_area_projects', 'knowledge_areas',
       'allocations', 'project_requirements', 'team_capability_coverage',
       'person_capabilities', 'capabilities', 'project_owners', 'project_teams',
-      'projects', 'clients', 'team_memberships', 'teams', 'people',
+      'projects', 'clients', 'team_memberships', 'teams', 'people', 'financial_assumptions',
     ];
     for (const table of tables) db.prepare(`DELETE FROM ${table}`).run();
 
@@ -114,6 +114,7 @@ export function seed() {
     insertRows('evidence', 7, evidence);
     insertRows('staffing_scenarios', 8, staffingScenarios);
     insertRows('scenario_changes', 6, scenarioChanges);
+    insertRows('financial_assumptions', 8, financialAssumptions);
     // Seeded recognitions are pre-approved showcase records (approval_status
     // 'approved', approved_by 'Engineering Leadership'). Rows whose 10th
     // element is the 'recommended' marker are seeded as pending recommendations

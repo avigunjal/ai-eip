@@ -37,14 +37,21 @@ const TopBar = () => {
 
   // Route-aware title: resolve from the sitemap (exact match first), then the
   // deepest matched route's handle.title as a fallback (e.g. detail pages).
-  const matchedTitle = useMatches().reduce((_, m) => m.handle?.title ?? _, null);
+  // handle.title may be a function of the match (used by decision workspace
+  // so the crumb reads the decision's actual name).
+  const matches = useMatches();
+  const resolveTitle = (m) => {
+    const title = m.handle?.title;
+    return typeof title === 'function' ? title(m) : title;
+  };
+  const matchedTitle = matches.reduce((_, m) => resolveTitle(m) ?? _, null);
   const pageTitle = pageTitles[pathname] ?? matchedTitle ?? 'Engineering Overview';
+  const trail = matches.filter((m) => m.handle?.title != null).map((m) => ({ label: resolveTitle(m), pathname: m.pathname }));
 
   useEffect(() => {
     document.title = `AI-EIP — ${pageTitle}`;
   }, [pageTitle]);
 
-  const segments = pathname.split('/').filter(Boolean);
   const isOverview = pathname === paths.root;
 
   return (
@@ -80,11 +87,25 @@ const TopBar = () => {
           >
             AI-EIP
           </Typography>
-          {!isOverview && segments.length > 0 && (
-            <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'var(--header-text)' }}>
-              {pageTitle}
-            </Typography>
-          )}
+          {!isOverview &&
+            trail.length > 0 &&
+            trail.map((crumb, i) => {
+              const isLast = i === trail.length - 1;
+              return isLast ? (
+                <Typography key={crumb.label} sx={{ fontSize: 14, fontWeight: 600, color: 'var(--header-text)' }}>
+                  {crumb.label}
+                </Typography>
+              ) : (
+                <Typography
+                  key={crumb.label}
+                  component={Link}
+                  to={crumb.pathname}
+                  sx={{ fontSize: 14, color: 'var(--header-text-muted)', textDecoration: 'none', '&:hover': { color: 'var(--header-text)' } }}
+                >
+                  {crumb.label}
+                </Typography>
+              );
+            })}
         </Breadcrumbs>
 
         <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'var(--header-text)', display: { md: 'none' } }}>

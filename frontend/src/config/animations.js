@@ -44,6 +44,29 @@ export const glowPulse = keyframes`
   50% { box-shadow: 0 0 0 1px var(--red-lighter), 0 8px 30px rgba(209, 67, 67, 0.30); }
 `;
 
+/**
+ * AI glow for the recommended option card — a generous background glow that
+ * reads as "needs attention", with only a very slight breathing sway so the
+ * pulse never feels active. The two box-shadow layers overlap heavily and move
+ * by a small delta, so the glow is mostly constant with a gentle lift.
+ * Reduced-motion collapses the sway to the resting state.
+ */
+export const aiGlowBreathe = keyframes`
+  0%, 100% { box-shadow: var(--shadow-card), 0 0 14px 0 color-mix(in srgb, var(--ai) 30%, transparent), 0 0 40px 5px color-mix(in srgb, var(--ai) 14%, transparent); }
+  50% { box-shadow: var(--shadow-card), 0 0 18px 2px color-mix(in srgb, var(--ai) 42%, transparent), 0 0 48px 8px color-mix(in srgb, var(--ai) 22%, transparent); }
+`;
+
+/**
+ * Very subtle AI glow for the recommended option card — a steady, slight
+ * background halo that hints "needs attention" with only a barely-there
+ * flicker. The peak barely differs from the resting state, so it reads as a
+ * gentle presence, not a pulse. Reduced-motion collapses to the resting state.
+ */
+export const aiGlowSoft = keyframes`
+  0%, 100% { box-shadow: var(--shadow-card), 0 0 10px 0 color-mix(in srgb, var(--ai) 22%, transparent), 0 0 30px 3px color-mix(in srgb, var(--ai) 10%, transparent); }
+  50% { box-shadow: var(--shadow-card), 0 0 12px 1px color-mix(in srgb, var(--ai) 30%, transparent), 0 0 34px 4px color-mix(in srgb, var(--ai) 14%, transparent); }
+`;
+
 /** Subtle AI sparkle rotation for AI action buttons (every 5s). */
 export const sparkleSpin = keyframes`
   0%, 88%, 100% { transform: rotate(0deg) scale(1); }

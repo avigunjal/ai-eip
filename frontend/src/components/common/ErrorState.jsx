@@ -5,7 +5,7 @@ import SparkleIcon from '../../components/ui/SparkleIcon.jsx';
  * Themed error state with Retry action and AI-EIP brand mark.
  * Used by pages via the `useData` hook when a fetcher rejects.
  */
-const ErrorState = ({ message = 'Something went wrong while loading this data.', onRetry, sx }) => (
+const ErrorState = ({ title = "Couldn't load data", message = 'Something went wrong while loading this data.', onRetry, actions, sx }) => (
   <Box
     sx={{
       position: 'relative',
@@ -86,7 +86,7 @@ const ErrorState = ({ message = 'Something went wrong while loading this data.',
       </Box>
 
       <Typography sx={{ fontWeight: 700, fontSize: 26, letterSpacing: '-0.02em' }}>
-        Couldn&apos;t load data
+        {title}
       </Typography>
       <Typography sx={{ color: 'text.secondary', fontSize: 15, mt: 1, mb: 3, maxWidth: 360 }}>
         {message}
@@ -101,6 +101,9 @@ const ErrorState = ({ message = 'Something went wrong while loading this data.',
         >
           Retry
         </Button>
+      )}
+      {actions && (
+        <Box sx={{ display: 'flex', gap: 1.5, mt: 1.5, flexWrap: 'wrap', justifyContent: 'center' }}>{actions}</Box>
       )}
     </Box>
   </Box>

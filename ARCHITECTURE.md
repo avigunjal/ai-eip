@@ -263,6 +263,7 @@ Responsibilities:
 - Team intelligence views
 - Recommendation workflows
 - AI explanation surfaces (with explicit deterministic/LLM source indicators)
+- Decision Intelligence views (inbox + decision workspace)
 
 ## 7.2 Backend API Layer
 
@@ -301,6 +302,7 @@ Domain entities modeled:
 - Staffing scenarios and scenario changes
 - Recognition (contribution history and impact)
 - Knowledge transfer plans and transfer actions
+- Financial planning assumptions (role cost, billing target, recovery rate) used to value decision exposure
 
 ## 7.4 Intelligence Engines
 
@@ -339,6 +341,17 @@ Recommends a balanced team for a project from capability coverage, penalizing ca
 ### Insight Synthesis (`insights`)
 
 Converts engine output into concise, explainable findings. Every insight cites its drivers, evidence, and assumptions, and is the input to the AI explanation layer.
+
+### Decision Intelligence (`modules/decision-intelligence`)
+
+The Decision Impact Simulator takes an engineering decision and values its delivery, capacity, coverage, and financial exposure deterministically. It is fed by the existing signal engines (project risk, knowledge risk, team/capacity, coverage) plus an editable planning-assumptions layer:
+
+- **Scenario list** — projects with open (unmitigated) signals ranked by delivery exposure; drives the Decision Intelligence inbox.
+- **Simulation** — runs each option (`continue`, `staffing`, `reallocate`, `knowledge_transfer`) across risk, capacity, coverage, knowledge concentration, and a financial exposure model.
+- **Scoring & recommendation** — deterministic weighted scoring selects a winner with reasons, trade-offs, and an estimated avoided-exposure figure.
+- **Assumptions repository** — role cost/billing/recovery planning values stored in the signal layer and editable via API; values are explicitly planning estimates, never real financial records (see the `financial_assumptions` migration).
+
+Like all engines, the Decision Impact Simulator is deterministic and offline: it never requires an LLM, and AI (if enabled) only explains the pre-computed result.
 
 ## 7.5 AI Reasoning Layer
 
@@ -383,6 +396,7 @@ The MVP implementation includes:
 - AI reasoning layer: provider registry (OpenRouter current, xAI supported), runtime toggle, grounded structured prompts, caching, dedupe, retry, deterministic fallback
 - Knowledge transfer plans and backup assignment workflows
 - Staffing scenarios persisted from the team composer
+- Decision Intelligence: inbox (Screen 1) + decision workspace (Screen 2) with option simulation, deterministic scoring, AI recommendation, and USD financial impact
 - Test suite (`node --test`) covering analytics engines, skill matching, LLM provider parsing, and API integration
 
 ## Future Evolution

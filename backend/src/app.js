@@ -17,6 +17,7 @@ import knowledgeRoutes from './modules/knowledge/knowledge.routes.js';
 import teamComposerRoutes from './modules/team-composer/team-composer.routes.js';
 import recognitionRoutes from './modules/recognition/recognition.routes.js';
 import insightRoutes from './modules/insight/insight.routes.js';
+import decisionRoutes from './modules/decision-intelligence/decision.routes.js';
 import aiRoutes from './modules/ai/ai.routes.js';
 import authRoutes from './modules/auth/auth.routes.js';
 import { requireAuth } from './modules/auth/auth.middleware.js';
@@ -47,6 +48,7 @@ app.use('/api/knowledge', knowledgeRoutes);
 app.use('/api/team-composer', teamComposerRoutes);
 app.use('/api/recognition', recognitionRoutes);
 app.use('/api/insights', insightRoutes);
+app.use('/api/decision-intelligence', decisionRoutes);
 app.use('/api/ai', aiRoutes);
 
 // Fallbacks

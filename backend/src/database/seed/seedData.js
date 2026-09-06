@@ -516,6 +516,28 @@ export const scenarioChanges = [
 ];
 
 // ---------------------------------------------------------------------------
+// Financial assumptions — Decision Impact Simulator
+// ---------------------------------------------------------------------------
+// [id, role, annualCostPerFte, billingTargetPerFte, workingDaysPerYear, recoveryRate, effectiveFrom, notes]
+// Plausible planning inputs only. The simulator never presents these as actual
+// salary, billing, margin, or revenue records. Rows are editable via PATCH and
+// the 'default' row supplies the blended daily value used to size exposure.
+export const financialAssumptions = [
+  ['fin-01', 'Engineering Manager', 4_500_000, 7_000_000, 220, 0.35, '2026-01-01', 'Planning-rate assumption used for engineering managers'],
+  ['fin-02', 'Staff Engineer', 4_200_000, 6_500_000, 220, 0.35, '2026-01-01', 'Planning-rate assumption used for staff engineers'],
+  ['fin-03', 'Tech Lead', 3_800_000, 5_900_000, 220, 0.35, '2026-01-01', 'Planning-rate assumption used for tech leads'],
+  ['fin-04', 'Senior Engineer', 3_100_000, 4_800_000, 220, 0.35, '2026-01-01', 'Planning-rate assumption used for senior engineers'],
+  ['fin-05', 'Platform Engineer', 2_900_000, 4_500_000, 220, 0.35, '2026-01-01', 'Planning-rate assumption used for platform engineers'],
+  ['fin-06', 'Cloud Engineer', 2_800_000, 4_400_000, 220, 0.35, '2026-01-01', 'Planning-rate assumption used for cloud engineers'],
+  ['fin-07', 'SRE', 3_200_000, 5_000_000, 220, 0.35, '2026-01-01', 'Planning-rate assumption used for SREs'],
+  ['fin-08', 'Data Engineer', 2_600_000, 4_000_000, 220, 0.35, '2026-01-01', 'Planning-rate assumption used for data engineers'],
+  ['fin-09', 'Engineer', 2_200_000, 3_400_000, 220, 0.35, '2026-01-01', 'Planning-rate assumption used for engineers'],
+  ['fin-10', 'QA Lead', 2_300_000, 3_600_000, 220, 0.35, '2026-01-01', 'Planning-rate assumption used for QA leads'],
+  ['fin-11', 'QA Engineer', 1_800_000, 2_800_000, 220, 0.35, '2026-01-01', 'Planning-rate assumption used for QA engineers'],
+  ['fin-99', 'default', 2_500_000, 3_900_000, 220, 0.35, '2026-01-01', 'Blended default used to value exposure when no role-specific row applies'],
+];
+
+// ---------------------------------------------------------------------------
 // Recognition
 // ---------------------------------------------------------------------------
 // [id, personId, projectId, knowledgeAreaId, contributionType, summary, occurredAt, visibility, impact(JSON)]

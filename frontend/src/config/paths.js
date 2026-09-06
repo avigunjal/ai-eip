@@ -9,6 +9,8 @@ export const paths = {
   system: (id) => `/knowledge/${id}`,
   transferPlans: '/knowledge/transfer-plans',
   composer: '/composer',
+  decisionIntelligence: '/decision-intelligence',
+  decision: (id) => `/decision-intelligence/${id}`,
   teams: '/teams',
   team: (id) => `/teams/${id}`,
   recognition: '/recognition',

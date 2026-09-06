@@ -11,6 +11,7 @@ import Group from "@mui/icons-material/Group";
 import AutoAwesome from "@mui/icons-material/AutoAwesome";
 import EmojiEvents from "@mui/icons-material/EmojiEvents";
 import Lightbulb from "@mui/icons-material/Lightbulb";
+import FactCheck from "@mui/icons-material/FactCheck";
 import Settings from "@mui/icons-material/Settings";
 
 /** Icon lookup shared by the sidebar and the command palette. */
@@ -23,6 +24,7 @@ export const iconMap = {
   "wand-sparkles": AutoAwesome,
   award: EmojiEvents,
   lightbulb: Lightbulb,
+  "fact-check": FactCheck,
   settings: Settings,
 };
 
@@ -33,6 +35,7 @@ export const pageTitles = {
   "/knowledge": "Knowledge",
   "/teams": "Teams",
   "/composer": "AI Composer",
+  "/decision-intelligence": "Decision Intelligence",
   "/recognition": "Recognition",
   "/insights": "Insights",
   "/settings": "Settings",
@@ -45,6 +48,7 @@ export const sidebarLinks = [
   { name: "Knowledge", to: "/knowledge", icon: "book-open" },
   { name: "Teams", to: "/teams", icon: "users-round" },
   { name: "AI Composer", to: "/composer", icon: "wand-sparkles" },
+  { name: "Decision Intelligence", to: "/decision-intelligence", icon: "fact-check" },
   { name: "Recognition", to: "/recognition", icon: "award" },
   { name: "Insights", to: "/insights", icon: "lightbulb", badge: 5 },
   { name: "Settings", to: "/settings", icon: "settings" },
@@ -65,6 +69,7 @@ export const navGroups = {
     "Knowledge",
     "Teams",
     "AI Composer",
+    "Decision Intelligence",
     "Recognition",
   ],
   engineering: ["Insights"],

@@ -1,4 +1,4 @@
-// AI domain service. Orchestrates the three AI use cases, always keeping the
+// AI domain service. Orchestrates the four AI use cases, always keeping the
 // app deterministic-safe:
 //
 //   deterministic intelligence → compact context → LLM (if enabled) → validate
@@ -24,16 +24,19 @@ import {
   SYSTEM_INSIGHTS,
   SYSTEM_COMPOSITION,
   SYSTEM_RECOGNITION_EXPLANATION,
+  SYSTEM_DECISION_EXPLANATION,
   projectContext,
   insightsContext,
   compositionContext,
   recognitionExplanationContext,
+  decisionComparisonResultContext,
 } from './context.js';
 import {
   PROJECT_ANALYSIS_SCHEMA,
   INSIGHT_EXPLANATION_SCHEMA,
   COMPOSITION_EXPLANATION_SCHEMA,
   RECOGNITION_EXPLANATION_SCHEMA,
+  DECISION_EXPLANATION_SCHEMA,
 } from './schemas.js';
 
 registerProvider('openrouter', () => createOpenRouterProvider({ apiKey: env.openrouterApiKey, model: env.openrouterModel }));
@@ -239,6 +242,18 @@ function coerceRecognitionExplanation(content) {
   if (!content || typeof content !== 'object') return null;
   const narrative = typeof content.narrative === 'string' ? content.narrative.trim() : '';
   return narrative ? { narrative } : null;
+}
+
+function coerceDecisionExplanation(content) {
+  if (!content || typeof content !== 'object') return null;
+  const summary = typeof content.summary === 'string' ? content.summary.trim() : '';
+  if (!summary) return null;
+  return {
+    summary,
+    whyRecommended: asStringArray(content.whyRecommended, 4),
+    tradeoffs: asStringArray(content.tradeoffs, 4),
+    leadershipConsiderations: asStringArray(content.leadershipConsiderations, 4),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -842,6 +857,128 @@ export async function getRecognitionExplanation(grounding) {
       if (!(error instanceof ProviderError)) throw error;
       console.warn(`[ai] recognition explanation failed (${error.code}) for ${id}.`);
       return { deterministic, ai: null };
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Use case 5 — decision explanation ("Why is the reallocation recommended?")
+// ---------------------------------------------------------------------------
+// Explains the ALREADY COMPLETED deterministic comparison. The input is the
+// result of compareDecisions(); the endpoint never recomputes scores, never
+// changes the winner or any currency value, and never lets the LLM do the math.
+// The winner can never change: the deterministic echo is a mirror of the input
+// and the LLM is only allowed to explain the supplied facts.
+
+const DECISION_EXPLANATION_TTL_MS = 30 * 60 * 1000;
+
+/**
+ * Shape-guard for an already-completed comparison result. Only structural
+ * validation — no score is recomputed here.
+ */
+export function validateComparisonResult(input) {
+  if (!input || typeof input !== 'object') return false;
+  const { project, currentSignals, options, recommended } = input;
+  if (!project || typeof project.id !== 'string') return false;
+  if (!currentSignals || typeof currentSignals !== 'object') return false;
+  if (!Array.isArray(options) || options.length === 0) return false;
+  if (!options.every((option) => option && typeof option === 'object' && typeof option.option === 'string' && Number.isFinite(option.score))) return false;
+  if (!recommended || typeof recommended !== 'object') return false;
+  if (typeof recommended.option !== 'string' || !Number.isFinite(recommended.score)) return false;
+  if (!Array.isArray(recommended.reasons) || !Array.isArray(recommended.tradeOffs)) return false;
+  return true;
+}
+
+/**
+ * The immutable deterministic projection returned to the client. A pure mirror
+ * of the input comparison — the recommended option, the winner score, and the
+ * fixed option table (scores and currency values included as-is).
+ */
+export function deterministicEcho(result) {
+  const options = (result.options ?? []).map((option) => {
+    const after = option.after ?? {};
+    const fin = option.financial ?? {};
+    return {
+      option: option.option,
+      label: option.label,
+      score: option.score,
+      after: {
+        risk: after.risk?.score ?? null,
+        exposure: { score: after.exposure?.score ?? null, label: after.exposure?.label ?? null },
+        coverage: after.coverage?.score ?? null,
+        knowledgeConcentration: after.knowledge?.concentration ?? null,
+      },
+      financial: {
+        netPlanningImpact: fin.netPlanningImpact ?? 0,
+        avoidedExposure: fin.avoidedExposure ?? 0,
+        staffingCost: fin.staffingCost ?? 0,
+      },
+    };
+  });
+  return {
+    projectId: result.project?.id,
+    recommendedOption: result.recommended?.option,
+    winnerScore: result.recommended?.score,
+    options,
+  };
+}
+
+// Compact string hash so the cache key changes whenever meaningful
+// deterministic facts (scores, winner, currency values) change.
+function fnv1a(key) {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < key.length; i += 1) {
+    hash ^= key.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16);
+}
+
+/**
+ * Explain a completed deterministic comparison for one project. Never throws on
+ * an unavailable/failed provider: `ai` is null then and the deterministic echo
+ * is always returned. Returns `{ ok: false, error }` for a malformed input.
+ */
+export async function explainDecision(input) {
+  if (!validateComparisonResult(input)) {
+    return { ok: false, error: 'The body must be a completed decision comparison result.' };
+  }
+
+  const echo = deterministicEcho(input);
+  const key = `decision-explanation:${fnv1a(JSON.stringify(echo))}`;
+
+  return runOnce(key, async () => {
+    const cached = getCached(key, DECISION_EXPLANATION_TTL_MS);
+    if (cached !== undefined) return { ok: true, deterministic: echo, ai: cached };
+
+    const provider = isAIEnabled() ? getLLMProvider() : null;
+    if (!provider) return { ok: true, deterministic: echo, ai: null };
+
+    try {
+      const outcome = await completeWithRetry(
+        provider,
+        SYSTEM_DECISION_EXPLANATION,
+        decisionComparisonResultContext(input),
+        { maxTokens: 1500, schema: DECISION_EXPLANATION_SCHEMA },
+        coerceDecisionExplanation,
+      );
+      if (!outcome) return { ok: true, deterministic: echo, ai: null };
+      const value = {
+        summary: outcome.coerced.summary,
+        whyRecommended: outcome.coerced.whyRecommended,
+        tradeoffs: outcome.coerced.tradeoffs,
+        leadershipConsiderations: outcome.coerced.leadershipConsiderations,
+        source: 'llm',
+        provider: provider.name,
+        model: outcome.model,
+        generatedAt: new Date().toISOString(),
+      };
+      cache.set(key, { at: Date.now(), value });
+      return { ok: true, deterministic: echo, ai: value };
+    } catch (error) {
+      if (!(error instanceof ProviderError)) throw error;
+      console.warn(`[ai] decision explanation failed (${error.code}); returning the deterministic comparison only.`);
+      return { ok: true, deterministic: echo, ai: null };
     }
   });
 }

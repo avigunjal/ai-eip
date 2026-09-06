@@ -84,3 +84,15 @@ export const RECOGNITION_EXPLANATION_SCHEMA = {
     narrative: { type: 'string' },
   },
 };
+
+export const DECISION_EXPLANATION_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['summary', 'whyRecommended', 'tradeoffs', 'leadershipConsiderations'],
+  properties: {
+    summary: { type: 'string' },
+    whyRecommended: STRING_ARRAY,
+    tradeoffs: STRING_ARRAY,
+    leadershipConsiderations: STRING_ARRAY,
+  },
+};

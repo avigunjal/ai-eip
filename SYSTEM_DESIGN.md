@@ -42,6 +42,10 @@ frontend/
 │   │   ├── Risks/     Knowledge/ KnowledgeDetail/  TransferPlans/
 │   │   ├── Teams/     TeamDetail/ PersonProfile/
 │   │   ├── Composer/  Recognition/  Insights/  Settings/  NotFound.jsx
+│   │   ├── DecisionIntelligence/   # Screen 1 inbox (DecisionInbox, DecisionCard,
+│   │   │                           #   DecisionSummaryCards, DecisionOutcomes, ...)
+│   │   └── DecisionDetail/         # Screen 2 workspace (DecisionOptions, ScenarioComparison,
+│   │                               #   AIRecommendation, BusinessImpact, DecisionActionPanel, ...)
 │   ├── components/
 │   │   ├── common/             # AvatarGroup, MetricCard, StatusBadge, EmptyState,
 │   │   │                       # ErrorState, LoadingState, PageHeader, EntityChip
@@ -53,12 +57,16 @@ frontend/
 │   │   ├── dashboard.js  projects.js  risks.js  teams.js  people.js
 │   │   ├── capabilities.js  knowledge.js  teamComposer.js  recognition.js
 │   │   ├── insights.js  ai.js
+│   │   ├── decisionIntelligence.js   # Screen 1 inbox (DECISIONS envelope; live-endpoint seam)
+│   │   ├── decisionDetail.js         # Screen 2 workspace (merges inbox + detail; 404-safe)
+│   │   ├── decisionRecommendation.js # option scoring/engine + formatCurrency (USD)
 │   │   └── *.adapter.js        # API → UI view-model mappers (dashboard, insights, projects)
 │   ├── hooks/                  # useData, useDashboard, useUrlFilters, useInsightAi,
 │   │                           # useAiTerms, useToast, useBreakpoints, useCountUp
-│   ├── store/                  # zustand: actionStore, aiStore, toastStore, uiStore
+│   ├── store/                  # zustand: actionStore, aiStore, toastStore, uiStore,
+│   │                           #          decisionStore (options, selected option, recommendation)
 │   ├── data/                   # fixtures.js + service.js (in-memory fallback world)
-│   ├── config/                 # constants, paths, riskLabels, modelLabel, dates
+│   ├── config/                 # constants, paths, riskLabels, modelLabel, dates, currency
 │   ├── theme/                  # MUI theme (palette, typography, shadows, components)
 │   └── providers/ThemeProvider.jsx
 ```
@@ -83,7 +91,7 @@ Page (React)
 
 ## 1.4 Routing
 
-React Router v7 data router. All routes are children of `AppShell` so the sidebar/topbar persist; `handle.title` drives the browser title and breadcrumb. Detail routes: `projects/:projectId`, `knowledge/:systemId`, `teams/:teamId`, `people/:personId`, plus `knowledge/transfer-plans`. Catch-all redirects to the dashboard.
+React Router v7 data router. All routes are children of `AppShell` so the sidebar/topbar persist; `handle.title` drives the browser title and breadcrumb. Detail routes: `projects/:projectId`, `knowledge/:systemId`, `teams/:teamId`, `people/:personId`, `decision-intelligence/:decisionId`, plus `knowledge/transfer-plans`. Catch-all redirects to the dashboard.
 
 ---
 
@@ -124,12 +132,16 @@ backend/
 │   │   ├── recognition/        # recognition feed + impact
 │   │   ├── insight/            # deterministic insight synthesis
 │   │   ├── evidence/           # evidence repository (cross-domain)
+│   │   ├── decision-intelligence/ # Decision Impact Simulator: scenario list, project
+│   │   │                       #   context, option simulation, scoring, financial
+│   │   │                       #   assumptions, AI explain (signals → simulator →
+│   │   │                       #   scoring → controller)
 │   │   └── ai/                 # AI reasoning layer (provider registry, use cases)
 │   ├── analytics/              # pure scoring engines (no HTTP)
 │   │   ├── project-risk/       #   project-risk.service.js, project-risk.rules.js
 │   │   └── knowledge-risk/     #   knowledge-risk.service.js
 │   ├── database/
-│   │   ├── migrations/         # 001_initialSchema.sql, 002_*.sql (+ README)
+│   │   ├── migrations/         # 001_initialSchema.sql ... 007_decision_intelligence.sql
 │   │   └── seed/               # seedData.js (canonical) + seed.js (runner)
 │   ├── shared/
 │   │   ├── constants/          # severities, thresholds, DEMO_TODAY
@@ -140,7 +152,8 @@ backend/
     ├── analytics/project-risk.test.js
     ├── integration/api.test.js
     ├── modules/llm.provider.test.js
-    └── modules/skill-matcher.test.js
+    ├── modules/skill-matcher.test.js
+    └── decision-intelligence/   # decision.test.js + explain.test.js
 ```
 
 ## 2.3 Module Anatomy
@@ -285,7 +298,28 @@ GET /api/insights → { insights: Insight[] }
 
 `Insight` includes `id`, `level`, `score`, `confidence`, `summary`, `evidence[]`, `drivers[]`, `recommendedActions[]`, `assumptions[]`. Deterministic; no LLM involved.
 
-## 3.12 AI Reasoning Layer
+## 3.12 Decision Intelligence
+
+```
+GET  /api/decision-intelligence                            → { scenarios: Scenario[] }
+GET  /api/decision-intelligence/assumptions                → { assumptions: Assumption[] }
+PATCH /api/decision-intelligence/assumptions/:id           → { assumption: Assumption }
+      body (any subset): { annualCostPerFte, billingTargetPerFte, workingDaysPerYear, recoveryRate }
+GET  /api/decision-intelligence/projects/:projectId        → { context }
+GET  /api/decision-intelligence/projects/:projectId/options → { options: OptionDescriptor[] }
+POST /api/decision-intelligence/projects/:projectId/simulate → { project, demoToday, option }
+      body: { option }
+POST /api/decision-intelligence/projects/:projectId/compare → { project, demoToday,
+      currentSignals, options[], recommended, assumptions, deterministic, generated }
+POST /api/decision-intelligence/explain                     → { explanation, ... }
+      body: { projectId }
+```
+
+`Scenario` (inbox) includes `project` (id, name, phase, status, targetDate), `signals: { risk, capacity, coverage, knowledge, exposure }`, `openRisks`. Projects with no open (unmitigated) risks are excluded; scenarios are ranked by delivery-exposure score descending.
+
+`compare` returns every simulated option (score, scoreBreakdown, after-state deltas, financial impact) plus `recommended: { option, label, score, reasons[], tradeOffs[], sourceImpact }` and the editable `assumptions` with a disclaimer that figures are planning estimates — not actual financial records.
+
+## 3.13 AI Reasoning Layer
 
 ```
 GET  /api/ai/settings                                    → { enabled, provider, model }
@@ -323,7 +357,7 @@ POST /api/ai/insights                                     → { insights }   # d
 - Foreign keys enforced (`PRAGMA foreign_keys = ON`).
 - Canonical seed (`src/database/seed/seedData.js`) is the single source of demo truth; `npm run db:seed` recreates it. DDL is portable to PostgreSQL.
 
-## 4.2 Logical Model (23 tables)
+## 4.2 Logical Model (25 tables)
 
 **Identity & Organization**
 - `people` (id, name, role, team_id, availability_fte, years_of_experience)
@@ -363,6 +397,10 @@ POST /api/ai/insights                                     → { insights }   # d
 
 **Recognition**
 - `recognition` (id, person_id, project_id?, knowledge_area_id?, contribution_type, summary, occurred_at, visibility, impact TEXT/JSON)
+- `recognition_evidence` (recognition_id, entity_type, entity_id) — links recognition to the generic `evidence` store
+
+**Decision Intelligence**
+- `financial_assumptions` (id, role, annual_cost_per_fte, billing_target_per_fte, working_days_per_year, recovery_rate, effective_from, notes) — explicit, editable planning assumptions used to value decision exposure; never presented as actual financial records
 
 ## 4.3 Key Relationships
 
@@ -425,6 +463,7 @@ return to controller → { source: 'llm'|'deterministic', provider, model, ... }
 - `projectContext` — project facts, top risk drivers with evidence, highest risks.
 - `insightsContext` — up to 5 insights with level/score/confidence/summary/drivers/evidence.
 - `compositionContext` — recommended team with fit/coverage, required skills, assessment, rationale, trade-off, impact, alternatives.
+- `decisionComparisonResultContext` — the already-completed deterministic comparison (winner, scores, deltas, financials, assumptions). Input is validated so the AI can only explain an existing result; it can never change the winner or scores.
 
 Three system prompts (`SYSTEM_ANALYZE`, `SYSTEM_INSIGHTS`, `SYSTEM_COMPOSITION`) all embed the grounding rule and JSON-only response instructions with a declared schema.
 
@@ -433,6 +472,7 @@ Three system prompts (`SYSTEM_ANALYZE`, `SYSTEM_INSIGHTS`, `SYSTEM_COMPOSITION`)
 1. **Project analysis** — deterministic assessment always served; `ai` populated from cache on load, generated on explicit "Explain with AI" action, regenerated on demand.
 2. **Insight explanations** — one batch LLM call for cache-missing insights; per-insight cache; single-insight explain and regenerate endpoints.
 3. **Composition explanations** — deterministic explanation always available; `ai` cached on explicit action.
+4. **Decision explanations** — the frontend posts the completed deterministic comparison to `/api/decision-intelligence/explain`; the LLM only summarizes *why* the winner was picked (summary, whyRecommended, trade-offs, leadership considerations). Deterministic echo always returned; `ai: null` on disable/failure — still 200.
 
 ---
 
@@ -553,4 +593,8 @@ Target state when AI-EIP moves from seeded demo data to live engineering signals
 | SQLite today, PostgreSQL tomorrow | Zero-infra MVP; portable DDL preserves contracts |
 | Canonical seed with fixed `DEMO_TODAY` | Deterministic, stable demo across re-seeds and machines |
 | UI actions never mutate signals | Transfer-plan backups and scenarios don't alter risk/insight state |
+| Decision exposure valued from editable assumptions | No real financial data exists; planning estimates are stored and editable, with an explicit disclaimer, so simulation is transparent and reproducible |
+| Deterministic option scoring picks the recommendation | The winner (and its reasons/trade-offs) is computed offline; AI only explains it — consistent with "signal first, AI second" |
+| Frontier work seeded as data-driven inbox/detail seams | Screen 1 and Screen 2 fetch from centralized mock modules (`decisionIntelligence.js` / `decisionDetail.js`) that mirror a future live API contract without touching the pages |
+| USD as the display currency | `config/currency.js` centralizes `formatCurrency`; INR-style `₹28.7L`/`₹1.8Cr` shorthand retained only for INR, USD uses `$342K`/`$14K` |
 | Fixture fallback in frontend | UI development and degraded mode independent of backend availability |

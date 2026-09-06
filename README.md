@@ -63,7 +63,7 @@ The backend is a **modular monolith**: each domain owns its `routes → controll
 ai-eip/
 ├── frontend/   # React 19 + Vite + MUI SPA
 ├── backend/    # Node.js + Express API (modular monolith, SQLite)
-├── docs/       # Specs, integration plans, screenshots
+├── docs/       # Specs, integration plans, screenshots, progress tracker
 ├── ARCHITECTURE.md
 └── SYSTEM_DESIGN.md
 ```
@@ -75,7 +75,7 @@ ai-eip/
 | Frontend | React 19, Vite, MUI, Recharts, Zustand, React Router v7, axios |
 | Backend  | Node.js, Express, better-sqlite3 (SQLite → PostgreSQL/Supabase planned) |
 | AI       | Provider abstraction — OpenRouter (current), xAI Grok (supported); runtime toggle; deterministic fallback |
-| Tests    | `node --test` (analytics engines, skill matcher, LLM provider, API integration) |
+| Tests    | `node --test` (analytics engines, skill matcher, LLM provider, decision intelligence simulator, API integration) |
 
 ## Getting started
 
@@ -123,6 +123,7 @@ AI is user-triggered only — nothing calls the LLM on page load. Every AI respo
 - **AI Composer** — evidence-based team recommendations considering skills, capacity, and project risks
 - **Recognition** — contribution feed with grounded impact statements
 - **Insights** — synthesized, evidence-backed findings with optional AI explanations
+- **Decision Intelligence** — a deterministic Decision Impact Simulator that values engineering decisions: an inbox of projects with open delivery signals, then a decision workspace that simulates each option (continue / staff up / reallocate / knowledge transfer), scores the outcomes, and recommends a winner with reasons, trade-offs, and financial impact
 - **Settings** — runtime AI enable/disable
 
 ## Demo Flow
@@ -133,6 +134,8 @@ AI is user-triggered only — nothing calls the LLM on page load. Every AI respo
 4. Generate an AI explanation for a project or insight
 5. Use the AI Composer to recommend a balanced team
 6. Create mitigation actions (transfer plans, backup ownership)
+7. Open **Decision Intelligence**, choose a decision in the inbox, and compare option outcomes
+8. Review the recommended decision, its reasons/trade-offs, and the AI explanation
 
 ## Screenshots
 
@@ -160,7 +163,7 @@ cd backend && npm test
 
 ## Demo data
 
-The canonical seed (`backend/src/database/seed/seedData.js`) ships a realistic engineering organization: 10 projects, 18 risks, 9 engineering squads (Payments, Frontend, Backend, Platform, Cloud & Infrastructure, Data, QA, SRE, Architecture), 28 people, 28 engineering skills (React, Node.js, AWS, Kubernetes, REST API, and more), 16 knowledge areas, transfer plans, staffing scenarios, and a Payment Service single-owner narrative. A fixed demo date keeps every metric stable across re-seeds.
+The canonical seed (`backend/src/database/seed/seedData.js`) ships a realistic engineering organization: 10 projects, 18 risks, 9 engineering squads (Payments, Frontend, Backend, Platform, Cloud & Infrastructure, Data, QA, SRE, Architecture), 28 people, 28 engineering skills (React, Node.js, AWS, Kubernetes, REST API, and more), 16 knowledge areas, transfer plans, staffing scenarios, a Payment Service single-owner narrative, and editable financial planning assumptions used to value decision exposure. A fixed demo date keeps every metric stable across re-seeds. Display values are USD-formatted (`$342K`) via `frontend/src/config/currency.js`.
 
 ## Future direction
 

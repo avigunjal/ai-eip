@@ -121,6 +121,21 @@ Write 3-6 warm, professional sentences that read as one narrative.
 ${JSON_INSTRUCTION}
 Schema: {"narrative":"string"}`;
 
+export const SYSTEM_DECISION_EXPLANATION = `You are a delivery decision explainer for an AI Engineering Intelligence Platform.
+You receive an already-completed deterministic comparison of four decision options for one project, including the computed
+winner and the winner's deterministic rationale and trade-offs.
+Explain the comparison for a delivery leader. Your explanation must:
+- stay purely explanatory: the winner is already computed deterministically, so never re-decide it, never recalculate or
+  second-guess any score or currency value, and never introduce a new option;
+- ground every claim in the supplied facts: use the deterministic rationale and trade-offs as the factual basis for your
+  phrasing (you may paraphrase, never contradict);
+- weigh the organizational trade-offs honestly (source-team strain, cost, knowledge risk, window);
+- only invent what a human would say, never a fact: no new metrics, dates, people, percent signs, or time windows.
+Explain the supplied facts; you cannot change them.
+${GROUNDING_RULE}
+${JSON_INSTRUCTION}
+Schema: {"summary":"string","whyRecommended":["string"],"tradeoffs":["string"],"leadershipConsiderations":["string"]}`;
+
 /** Compact, fully evidence-sourceable recognition context for the LLM. */
 export function recognitionExplanationContext(grounding) {
   const evidenceLines = (grounding.evidence ?? []).map((item) =>
@@ -138,4 +153,63 @@ export function recognitionExplanationContext(grounding) {
     `Deterministic scores: evidence ${int.evidenceStrength ?? ''}/100, impact ${int.impact ?? ''}/100, scope ${int.scope ?? ''}/100, consistency ${int.consistency ?? ''}/100`,
     `Award tier: ${award.highestQualifiedLevel ?? 'none'} | qualified levels: ${(award.qualifiedLevels ?? []).join(', ') || 'none'}`,
   ].join('\n');
+}
+
+// --- Decision Impact Simulator explanation -----------------------------------
+
+function exposureOf(signals) {
+  return signals?.exposure ? `${signals.exposure.score} (${signals.exposure.label})` : 'n/a';
+}
+
+function inr(value) {
+  return Number(value ?? 0).toLocaleString('en-IN');
+}
+
+function optionFacts(option) {
+  const after = option.after ?? {};
+  const fin = option.financial ?? {};
+  const facts = [
+    `${option.option} — "${option.label}": score ${option.score}/100`,
+    `  After: exposure ${exposureOf(after)}, risk ${after.risk?.score ?? 'n/a'}, coverage ${after.coverage?.score ?? 'n/a'}, knowledge concentration ${after.knowledge?.concentration ?? 'n/a'}`,
+    `  Financial: net ₹${inr(fin.netPlanningImpact)} (avoided ₹${inr(fin.avoidedExposure)}, cost ₹${inr(fin.staffingCost)})`,
+  ];
+  if (option.sourceImpact) {
+    const s = option.sourceImpact;
+    facts.push(`  Source team impact: ${s.teamName} ${s.pressureBefore}% → ${s.pressureAfter}% while ${s.personName} (${s.fte} FTE) is reallocated`);
+  }
+  return facts.join('\n');
+}
+
+/**
+ * Compact, fact-only context built from the ALREADY COMPLETED comparison
+ * result. The deterministic recommendation rationale and trade-offs are passed
+ * through verbatim — the LLM explains these facts, it never reconstructs them.
+ */
+export function decisionComparisonResultContext(result) {
+  const project = result.project ?? {};
+  const signals = result.currentSignals ?? {};
+  const options = Array.isArray(result.options) ? result.options.slice(0, 4) : [];
+  const recommended = result.recommended ?? {};
+
+  const lines = [
+    `Project: ${project.name} (${project.id}) | Phase: ${project.phase ?? 'n/a'} | Status: ${project.status ?? 'n/a'}`,
+    `Target date: ${project.targetDate ?? 'n/a'} | Window: ${signalDays(signals)} days to target (as of ${result.demoToday ?? 'today'})`,
+    `Current signals: risk ${signals.risk?.score ?? 'n/a'} (${signals.risk?.severity ?? 'n/a'}), delivery exposure ${exposureOf(signals)}, capability coverage ${signals.coverage?.score ?? 'n/a'}%, knowledge concentration ${signals.knowledge?.concentration ?? 'n/a'} (single-owner: ${signals.knowledge?.singleOwner ?? 'n/a'})`,
+    '',
+    'Decision options (fixed table):',
+    options.map(optionFacts).join('\n') || 'none',
+    '',
+    `Recommended option: ${recommended.option} — "${recommended.label}" (score ${recommended.score}/100)`,
+    '',
+    'Deterministic rationale (facts supplied by the engine):',
+    ...(recommended.reasons ?? []).map((reason) => `- ${typeof reason === 'string' ? reason : reason?.text ?? ''}`),
+    '',
+    'Deterministic trade-offs (facts supplied by the engine):',
+    ...(recommended.tradeOffs ?? []).map((tradeOff) => `- ${typeof tradeOff === 'string' ? tradeOff : tradeOff?.text ?? ''}`),
+  ];
+  return lines.join('\n');
+}
+
+function signalDays(signals) {
+  return signals?.exposure?.remainingDays ?? signals?.exposure?.windowDays ?? 'n/a';
 }

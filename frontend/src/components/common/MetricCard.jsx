@@ -14,10 +14,11 @@ import { useCountUp } from '../../hooks/useCountUp.js';
  * Values count up 0 → target on first load (800ms); hover lifts the card,
  * softens the shadow, scales the icon, and highlights the value.
  */
-const MetricCard = ({ label, value, delta, detail, icon, iconBg, iconColor, trend, onClick, help, chain, compact, sx }) => {
+const MetricCard = ({ label, value, delta, detail, icon, iconBg, iconColor, trend, onClick, help, chain, compact, animate = true, sx }) => {
   const deltaGood = delta != null && delta >= 0;
   const DeltaIcon = delta != null && delta >= 0 ? ArrowUpward : ArrowDownward;
-  const animatedValue = useCountUp(value);
+  const countedValue = useCountUp(value);
+  const animatedValue = animate ? countedValue : value;
   return (
     <Surface
       onClick={onClick}

@@ -13,6 +13,9 @@ import TransferPlans from '../pages/TransferPlans/index.jsx';
 import Teams from '../pages/Teams/index.jsx';
 import TeamDetail from '../pages/TeamDetail/index.jsx';
 import Composer from '../pages/Composer/index.jsx';
+import DecisionIntelligence from '../pages/DecisionIntelligence/index.jsx';
+import DecisionDetail from '../pages/DecisionDetail/index.jsx';
+import { decisionCrumbLabel } from '../api/decisionDetail.js';
 import Recognition from '../pages/Recognition/index.jsx';
 import PersonProfile from '../pages/PersonProfile/index.jsx';
 import Insights from '../pages/Insights/index.jsx';
@@ -66,6 +69,16 @@ const router = createBrowserRouter([
         handle: { title: 'Team detail' },
       },
       { path: 'composer', element: <Composer />, handle: { title: 'AI Composer' } },
+      {
+        path: 'decision-intelligence',
+        element: <DecisionIntelligence />,
+        handle: { title: 'Decision Intelligence' },
+      },
+      {
+        path: 'decision-intelligence/:decisionId',
+        element: <DecisionDetail />,
+        handle: { title: ({ params }) => decisionCrumbLabel(params.decisionId) },
+      },
       { path: 'recognition', element: <Recognition />, handle: { title: 'Recognition' } },
       {
         path: 'people/:personId',
