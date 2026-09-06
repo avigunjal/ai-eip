@@ -92,7 +92,7 @@ export function overviewKpis() {
   const overloaded = teams.filter((t) => t.capacityPct > 85).length;
   return {
     health: { value: avgHealth, delta: 4 },
-    projectsAtRisk: { value: atRisk, detail: 'require attention this week' },
+    projectsAtRisk: { value: atRisk, detail: 'require action this week' },
     knowledgeConcentration: { value: 'High', detail: `${criticalSingleOwner} critical single-owner areas` },
     teamCapacity: { value: `${avgCapacity}%`, detail: `${overloaded} teams above sustainable load` },
     recognizedImpact: { value: '+14%', delta: 14 },
