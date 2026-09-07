@@ -31,7 +31,7 @@ const ConfidenceBar = ({ value }) => (
       <LinearProgress
         variant="determinate"
         value={value ?? 0}
-        sx={{ height: 6, borderRadius: 4, bgcolor: 'action.hover', '& .MuiLinearProgress-bar': { bgcolor: 'var(--ai)' } }}
+        sx={{ height: 6, borderRadius: 4, bgcolor: 'var(--surface-subtle)', '& .MuiLinearProgress-bar': { bgcolor: 'var(--ai)' } }}
       />
     </Box>
     <Typography component="span" sx={{ fontSize: 13, fontWeight: 700, color: 'text.primary' }}>

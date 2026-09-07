@@ -24,7 +24,7 @@ import { paths } from '../../config/paths.js';
 function CoverageBar({ value, color }) {
   const display = useCountUpNumber(value);
   return (
-    <Box sx={{ flex: 1, height: 6, borderRadius: 4, bgcolor: 'action.hover', overflow: 'hidden' }}>
+    <Box sx={{ flex: 1, height: 6, borderRadius: 4, bgcolor: 'var(--surface-subtle)', overflow: 'hidden' }}>
       <Box
         sx={{
           height: '100%',

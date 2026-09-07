@@ -1,8 +1,8 @@
 # Decision Intelligence — Implementation Status
 
 **Feature:** Decision Intelligence (Decision Impact Simulator)
-**Status:** Complete (both screens shipped and verified)
-**Last updated:** 2026-09-06
+**Status:** Complete (both screens shipped and verified; Overview narrative shipped)
+**Last updated:** 2026-09-07
 
 ---
 
@@ -106,6 +106,24 @@ Screen 1 (Decision Inbox) surfaces decisions that need attention — not duplica
 - `frontend/src/api/decisionDetail.js` — `fetchDecisionDetail()` merges the inbox envelope (type/severity/signals/potentialValue) with workspace detail (problem/evidence/options/outcomes); returns `null` for unknown ids so the workspace renders a proper not-found (never a retry loop).
 - `frontend/src/store/decisionStore.js` — Zustand store for the workspace (options, selected option, recommendation).
 - `frontend/src/routes/router.jsx` — routes `decision-intelligence` and `decision-intelligence/:decisionId` with `decisionCrumbLabel`.
+
+---
+
+## Overview — Decision Intelligence narrative (`/`)
+
+The Engineering Overview carries the Dashboard → Decision Intelligence story so leadership sees what to decide next without opening the inbox:
+
+| # | Element | Implementation |
+|---|---|---|
+| 1 | Open-decision entry point | `primary-lighter` callout linking to the Payment Service backup-owner decision |
+| 2 | Decisions-required KPI | Curated `3 total · 1 critical · 2 high` MetricCard with violet label, `aiGlowSoft` attention glow, deep-links to the inbox |
+| 3 | Recommended-decision strips | `DecisionIntelligencePreview.jsx` — uniform clickable strips (badge, question, one-line signals, truncated recommended action, impact + Review pill); headers/column budgets removed after table variants misaligned |
+| 4 | Impact summary | Centered pill under the header: `$639K` aggregated from the same three real decisions + `↓62% risk / ↑28% confidence / ↑22% capacity` arrow chips |
+| 5 | AI key insights | `KeyInsightsCard.jsx` beside the relationship graph: 4 centralized signals (single-owner risk leads with Critical chip), AI-assessment footer linking to `/insights` |
+
+- **Files:** `frontend/src/pages/Overview/components/DecisionIntelligencePreview.jsx`, `KeyInsightsCard.jsx`; integration in `frontend/src/pages/Overview/index.jsx`.
+- **Graph fix (same pass):** `EngineeringRelationshipGraph.jsx` — nodes scale by `width / VIEW_W` with edge geometry in design units, so the Risk node stays inside the box at any zoom.
+- **Verification:** `npm run lint` + `npm run build` clean (only pre-existing warnings).
 
 ---
 

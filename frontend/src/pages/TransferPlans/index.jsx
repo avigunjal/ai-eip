@@ -62,7 +62,7 @@ const TransferPlans = () => {
               }},
               { key: 'progress', label: 'Progress', sortable: true, render: (r) => (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 120 }}>
-                  <LinearProgress variant="determinate" value={r.progress} sx={{ flex: 1, height: 6, borderRadius: 4, bgcolor: 'action.hover' }} />
+                  <LinearProgress variant="determinate" value={r.progress} sx={{ flex: 1, height: 6, borderRadius: 4, bgcolor: 'var(--surface-subtle)' }} />
                   <Typography sx={{ fontSize: 13, fontWeight: 700 }}>{r.progress}%</Typography>
                 </Box>
               )},

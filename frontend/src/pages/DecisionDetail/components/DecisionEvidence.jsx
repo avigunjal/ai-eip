@@ -94,7 +94,7 @@ const EvidenceSignal = ({ evidence }) => {
               width: '100%',
               maxWidth: 420,
               borderRadius: 4,
-              bgcolor: 'action.hover',
+              bgcolor: 'var(--surface-subtle)',
               overflow: 'hidden',
             }}
             aria-hidden

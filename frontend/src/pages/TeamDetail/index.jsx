@@ -55,7 +55,7 @@ const TeamDetail = () => {
       <Box sx={{ mt: 3, p: 3, outline: '1px solid', outlineColor: 'divider', borderRadius: 'var(--radius-card)', bgcolor: 'background.paper' }}>
         <Typography sx={{ fontWeight: 600 }}>Capacity vs sustainable load</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 1.5 }}>
-          <LinearProgress variant="determinate" value={team.capacityPct} sx={{ flex: 1, height: 10, borderRadius: 6, bgcolor: 'action.hover', '& .MuiLinearProgress-bar': { bgcolor: over ? 'error.main' : 'success.main' } }} />
+          <LinearProgress variant="determinate" value={team.capacityPct} sx={{ flex: 1, height: 10, borderRadius: 6, bgcolor: 'var(--surface-subtle)', '& .MuiLinearProgress-bar': { bgcolor: over ? 'error.main' : 'success.main' } }} />
           <Typography sx={{ fontSize: 13, fontWeight: 700 }}>{team.capacityPct}%</Typography>
         </Box>
         <Typography sx={{ fontSize: 12, color: 'text.secondary', mt: 1 }}>

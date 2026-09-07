@@ -128,7 +128,7 @@ const TopBar = () => {
             border: '1px solid',
             borderColor: 'divider',
             px: 1.5,
-            '&:hover': { bgcolor: 'action.hover', borderColor: 'divider' },
+            '&:hover': { bgcolor: 'var(--surface-subtle)', borderColor: 'divider' },
           }}
         >
           <Typography component="span" sx={{ flex: 1, textAlign: 'left', fontSize: 14, fontWeight: 400, color: 'text.disabled' }}>

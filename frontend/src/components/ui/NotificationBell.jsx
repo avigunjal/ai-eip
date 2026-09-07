@@ -50,7 +50,7 @@ const NotificationBell = () => {
         <Divider />
         <Box sx={{ p: 1 }}>
           {items.map((n) => (
-            <Box key={n.id} sx={{ px: 1, py: 1.5, borderRadius: 1, '&:hover': { bgcolor: 'action.hover' } }}>
+            <Box key={n.id} sx={{ px: 1, py: 1.5, borderRadius: 1, '&:hover': { bgcolor: 'var(--surface-subtle)' } }}>
               <Typography sx={{ fontSize: 14 }}>{n.title}</Typography>
               <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{n.meta} · {formatRelative(Date.now())}</Typography>
             </Box>

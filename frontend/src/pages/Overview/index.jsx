@@ -1,5 +1,7 @@
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Box, Button, Chip, Grid, Typography } from '@mui/material';
+import ArrowForward from '@mui/icons-material/ArrowForward';
+import { Zap } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import HealthAndSafety from '@mui/icons-material/HealthAndSafety';
 import WarningAmber from '@mui/icons-material/WarningAmber';
@@ -27,7 +29,11 @@ import { useDashboard, useDashboardInsights } from '../../hooks/useDashboard.js'
 import { useInsightAi } from '../../hooks/useInsightAi.js';
 import { useAiTerms } from '../../hooks/useAiTerms.js';
 import { collectSources } from '../../api/insights.adapter.js';
+import { aiGlowSoft } from '../../config/animations.js';
 import EngineeringRelationshipGraph from '../../components/ui/EngineeringRelationshipGraph.jsx';
+import SparkleIcon from '../../components/ui/SparkleIcon.jsx';
+import DecisionIntelligencePreview from './components/DecisionIntelligencePreview.jsx';
+import KeyInsightsCard from './components/KeyInsightsCard.jsx';
 import { fetchPerson } from '../../api/people.js';
 
 /**
@@ -40,6 +46,15 @@ import { fetchPerson } from '../../api/people.js';
  *  - "Export" action + date range already in TopBar
  *  - grid slot for a second chart (7/5 layout)
  */
+
+/**
+ * Demo — Decisions Required summary (Task 2). Curated to the Payment Service
+ * narrative: 3 decisions need attention right now (1 critical · 2 high).
+ * Presentation-only; the Decision Intelligence inbox remains the source of
+ * truth and the full dataset lives there.
+ */
+const DECISIONS_REQUIRED = { total: 3, critical: 1, high: 2 };
+
 const Overview = () => {
   const { data: dashboard, loading, error, retry } = useDashboard();
   const { data: insights = [], loading: insightsLoading, error: insightsError } = useDashboardInsights();
@@ -47,6 +62,7 @@ const Overview = () => {
   const { isSaved, saveInsight, unsaveInsight, dismissInsight, restoreInsight } = useActionStore();
   const { aiEnabled, explanations, explainingId, regeneratingId, handleExplain, handleRegenerate } = useInsightAi();
   const toast = useToast();
+  const navigate = useNavigate();
 
   if (loading) return <LoadingState variant="grid" sx={{ mt: 3 }} />;
   if (error) return <ErrorState onRetry={retry} />;
@@ -87,6 +103,30 @@ const Overview = () => {
       icon: <EmojiEvents color="primary" />,
       help: 'Recognized impact represents meaningful engineering contribution beyond conventional metrics such as story points — for example mentoring, reliability saves, and knowledge sharing backed by evidence.',
     },
+    {
+      label: 'Decisions required',
+      value: DECISIONS_REQUIRED.total,
+      detail: (
+        <Typography component="span" sx={{ fontSize: 13 }}>
+          <Box component="span" sx={{ color: 'var(--red)', fontWeight: 700 }}>
+            {DECISIONS_REQUIRED.critical} critical
+          </Box>
+          <Box component="span" sx={{ color: 'text.disabled' }}> · </Box>
+          <Box component="span" sx={{ color: 'var(--orange)', fontWeight: 700 }}>
+            {DECISIONS_REQUIRED.high} high
+          </Box>
+        </Typography>
+      ),
+      icon: <Zap size={19} strokeWidth={2.4} color="var(--violet)" />,
+      onClick: () => navigate(paths.decisionIntelligence),
+      sx: {
+        bgcolor: 'color-mix(in srgb, var(--violet-lighter) 70%, background.paper)',
+        outlineColor: 'color-mix(in srgb, var(--violet) 40%, transparent)',
+        boxShadow: '0 0 0 1px color-mix(in srgb, var(--violet) 18%, transparent), var(--shadow-card)',
+        animation: `${aiGlowSoft} 5s ease-in-out infinite`,
+        '& .metric-label': { color: 'var(--violet)' },
+      },
+    },
   ];
 
   return (
@@ -97,17 +137,50 @@ const Overview = () => {
       />
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 3 }}>
-        {/* KPI strip — deliberate 5-across on desktop (flex, lg = 1 row) */}
+        {/* KPI strip — 6-across on desktop (flex, lg = 1 row) */}
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
           {kpiCards.map((k) => (
-            <Box key={k.label} sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 30%', lg: '1 1 0' }, minWidth: 0 }}>
+            <Box
+              key={k.label}
+              tabIndex={k.onClick ? 0 : undefined}
+              role={k.onClick ? 'link' : undefined}
+              aria-label={k.onClick ? `Open ${k.label} in Decision Intelligence` : undefined}
+              onKeyDown={
+                k.onClick
+                  ? (e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        k.onClick();
+                      }
+                    }
+                  : undefined
+              }
+              sx={{
+                flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 30%', lg: '1 1 0' },
+                minWidth: 0,
+                ...(k.onClick && {
+                  borderRadius: 'var(--radius-card)',
+                  cursor: 'pointer',
+                  '&:focus-visible': { outline: 'var(--focus-ring)', outlineOffset: '2px' },
+                }),
+              }}
+            >
               <MetricCard compact {...k} />
             </Box>
           ))}
         </Box>
 
-        {/* Engineering relationships — interactive relationship graph */}
+        {/* Engineering relationships — interactive relationship graph + AI key insights */}
         {chain && (
+          <>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1fr) minmax(280px, 320px)' },
+              gap: { xs: 2, lg: 2.5 },
+              alignItems: 'stretch',
+            }}
+          >
           <ChartCard
             title="Engineering relationships"
             subtitle={`How ${chain.project.name} connects teams, people, skills, systems, and risk.`}
@@ -116,7 +189,61 @@ const Overview = () => {
           >
             <EngineeringRelationshipGraph data={chain} paths={paths} fetchPerson={fetchPerson} />
           </ChartCard>
+          <KeyInsightsCard />
+          </Box>
+
+          {/* Open decision entry point — Dashboard → Decision Intelligence */}
+          <Box
+            component={Link}
+            to={paths.decision('payment-backup')}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              flexWrap: 'wrap',
+              p: 2.5,
+              borderRadius: 'var(--radius-card)',
+              bgcolor: 'var(--primary-lighter)',
+              outline: '1px solid',
+              outlineColor: 'color-mix(in srgb, var(--primary) 35%, transparent)',
+              boxShadow: 'var(--shadow-card)',
+              textDecoration: 'none',
+              transition: 'outline-color var(--transition), box-shadow var(--transition)',
+              '&:hover': {
+                outlineColor: 'var(--primary)',
+                boxShadow: 'var(--shadow-float)',
+                textDecoration: 'none',
+              },
+              '&:focus-visible': { outline: 'var(--focus-ring)', outlineOffset: '2px' },
+            }}
+          >
+            <SparkleIcon sx={{ fontSize: 24, color: 'var(--primary)', flexShrink: 0 }} />
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography
+                sx={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--primary)' }}
+              >
+                Open decision
+              </Typography>
+              <Typography sx={{ fontSize: { xs: 15, sm: 16 }, fontWeight: 700, mt: 0.25, color: 'text.primary' }}>
+                This project has an open decision
+              </Typography>
+              <Typography sx={{ fontSize: 13, color: 'text.secondary', mt: 0.25, lineHeight: 1.5 }}>
+                Who should be the backup owner for Payment Service?
+              </Typography>
+            </Box>
+            <Button
+              variant="contained"
+              endIcon={<ArrowForward />}
+              sx={{ textTransform: 'none', fontWeight: 600, width: { xs: '100%', sm: 'auto' } }}
+            >
+              View decision
+            </Button>
+          </Box>
+          </>
         )}
+
+        {/* Decision Intelligence preview — what leadership should decide next */}
+        <DecisionIntelligencePreview />
 
         {/* Health trend + insights */}
         <Grid container spacing={3}>

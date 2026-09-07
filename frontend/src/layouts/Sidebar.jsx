@@ -80,7 +80,16 @@ function SidebarContent({ onNavigate }) {
               sx={{
                 mb: 0.5,
                 gap: 1.5,
+                borderLeft: 3,
+                borderLeftColor: 'transparent',
                 '& .MuiSvgIcon-root': { fontSize: 20 },
+                '&.active': {
+                  bgcolor: 'var(--primary-selected)',
+                  borderLeftColor: 'var(--primary-dark)',
+                  color: 'var(--primary-dark)',
+                  '& .MuiListItemText-primary': { color: 'var(--primary-dark)', fontWeight: 600 },
+                  '&:hover': { bgcolor: 'var(--primary-selected)' },
+                },
               }}
             >
               <ListItemIcon sx={{ minWidth: 0 }}>

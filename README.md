@@ -115,7 +115,7 @@ AI is user-triggered only — nothing calls the LLM on page load. Every AI respo
 
 ## Features
 
-- **Engineering Overview** — portfolio health, at-risk projects, critical knowledge risks, team pressure
+- **Engineering Overview** — portfolio health, at-risk projects, critical knowledge risks, team pressure, plus a Decision Intelligence narrative: open-decision entry point, decisions-required KPI, recommended-decision strips with an impact summary, and AI key insights beside the engineering relationship graph
 - **Projects** — health, delivery confidence, risk drivers with cited evidence, trend
 - **Risks** — risk register with probability/impact/urgency scores and prevention actions
 - **Knowledge** — coverage, documentation freshness, single-owner detection, transfer plans

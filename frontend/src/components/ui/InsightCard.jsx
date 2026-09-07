@@ -235,7 +235,7 @@ const InsightCard = ({ insight, onSave, onDismiss, saved, actions, onExplain, ex
                 flex: 1,
                 height: 6,
                 borderRadius: 4,
-                bgcolor: 'action.hover',
+                bgcolor: 'var(--surface-subtle)',
                 '& .MuiLinearProgress-bar': { bgcolor: severity.color },
               }}
             />

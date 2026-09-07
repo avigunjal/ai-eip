@@ -74,8 +74,8 @@ const createPalette = (t) => ({
   },
   action: {
     active: grey[600],
-    hover: grey[100],
-    selected: grey[100],
+    hover: t.surfaceSubtle,
+    selected: t.surfaceSubtle,
     hoverOpacity: 0.06,
     selectedOpacity: 0.12,
     disabled: grey[400],

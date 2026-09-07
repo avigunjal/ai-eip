@@ -31,6 +31,11 @@
   --primary-hover: #5d6d50;
   --primary-dark: #4c5a42;
   --primary-lighter: #e8ebe1;
+  /* selected nav item — primary tinted against the sidebar surface, visibly
+     greener than --primary-lighter so it reads clearly on the beige rail */
+  --primary-selected: color-mix(in srgb, var(--primary) 30%, var(--surface-sidebar));
+  /* nav hover — primary tinted so it is visible against the sidebar surface */
+  --nav-hover: color-mix(in srgb, var(--primary) 16%, var(--surface-sidebar));
   --teal: #159a8a;
   --amber: #b8894f;
   --red: #c7655b;

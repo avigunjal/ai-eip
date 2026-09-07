@@ -26,7 +26,7 @@ function TeamCapacityBar({ value, over }) {
           flex: 1,
           height: 8,
           borderRadius: 4,
-          bgcolor: 'action.hover',
+          bgcolor: 'var(--surface-subtle)',
           overflow: 'hidden',
           ...(over ? { animation: `${slowPulse} 3s ease-in-out infinite` } : {}),
         }}

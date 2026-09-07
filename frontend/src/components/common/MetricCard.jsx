@@ -42,7 +42,7 @@ const MetricCard = ({ label, value, delta, detail, icon, iconBg, iconColor, tren
     >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, minWidth: 0 }}>
         <Box sx={{ flex: 1, minWidth: 0, display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
-          <Typography sx={{ fontSize: compact ? 10 : 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'text.secondary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <Typography className="metric-label" sx={{ fontSize: compact ? 10 : 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'text.secondary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {label}
           </Typography>
           {help && (

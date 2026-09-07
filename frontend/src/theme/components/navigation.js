@@ -71,7 +71,7 @@ export default {
         borderRadius: 'var(--radius-control)',
         padding: '10px 12px',
         color: theme.palette.text.secondary,
-        '&:hover': { backgroundColor: theme.palette.action.hover },
+        '&:hover': { backgroundColor: 'var(--nav-hover)' },
         '&.Mui-selected': {
           backgroundColor: theme.palette.primary.lighter,
           color: theme.palette.primary.main,

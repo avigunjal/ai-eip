@@ -32,23 +32,24 @@ import { dotTravel, glowPulse } from '../../config/animations.js';
  */
 
 const VIEW_W = 1000;
-const VIEW_H = 450;
+const VIEW_H = 480;
 
 // The relationship spine, in flow order — hovering a node animates dots along
 // the downstream sub-path toward risk ("this relationship is causing attention").
 const CHAIN = ['project', 'team', 'person', 'skills', 'systems', 'risk'];
 
 // Node layout (center coordinates in the VIEW_W × VIEW_H space, pixel size).
-// Node layout (center coordinates in the VIEW_W × VIEW_H space, pixel size).
 // All relationship cards (team, person, skills, systems, risk) share one size
-// so the grid reads evenly; project is deliberately larger.
+// so the grid reads evenly; project is deliberately larger. Positions stay
+// bounded: the risk node keeps ≥32px from the right edge and ≥24px from the
+// bottom edge, and node widths scale with the container so nothing clips.
 const NODE_POS = {
-  project: { x: 150, y: 220, w: 212, h: 170 },
-  team: { x: 430, y: 76, w: 170, h: 96 },
-  person: { x: 430, y: 252, w: 170, h: 96 },
-  skills: { x: 690, y: 76, w: 170, h: 96 },
-  systems: { x: 690, y: 252, w: 170, h: 96 },
-  risk: { x: 880, y: 380, w: 230, h: 96 },
+  project: { x: 140, y: 240, w: 212, h: 170 },
+  team: { x: 440, y: 90, w: 170, h: 96 },
+  person: { x: 440, y: 268, w: 170, h: 96 },
+  skills: { x: 700, y: 90, w: 170, h: 96 },
+  systems: { x: 700, y: 268, w: 170, h: 96 },
+  risk: { x: 860, y: 408, w: 200, h: 96 },
 };
 
 const NODE_META = {
@@ -158,7 +159,7 @@ function NodeHeader({ meta }) {
   );
 }
 
-function NodeCard({ pos, meta, dimmed, hovered, onClick, onMouseEnter, onMouseLeave, ariaLabel, glow, children }) {
+function NodeCard({ pos, scale = 1, meta, dimmed, hovered, onClick, onMouseEnter, onMouseLeave, ariaLabel, glow, children }) {
   return (
     <Box
       component="button"
@@ -171,7 +172,7 @@ function NodeCard({ pos, meta, dimmed, hovered, onClick, onMouseEnter, onMouseLe
         position: 'absolute',
         left: toPct(pos.x, VIEW_W),
         top: toPct(pos.y, VIEW_H),
-        width: pos.w,
+        width: pos.w * scale,
         height: pos.h,
         transform: 'translate(-50%, -50%)',
         p: 1.5,
@@ -354,20 +355,30 @@ const EngineeringRelationshipGraph = ({ data, paths = defaultPaths, fetchPersonD
     return map;
   }, []);
 
-  const edges = useMemo(() => {
-    const xScale = VIEW_W / width;
-    return EDGE_DEFS.map((def) => {
+  // Pixel scale maps the fixed VIEW_W design space onto the measured container
+  // width. Cards shrink proportionally when the container is narrower and grow
+  // up to full design size when there's room, so nothing overflows the box. The
+  // SVG viewBox (0..VIEW_W) fills the whole container, so edge geometry in
+  // design units lines up with card positions (which are VIEW_W-percentage-based)
+  // and card pixel widths at any size.
+  const pixelScale = width / VIEW_W;
+
+  // Edges live in the SVG's viewBox space (0..VIEW_W), which sits underneath
+  // the node layer. Card centers align with viewBox coordinates and card
+  // viewBox widths equal their design widths regardless of container size, so
+  // connector geometry is fully described by the plain NODE_POS values.
+  const edges = EDGE_DEFS.map((def) => {
       if (def.kind === 'ownership') {
         // Anchor to the exact centers of each card's facing edge so the
         // Project → Team line always touches both cards.
         const from = {
-          x: NODE_POS.project.x + (NODE_POS.project.w / 2) * xScale,
+          x: NODE_POS.project.x + NODE_POS.project.w / 2,
           y: NODE_POS.project.y,
           w: 0,
           h: 0,
         };
         const to = {
-          x: NODE_POS.team.x - (NODE_POS.team.w / 2) * xScale,
+          x: NODE_POS.team.x - NODE_POS.team.w / 2,
           y: NODE_POS.team.y,
           w: 0,
           h: 0,
@@ -378,7 +389,7 @@ const EngineeringRelationshipGraph = ({ data, paths = defaultPaths, fetchPersonD
         // Systems → Risk: exit the systems card's right-center and enter the
         // risk card's top-center.
         const from = {
-          x: NODE_POS.systems.x + (NODE_POS.systems.w / 2) * xScale,
+          x: NODE_POS.systems.x + NODE_POS.systems.w / 2,
           y: NODE_POS.systems.y,
           w: 0,
           h: 0,
@@ -395,24 +406,23 @@ const EngineeringRelationshipGraph = ({ data, paths = defaultPaths, fetchPersonD
         // Person → Skills: exit the engineers card's right-center and enter
         // the skills card's left-center for a clean diagonal across the gap.
         const from = {
-          x: NODE_POS.person.x + (NODE_POS.person.w / 2) * xScale,
+          x: NODE_POS.person.x + NODE_POS.person.w / 2,
           y: NODE_POS.person.y,
           w: 0,
           h: 0,
         };
         const to = {
-          x: NODE_POS.skills.x - (NODE_POS.skills.w / 2) * xScale,
+          x: NODE_POS.skills.x - NODE_POS.skills.w / 2,
           y: NODE_POS.skills.y,
           w: 0,
           h: 0,
         };
         return { ...def, ...edgeGeometry(from, to, def.curve) };
       }
-      const from = { ...NODE_POS[def.from], w: NODE_POS[def.from].w * xScale };
-      const to = { ...NODE_POS[def.to], w: NODE_POS[def.to].w * xScale };
+      const from = { ...NODE_POS[def.from] };
+      const to = { ...NODE_POS[def.to] };
       return { ...def, ...edgeGeometry(from, to, def.curve) };
     });
-  }, [width]);
 
   // Downstream sub-path from the hovered node toward risk; edges on it get
   // moving dots ("this relationship is causing attention").
@@ -437,7 +447,7 @@ const EngineeringRelationshipGraph = ({ data, paths = defaultPaths, fetchPersonD
         sx={{
           position: 'relative',
           width: '100%',
-          height: 450,
+          height: 480,
           overflow: 'hidden',
           borderRadius: 'var(--radius-card)',
           bgcolor: 'var(--surface-subtle)',
@@ -527,6 +537,7 @@ const EngineeringRelationshipGraph = ({ data, paths = defaultPaths, fetchPersonD
         {/* Node layer */}
         <NodeCard
           pos={NODE_POS.project}
+          scale={pixelScale}
           meta={NODE_META.project}
           dimmed={nodeDimmed('project')}
           hovered={hover === 'project'}
@@ -540,6 +551,7 @@ const EngineeringRelationshipGraph = ({ data, paths = defaultPaths, fetchPersonD
 
         <NodeCard
           pos={NODE_POS.team}
+          scale={pixelScale}
           meta={NODE_META.team}
           dimmed={nodeDimmed('team')}
           hovered={hover === 'team'}
@@ -554,6 +566,7 @@ const EngineeringRelationshipGraph = ({ data, paths = defaultPaths, fetchPersonD
 
         <NodeCard
           pos={NODE_POS.person}
+          scale={pixelScale}
           meta={NODE_META.person}
           dimmed={nodeDimmed('person')}
           hovered={hover === 'person'}
@@ -576,6 +589,7 @@ const EngineeringRelationshipGraph = ({ data, paths = defaultPaths, fetchPersonD
 
         <NodeCard
           pos={NODE_POS.skills}
+          scale={pixelScale}
           meta={NODE_META.skills}
           dimmed={nodeDimmed('skills')}
           hovered={hover === 'skills'}
@@ -595,6 +609,7 @@ const EngineeringRelationshipGraph = ({ data, paths = defaultPaths, fetchPersonD
 
         <NodeCard
           pos={NODE_POS.systems}
+          scale={pixelScale}
           meta={NODE_META.systems}
           dimmed={nodeDimmed('systems')}
           hovered={hover === 'systems'}
@@ -609,6 +624,7 @@ const EngineeringRelationshipGraph = ({ data, paths = defaultPaths, fetchPersonD
 
         <NodeCard
           pos={NODE_POS.risk}
+          scale={pixelScale}
           meta={NODE_META.risk}
           dimmed={nodeDimmed('risk')}
           hovered={hover === 'risk'}
