@@ -28,7 +28,6 @@ import AnalyzingPanel from './AnalyzingPanel.jsx';
 import { useAiTerms } from '../../hooks/useAiTerms.js';
 import { getSeverity } from '../../config/riskLabels.js';
 import { fadeSlideIn, expandDown, highlightFlash } from '../../config/animations.js';
-import { modelLabel } from '../../config/modelLabel.js';
 import { formatRelative } from '../../config/dates.js';
 
 const SECTION_LABEL = { evidence: 'Evidence', reasoning: 'Reasoning', impact: 'Impact' };
@@ -283,14 +282,12 @@ const InsightCard = ({ insight, onSave, onDismiss, saved, actions, onExplain, ex
                 animation: `${fadeSlideIn} 300ms ease`,
               }}
             >
-              <Tooltip title={aiMeta?.model ? `${aiMeta.provider} · ${aiMeta.model}` : 'Signal-derived assessment'}>
-                <Chip
-                  size="small"
-                  variant="outlined"
-                  color={isLlm ? 'primary' : 'default'}
-                  label={isLlm ? `✦ AI · ${modelLabel(aiMeta.model)}` : 'Engineering signals'}
-                />
-              </Tooltip>
+              <Chip
+                size="small"
+                variant="outlined"
+                color={isLlm ? 'primary' : 'default'}
+                label={isLlm ? '✦ AI Analysis Engine' : 'Engineering signals'}
+              />
               {isLlm && (
                 <Button
                   size="small"
@@ -453,7 +450,7 @@ const InsightCard = ({ insight, onSave, onDismiss, saved, actions, onExplain, ex
               </>
             ) : (
               <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>
-                Based on recent signals from your connected data sources.
+                Based on recent engineering signals.
               </Typography>
             )}
           </Box>

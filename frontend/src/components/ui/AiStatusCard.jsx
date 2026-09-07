@@ -18,7 +18,7 @@ const LiveDot = () => (
       }}
     />
     <Typography component="span" sx={{ fontSize: 12, fontWeight: 600, color: 'var(--teal)' }}>
-      Live
+      Active
     </Typography>
   </Box>
 );

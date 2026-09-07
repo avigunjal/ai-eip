@@ -56,6 +56,7 @@ const Projects = () => {
     { label: 'At risk', value: byStatus('at_risk') },
     { label: 'On track', value: byStatus('on_track') },
     { label: 'Paused', value: byStatus('paused') },
+    { label: 'Completed', value: byStatus('complete') },
   ];
 
   return (
@@ -63,9 +64,9 @@ const Projects = () => {
       <PageHeader title="Projects" subtitle={<AISubtitle>{t('subtitleProjects')}</AISubtitle>} />
 
       {/* KPI strip */}
-      <Grid container spacing={3} sx={{ mt: 3 }}>
+      <Grid container spacing={3} sx={{ mt: 3, display: 'flex', flexWrap: 'wrap' }}>
         {kpis.map((k) => (
-          <Grid item key={k.label} xs={6} sm={3}>
+          <Grid item key={k.label} xs={6} sm={3} sx={{ flex: { xs: '1 1 45%', sm: '1 1 0%' }, minWidth: { sm: 180 } }}>
             <MetricCard {...k} />
           </Grid>
         ))}

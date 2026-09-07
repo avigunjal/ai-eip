@@ -1,5 +1,7 @@
 import { Box, Button, Chip, Grid, LinearProgress, Switch, Tab, Tabs, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Schedule from '@mui/icons-material/Schedule';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import { fetchAiSettings, updateAiSettings } from '../../api/ai.js';
 import { useAiStore } from '../../store/aiStore.js';
@@ -10,16 +12,66 @@ import { useToast } from '../../hooks/useToast.js';
  * Settings — data sources, score config, notifications, workspace, AI.
  *
  * REMAINING (extend later):
- *  - Data sources: connect/disconnect mock integration cards with status
  *  - Score config: sliders for health/risk scoring weights
  *  - Notifications: toggle switches per channel
  *  - Workspace: member list + roles + invite
  */
 
+const PROTOTYPE_SIGNALS = [
+  'Delivery signals',
+  'Engineering signals',
+  'Knowledge signals',
+  'Incident signals',
+  'Recognition evidence',
+];
+
+const ROADMAP_INTEGRATIONS = ['GitHub', 'Jira', 'Confluence', 'ServiceNow'];
+
+/**
+ * Data sources. Honest about the prototype: the platform runs on seeded
+ * engineering signals today; real enterprise integrations are a roadmap item,
+ * never presented as connected endpoints.
+ */
+const DataSourcesSection = () => (
+  <Box>
+    <Typography sx={{ color: 'text.secondary', mt: 1, maxWidth: 560 }}>
+      The platform currently runs on seeded engineering signal data shipped with
+      this build. Production integrations are planned and listed separately —
+      nothing here implies a live connection.
+    </Typography>
+
+    <Typography sx={{ fontWeight: 600, fontSize: 14, mt: 3 }}>Current Prototype Data</Typography>
+    <Box sx={{ mt: 1, display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+      {PROTOTYPE_SIGNALS.map((s) => (
+        <Chip
+          key={s}
+          size="small"
+          icon={<CheckCircle sx={{ fontSize: 15, color: 'var(--teal)' }} />}
+          label={s}
+          variant="outlined"
+        />
+      ))}
+    </Box>
+
+    <Typography sx={{ fontWeight: 600, fontSize: 14, mt: 3 }}>Production Integrations — Roadmap</Typography>
+    <Box sx={{ mt: 1, display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+      {ROADMAP_INTEGRATIONS.map((name) => (
+        <Chip
+          key={name}
+          size="small"
+          icon={<Schedule sx={{ fontSize: 15, color: 'text.secondary' }} />}
+          label={name}
+          variant="outlined"
+        />
+      ))}
+    </Box>
+  </Box>
+);
+
 /**
  * Runtime AI toggle. Backed by GET/PATCH /api/ai/settings — an in-memory
  * backend setting seeded from AI_ENABLED at startup. Toggling never writes to
- * .env and never exposes API keys; provider/model are shown read-only.
+ * .env and never exposes API keys; the engine is shown read-only.
  */
 const AiSettingsSection = () => {
   const [settings, setSettings] = useState(null);
@@ -102,8 +154,7 @@ const AiSettingsSection = () => {
             </Box>
 
             <Box sx={{ mt: 3, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-              <Chip size="small" variant="outlined" label={`Provider · ${settings.provider}`} />
-              <Chip size="small" variant="outlined" label={`Model · ${settings.model}`} />
+              <Chip size="small" variant="outlined" label="Engine · AI-EIP Intelligence Engine" />
             </Box>
           </>
         )
@@ -193,11 +244,7 @@ const Settings = () => {
   const [tab, setTab] = useState(0);
 
   const sections = [
-    {
-      title: 'Data sources',
-      body: 'Connect the engineering tools that feed the platform — GitHub, Jira, Datadog, PagerDuty.',
-      hints: ['Integration cards with Connected / Needs auth status', 'Last sync + error handling per source'],
-    },
+    { title: 'Data sources', render: <DataSourcesSection /> },
     {
       title: 'Score configuration',
       body: 'Tune how engineering health and risk scores are weighted.',

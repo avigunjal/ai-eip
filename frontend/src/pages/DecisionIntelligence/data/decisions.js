@@ -111,7 +111,7 @@ export const DECISIONS = [
 export const KPI_SUMMARY = {
   decisionsRequiringAction: 6,
   newInLast30Days: 2,
-  estimatedValue: '$1.8M',
+  estimatedValue: '$1.3M',
   riskReductionPct: '62%',
   aiConfidencePct: '84%',
 };
@@ -120,6 +120,6 @@ export const KPI_SUMMARY = {
 export const POTENTIAL_OUTCOMES = [
   { key: 'riskReduction', arrow: 'down', value: '62%', label: 'Risk reduction' },
   { key: 'capacity', arrow: 'up', value: '28%', label: 'Capacity' },
-  { key: 'estimatedValue', arrow: null, value: '$964K', label: 'Value' },
+  { key: 'estimatedValue', arrow: null, value: '$727K', label: 'Value' },
   { key: 'singleOwner', arrow: null, value: '3', label: 'Single-owner risks resolved' },
 ];

@@ -68,7 +68,7 @@ const Knowledge = () => {
   };
 
   const kpis = [
-    { label: 'Critical knowledge risks', value: summary.criticalRisks },
+    { label: 'Knowledge areas at risk', value: summary.criticalRisks, help: 'Knowledge areas whose risk is rated high or critical — fragile coverage that may need owner or capacity attention.' },
     { label: 'Single-owner areas', value: summary.singleOwner },
     { label: 'Current documentation', value: summary.docsFresh },
     { label: 'Coverage trend', value: summary.coverageTrend },

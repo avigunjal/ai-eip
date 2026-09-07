@@ -1,4 +1,11 @@
 import { http } from './client.js';
+import {
+  sanitizeAiMeta,
+  sanitizeAiSettings,
+  sanitizeAssessment,
+  sanitizeComposition,
+  sanitizeExplanation,
+} from '../utils/aiSanitize.js';
 
 /**
  * LLM-augmented AI endpoints. Every request is explicitly user-triggered
@@ -18,7 +25,8 @@ const AI_REQUEST_TIMEOUT_MS = 120_000;
  * @returns {Promise<{ deterministic: ProjectAssessment, ai: ProjectAssessment|null }>}
  */
 export async function getProjectAssessment(projectId) {
-  return http.get(`/ai/analyze/project/${projectId}`);
+  const res = await http.get(`/ai/analyze/project/${projectId}`);
+  return { deterministic: res.deterministic, ai: sanitizeAssessment(res.ai) };
 }
 
 /**
@@ -32,7 +40,7 @@ export async function getProjectAssessment(projectId) {
  */
 export async function explainProjectAnalysis(projectId) {
   const { analysis } = await http.post(`/ai/analyze/project/${projectId}`, undefined, { timeout: AI_REQUEST_TIMEOUT_MS });
-  return analysis;
+  return sanitizeAssessment(analysis);
 }
 
 /**
@@ -44,7 +52,7 @@ export async function explainProjectAnalysis(projectId) {
  */
 export async function regenerateProjectAnalysis(projectId) {
   const { analysis } = await http.post(`/ai/analyze/project/${projectId}/regenerate`, undefined, { timeout: AI_REQUEST_TIMEOUT_MS });
-  return analysis;
+  return sanitizeAssessment(analysis);
 }
 
 /**
@@ -55,7 +63,15 @@ export async function regenerateProjectAnalysis(projectId) {
  * @returns {Promise<{ insights: Insight[], source: string, generatedAt: string }>}
  */
 export async function explainInsights() {
-  return http.post('/ai/explain/insights', undefined, { timeout: AI_REQUEST_TIMEOUT_MS });
+  const res = await http.post('/ai/explain/insights', undefined, { timeout: AI_REQUEST_TIMEOUT_MS });
+  return {
+    ...res,
+    insights: (Array.isArray(res.insights) ? res.insights : []).map((insight) => ({
+      ...insight,
+      explanation: insight.explanation ? sanitizeExplanation(insight.explanation) : null,
+      explanationMeta: sanitizeAiMeta(insight.explanationMeta),
+    })),
+  };
 }
 
 /**
@@ -66,7 +82,12 @@ export async function explainInsights() {
  * @returns {Promise<Array<{ insightId: string, explanation: { reasoning: string, impact: string|null }|null, explanationMeta: object|null }>>}
  */
 export async function fetchInsightExplanations() {
-  return http.get('/ai/explain/insights');
+  const items = await http.get('/ai/explain/insights');
+  return (Array.isArray(items) ? items : []).map((item) => ({
+    insightId: item.insightId,
+    explanation: item.explanation ? sanitizeExplanation(item.explanation) : null,
+    explanationMeta: sanitizeAiMeta(item.explanationMeta),
+  }));
 }
 
 /**
@@ -78,7 +99,12 @@ export async function fetchInsightExplanations() {
  * @returns {Promise<{ insightId: string, explanation: { reasoning: string, impact: string|null }, explanationMeta: { source: string, provider: string|null, model: string|null, generatedAt: string } }>}
  */
 export async function explainInsight(insightId) {
-  return http.post(`/ai/explain/insights/${insightId}`, undefined, { timeout: AI_REQUEST_TIMEOUT_MS });
+  const result = await http.post(`/ai/explain/insights/${insightId}`, undefined, { timeout: AI_REQUEST_TIMEOUT_MS });
+  return {
+    insightId: result.insightId,
+    explanation: sanitizeExplanation(result.explanation),
+    explanationMeta: sanitizeAiMeta(result.explanationMeta),
+  };
 }
 
 /**
@@ -89,7 +115,12 @@ export async function explainInsight(insightId) {
  * @returns {Promise<{ insightId: string, explanation: { reasoning: string, impact: string|null }, explanationMeta: { source: string, provider: string|null, model: string|null, generatedAt: string } }>}
  */
 export async function regenerateInsightExplanation(insightId) {
-  return http.post(`/ai/explain/insights/${insightId}/regenerate`, undefined, { timeout: AI_REQUEST_TIMEOUT_MS });
+  const result = await http.post(`/ai/explain/insights/${insightId}/regenerate`, undefined, { timeout: AI_REQUEST_TIMEOUT_MS });
+  return {
+    insightId: result.insightId,
+    explanation: sanitizeExplanation(result.explanation),
+    explanationMeta: sanitizeAiMeta(result.explanationMeta),
+  };
 }
 
 /**
@@ -99,7 +130,8 @@ export async function regenerateInsightExplanation(insightId) {
  * @returns {Promise<{ recommendation: TeamRecommendation, explanation: { whyThisTeam: string, tradeOffs: string|null, expectedImpact: string|null, confidence: number|null }, source: string, provider: string|null, model: string|null }>}
  */
 export async function explainComposition(projectId) {
-  return http.post('/ai/explain/composition', { projectId }, { timeout: AI_REQUEST_TIMEOUT_MS });
+  const result = await http.post('/ai/explain/composition', { projectId }, { timeout: AI_REQUEST_TIMEOUT_MS });
+  return sanitizeComposition(result);
 }
 
 /**
@@ -110,7 +142,8 @@ export async function explainComposition(projectId) {
  * @returns {Promise<{ deterministic: { whyThisTeam: string, tradeOffs: string|null, expectedImpact: string|null, confidence: number|null }, ai: CompositionExplanation|null }>}
  */
 export async function getCompositionAssessment(projectId) {
-  return http.get(`/ai/explain/composition/${projectId}`);
+  const res = await http.get(`/ai/explain/composition/${projectId}`);
+  return { deterministic: res.deterministic, ai: sanitizeComposition(res.ai) };
 }
 
 /**
@@ -121,7 +154,8 @@ export async function getCompositionAssessment(projectId) {
  * @returns {Promise<CompositionExplanation>}
  */
 export async function regenerateCompositionExplanation(projectId) {
-  return http.post(`/ai/explain/composition/${projectId}/regenerate`, undefined, { timeout: AI_REQUEST_TIMEOUT_MS });
+  const ai = await http.post(`/ai/explain/composition/${projectId}/regenerate`, undefined, { timeout: AI_REQUEST_TIMEOUT_MS });
+  return sanitizeComposition(ai);
 }
 
 /**
@@ -131,15 +165,15 @@ export async function regenerateCompositionExplanation(projectId) {
  * @returns {Promise<{ enabled: boolean, provider: string, model: string }>}
  */
 export async function fetchAiSettings() {
-  return http.get('/ai/settings');
+  return sanitizeAiSettings(await http.get('/ai/settings'));
 }
 
 /**
  * Toggle the runtime AI setting (in-memory; does not touch .env).
  *
  * @param {{ enabled: boolean }} input
- * @returns {Promise<{ enabled: boolean, provider: string, model: string }>}
+ * @returns {Promise<{ enabled: boolean }>}
  */
 export async function updateAiSettings({ enabled }) {
-  return http.patch('/ai/settings', { enabled });
+  return sanitizeAiSettings(await http.patch('/ai/settings', { enabled }));
 }

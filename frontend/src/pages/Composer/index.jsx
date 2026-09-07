@@ -47,7 +47,6 @@ import { useData } from '../../hooks/useData.js';
 import { useToast } from '../../hooks/useToast.js';
 import { useAiTerms } from '../../hooks/useAiTerms.js';
 import { useAiEnabled } from '../../store/aiStore.js';
-import { modelLabel } from '../../config/modelLabel.js';
 import { formatRelative } from '../../config/dates.js';
 import { paths } from '../../config/paths.js';
 import { SUSTAINABLE_CAPACITY } from '../../config/constants.js';
@@ -364,11 +363,11 @@ const Composer = () => {
         doc.text(`Confidence: ${aiState.explanation.confidence}%`, margin, y);
       }
 
-      if (aiState.meta?.model) {
+      if (aiState.meta?.generatedAt) {
         y += 6;
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(100, 100, 100);
-        doc.text(`Model: ${modelLabel(aiState.meta.model)}`, margin, y);
+        doc.text('Engine: AI-EIP Intelligence Engine', margin, y);
         doc.text(`Generated: ${formatRelative(aiState.meta.generatedAt)}`, margin, y + 5);
       }
     }
@@ -823,7 +822,7 @@ const Composer = () => {
                   size="small"
                   variant="outlined"
                   color={aiView ? 'primary' : 'default'}
-                  label={aiView ? `✦ AI · ${modelLabel(aiState.meta.model)}` : 'Deterministic · Engineering signals'}
+                  label={aiView ? '✦ AI Analysis Engine' : 'Deterministic · Engineering signals'}
                 />
               </Box>
               {busy ? (
@@ -942,7 +941,7 @@ const Composer = () => {
                     : t('generatedAnalysis')}
                 </Typography>
                 <Typography sx={{ fontSize: 12, color: 'text.disabled' }}>
-                  Powered by {modelLabel(aiState.meta.model)} · Generated {formatRelative(aiState.meta.generatedAt)}
+                  Powered by AI-EIP Intelligence Engine · Generated {formatRelative(aiState.meta.generatedAt)}
                 </Typography>
               </Box>
             )}

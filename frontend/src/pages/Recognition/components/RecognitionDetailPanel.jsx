@@ -15,7 +15,6 @@ import {
   IconButton,
   LinearProgress,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import Close from '@mui/icons-material/Close';
@@ -35,7 +34,6 @@ import { TOPBAR_HEIGHT } from '../../../config/constants.js';
 import { paths } from '../../../config/paths.js';
 import { getPeople } from '../../../data/service.js';
 import SparkleIcon from '../../../components/ui/SparkleIcon.jsx';
-import { modelLabel } from '../../../config/modelLabel.js';
 
 const INTELLIGENCE_DIMENSIONS = [
   { key: 'evidenceStrength', label: 'Evidence Strength' },
@@ -584,8 +582,7 @@ const RecognitionDetailPanel = ({ item, onClose, onApproved }) => {
                 <>
                   <Typography sx={{ fontSize: 12.5, color: 'text.secondary', lineHeight: 1.6 }}>{ai.result.ai.narrative}</Typography>
                   <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>
-                    {ai.result.ai.provider ? `${ai.result.ai.provider} · ` : ''}
-                    {ai.result.ai.model ? <Tooltip title={ai.result.ai.model}><Box component="span">{modelLabel(ai.result.ai.model)}</Box></Tooltip> : 'AI'}
+                    AI-EIP Intelligence Engine
                   </Typography>
                 </>
               ) : (

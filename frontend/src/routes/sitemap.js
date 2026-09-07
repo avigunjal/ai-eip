@@ -44,13 +44,13 @@ export const pageTitles = {
 export const sidebarLinks = [
   { name: "Overview", to: "/", icon: "layout-dashboard", exact: true },
   { name: "Projects", to: "/projects", icon: "folder-git-2" },
-  { name: "Risks", to: "/risks", icon: "shield-alert", badge: 3 },
+  { name: "Risks", to: "/risks", icon: "shield-alert" },
   { name: "Knowledge", to: "/knowledge", icon: "book-open" },
   { name: "Teams", to: "/teams", icon: "users-round" },
   { name: "AI Composer", to: "/composer", icon: "wand-sparkles" },
   { name: "Decision Intelligence", to: "/decision-intelligence", icon: "fact-check" },
   { name: "Recognition", to: "/recognition", icon: "award" },
-  { name: "Insights", to: "/insights", icon: "lightbulb", badge: 5 },
+  { name: "Insights", to: "/insights", icon: "lightbulb" },
   { name: "Settings", to: "/settings", icon: "settings" },
 ];
 

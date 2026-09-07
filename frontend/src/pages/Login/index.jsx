@@ -199,7 +199,15 @@ const Login = () => {
           size="large"
           fullWidth
           disabled={submitting}
-          sx={{ py: 1.5, fontSize: 15, textTransform: 'none', fontWeight: 600 }}
+          sx={{
+            py: 1.5,
+            fontSize: 15,
+            textTransform: 'none',
+            fontWeight: 600,
+            bgcolor: 'var(--primary)',
+            '&:hover': { bgcolor: 'var(--primary-dark)' },
+            '&:active': { bgcolor: 'var(--primary-dark)' },
+          }}
         >
           {submitting ? <CircularProgress size={22} color="inherit" /> : 'Sign in'}
         </Button>

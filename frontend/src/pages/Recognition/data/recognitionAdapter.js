@@ -71,12 +71,6 @@ function buildContributors(items, peopleById) {
     }));
 }
 
-const isInWindow = (r, from, to) => {
-  const d = dayjs(r.occurredAt);
-  if (to) return d.isAfter(from) && !d.isAfter(to);
-  return d.isAfter(from);
-};
-
 export function buildRecognitionInsights(feed = [], people = []) {
   const peopleById = new Map(people.map((p) => [p.id, p]));
   const publicItems = feed.filter(isPublic);
@@ -101,55 +95,30 @@ export function buildRecognitionInsights(feed = [], people = []) {
     awardLevel: r.award?.highestQualifiedLevel ?? null,
   }));
 
-  // Deterministic "demo now": the latest event in the feed, so the KPI delta
-  // windows and trend buckets never drift as wall-clock time passes (mirrors
-  // the fixed DEMO_TODAY in backend/src/shared/constants). Newly created
-  // recognitions naturally become the anchor instead of being excluded.
-  const latestOccurredAt = items.reduce((latest, item) => {
-    if (!item.occurredAt) return latest;
-    return latest && item.occurredAt <= latest ? latest : item.occurredAt;
-  }, '');
-  const now = latestOccurredAt ? dayjs(latestOccurredAt) : dayjs();
-
-  // KPI deltas vs the previous 30-day window. Null when there is no window to
-  // compare against (honest — never a fabricated percentage).
-  const last30Start = now.subtract(30, 'day');
-  const last60Start = now.subtract(60, 'day');
-  const recent = publicItems.filter((r) => isInWindow(r, last30Start));
-  const prior = publicItems.filter((r) => isInWindow(r, last60Start, last30Start));
-  const pctDelta = (cur, prev) => (prev > 0 ? Math.round(((cur - prev) / prev) * 100) : null);
-  const uniquePeopleOf = (arr) => new Set(arr.map((r) => r.personId)).size;
-  const uniqueProjectsOf = (arr) => new Set(arr.map((r) => r.project?.id).filter(Boolean)).size;
-  const recentPeople = uniquePeopleOf(recent);
-  const priorPeople = uniquePeopleOf(prior);
-  const recentProjects = uniqueProjectsOf(recent);
-  const priorProjects = uniqueProjectsOf(prior);
-
   const avgEvidence = items.length
     ? items.reduce((sum, r) => sum + (r.evidence?.length ?? 0), 0) / items.length
     : 0;
   const evidenceScore = Math.min(100, Math.round((avgEvidence / EVIDENCE_REFERENCE) * 100));
+  const uniquePeopleOf = (arr) => new Set(arr.map((r) => r.personId)).size;
+  const uniqueProjectsOf = (arr) => new Set(arr.map((r) => r.project?.id).filter(Boolean)).size;
 
   const kpis = [
     {
       key: 'total',
-      label: 'Total Recognitions',
+      label: 'Verified Recognitions',
       value: items.length,
-      delta: pctDelta(recent.length, prior.length),
-      detail: 'vs. previous 30 days',
+      detail: 'verified with evidence',
     },
     {
       key: 'people',
-      label: 'People Recognized',
+      label: 'Unique Contributors',
       value: uniquePeopleOf(items),
-      delta: pctDelta(recentPeople, priorPeople),
-      detail: 'unique contributors',
+      detail: 'people recognized',
     },
     {
       key: 'projects',
       label: 'Projects Impacted',
       value: uniqueProjectsOf(items),
-      delta: pctDelta(recentProjects, priorProjects),
       detail: 'across all recognitions',
     },
     {
@@ -157,7 +126,7 @@ export function buildRecognitionInsights(feed = [], people = []) {
       label: 'Average Evidence Score',
       value: `${evidenceScore}%`,
       detail: 'avg evidence per recognition',
-      help: `How well recognitions are backed by verified evidence. Each recognition is scored against a full ${EVIDENCE_REFERENCE}-piece evidence bundle — one primary (person-attributed) plus one supporting (\`number of evidence items ÷ ${EVIDENCE_REFERENCE} × 100\`). Links come from the live \`recognition_evidence\` join table.`,
+      help: `How well recognitions are backed by verified evidence. Each recognition is scored against a full ${EVIDENCE_REFERENCE}-piece evidence bundle — one primary (person-attributed) plus one supporting (\`number of evidence items ÷ ${EVIDENCE_REFERENCE} × 100\`).`,
     },
   ];
 
@@ -175,7 +144,7 @@ export function buildRecognitionInsights(feed = [], people = []) {
     items,
     kpis,
     awardLevels,
-    trends: buildTrends(items, now),
+    trends: buildTrends(items),
     contributors: buildContributors(items, peopleById),
   };
 }

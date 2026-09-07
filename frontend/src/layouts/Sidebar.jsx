@@ -16,11 +16,13 @@ import Close from '@mui/icons-material/Close';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { sidebarLinks, workspace, iconMap } from '../routes/sitemap.js';
 import { useUiStore } from '../store/uiStore.js';
+import { useSidebarBadges } from '../hooks/useSidebarBadges.js';
 import { SIDEBAR_WIDTH } from '../config/constants.js';
 import AvatarMenu from '../components/ui/AvatarMenu.jsx';
 import SparkleIcon from '../components/ui/SparkleIcon.jsx';
 
 function SidebarContent({ onNavigate }) {
+  const badges = useSidebarBadges();
   return (
     <Box sx={{ display: 'flex', height: '100%', flexDirection: 'column' }}>
       {/* Brand */}
@@ -70,6 +72,7 @@ function SidebarContent({ onNavigate }) {
       <Box component="nav" sx={{ flex: 1, overflowY: 'auto', px: 1.5, py: 2 }}>
         {sidebarLinks.map((link) => {
           const Icon = iconMap[link.icon];
+          const badge = badges[link.to] ?? link.badge;
           return (
             <ListItemButton
               key={link.to}
@@ -99,7 +102,7 @@ function SidebarContent({ onNavigate }) {
                 primary={link.name}
                 primaryTypographyProps={{ fontSize: 14, fontWeight: 500 }}
               />
-              {typeof link.badge === 'number' && link.badge > 0 && (
+              {typeof badge === 'number' && badge > 0 && (
                 <Box
                   component="span"
                   sx={{
@@ -114,7 +117,7 @@ function SidebarContent({ onNavigate }) {
                     textAlign: 'center',
                   }}
                 >
-                  {link.badge}
+                  {badge}
                 </Box>
               )}
             </ListItemButton>

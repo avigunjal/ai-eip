@@ -1,4 +1,4 @@
-import { Box, Button, Chip, CircularProgress, LinearProgress, Skeleton, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Chip, CircularProgress, LinearProgress, Skeleton, Typography } from '@mui/material';
 import AutoAwesome from '@mui/icons-material/AutoAwesome';
 import Replay from '@mui/icons-material/Replay';
 import BarChart from '@mui/icons-material/BarChart';
@@ -6,7 +6,6 @@ import AiDisclaimer from '../common/AiDisclaimer.jsx';
 import AnalyzingPanel from './AnalyzingPanel.jsx';
 import { useAiTerms } from '../../hooks/useAiTerms.js';
 import { paths } from '../../config/paths.js';
-import { modelLabel } from '../../config/modelLabel.js';
 import { formatAbsolute } from '../../config/dates.js';
 import { fadeSlideIn } from '../../config/animations.js';
 
@@ -48,7 +47,6 @@ const CardShell = ({ children }) => (
 
 const ProjectAssessmentCard = ({ deterministic, ai, view, aiStatus, regenerating, onRegenerate, onViewSignals }) => {
   const showAi = view === 'ai' && aiStatus === 'success' && ai;
-  const model = ai?.model ?? null;
   const { t } = useAiTerms();
 
   if (aiStatus === 'loading') {
@@ -86,7 +84,7 @@ const ProjectAssessmentCard = ({ deterministic, ai, view, aiStatus, regenerating
           </Box>
           <Typography sx={{ fontWeight: 700, fontSize: 16 }}>{showAi ? t('assessment') : 'Project Assessment'}</Typography>
           {showAi ? (
-            <Chip size="small" label={`AI · ${modelLabel(model)}`} color="primary" variant="filled" />
+            <Chip size="small" label="AI Analysis Engine" color="primary" variant="filled" />
           ) : (
             <Chip size="small" label="Deterministic · Engineering signals" variant="outlined" />
           )}
@@ -113,9 +111,7 @@ const ProjectAssessmentCard = ({ deterministic, ai, view, aiStatus, regenerating
       <Typography sx={{ mt: 1, fontSize: 12, color: 'text.disabled' }}>
         {showAi
           ? (
-            <Tooltip title={`${ai.provider} · ${model}`} componentsProps={{ tooltip: { sx: { fontSize: 12 } } }}>
-              <span>Powered by {modelLabel(model)} · Generated {formatAbsolute(ai.generatedAt)}</span>
-            </Tooltip>
+            <span>Powered by AI-EIP Intelligence Engine · Generated {formatAbsolute(ai.generatedAt)}</span>
           )
           : `Deterministic analysis · engineering signals · Generated ${formatAbsolute(deterministic.generatedAt)}`}
       </Typography>
