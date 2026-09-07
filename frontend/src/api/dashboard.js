@@ -10,7 +10,7 @@ import { http } from './client.js';
  * @returns {Promise<{
  *   health: { value: number; delta: number };
  *   projectsAtRisk: { value: number; detail: string };
- *   knowledgeConcentration: { value: string; detail: string };
+ *   knowledgeAreasAtRisk: { value: string; detail: string };
  *   teamCapacity: { value: string; detail: string };
  * }>}
  */

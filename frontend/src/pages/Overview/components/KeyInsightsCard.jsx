@@ -8,6 +8,8 @@ import { Link as RouterLink } from 'react-router';
 import Surface from '../../../components/styled/Surface.jsx';
 import SparkleIcon from '../../../components/ui/SparkleIcon.jsx';
 import { paths } from '../../../config/paths.js';
+import { formatCurrency } from '../../../config/currency.js';
+import { DECISIONS } from '../../DecisionIntelligence/data/decisions.js';
 
 /**
  * Overview — Key Insights (Task 5). The AI interpretation layer: surfaces the
@@ -24,6 +26,13 @@ const INSIGHT_META = {
   critical: { icon: WarningAmber, color: 'var(--red)', bg: 'var(--red-lighter)' },
   warning: { icon: TrendingUp, color: 'var(--amber)', bg: 'var(--amber-lighter)' },
 };
+
+/** Largest single-decision potential impact → traces the "business impact"
+ * insight back to a real decision value (Atlas → $342K), never invents one. */
+const HIGHEST_DECISION_VALUE = formatCurrency({
+  value: Math.max(...DECISIONS.map((d) => d.potentialValue.value)),
+  currency: 'USD',
+});
 
 /** Centralized insight data — rendered via .map(). */
 const keyInsights = [
@@ -52,7 +61,7 @@ const keyInsights = [
   {
     id: 'business-impact',
     title: 'High business impact',
-    description: 'Potential value at risk: $340K if not addressed in the next 2 sprints.',
+    description: `Potential value at risk: ${HIGHEST_DECISION_VALUE} if not addressed in the next 2 sprints.`,
     severity: 'warning',
   },
 ];

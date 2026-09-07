@@ -41,7 +41,7 @@ function buildChain(project) {
  * Map `GET /api/dashboard` → the Overview view model.
  *
  * @param {{
- *   summary?: { health?: number; projectsAtRisk?: number; criticalKnowledgeRisks?: number; highestTeamPressure?: number };
+ *   summary?: { health?: number; projectsAtRisk?: number; knowledgeAreasAtRisk?: number; highestTeamPressure?: number };
  *   projects?: Project[];
  *   knowledgeRisks?: KnowledgeArea[];
  * }} dto
@@ -49,7 +49,7 @@ function buildChain(project) {
  *   kpis: {
  *     health: { value: number; delta: number };
  *     projectsAtRisk: { value: number; detail: string };
- *     knowledgeConcentration: { value: number; detail: string };
+ *     knowledgeAreasAtRisk: { value: number; detail: string };
  *     teamCapacity: { value: string; detail: string };
  *     recognizedImpact: { value: string; delta: number };
  *   };
@@ -66,7 +66,7 @@ export function mapDashboardOverview(dto) {
     kpis: {
       health: { value: summary.health ?? 0, delta: 0 },
       projectsAtRisk: { value: summary.projectsAtRisk ?? 0, detail: 'require action this week' },
-      knowledgeConcentration: { value: summary.criticalKnowledgeRisks ?? 0, detail: 'critical knowledge risks' },
+      knowledgeAreasAtRisk: { value: summary.knowledgeAreasAtRisk ?? 0, detail: 'rated high or critical risk' },
       teamCapacity: { value: `${summary.highestTeamPressure ?? 0}%`, detail: 'highest team pressure' },
       recognizedImpact: { value: '+14%', delta: 14 },
     },

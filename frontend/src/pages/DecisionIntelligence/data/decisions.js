@@ -7,6 +7,13 @@
  * description, signals[] (label + value + tone), potentialValue.
  */
 
+import { formatCurrency } from '../../../config/currency.js';
+
+/** The decisions featured across Overview and the Decision Intelligence
+ * preview. Their potential value is the single source for every portfolio
+ * "value protected" figure — Overview preview and this page must not drift. */
+export const FEATURED_DECISIONS = ['payment-backup', 'payments-delivery', 'data-lake-transfer'];
+
 export const DECISION_CATEGORIES = [
   { key: 'staffing', label: 'Staffing' },
   { key: 'risk_mitigation', label: 'Risk mitigation' },
@@ -107,19 +114,43 @@ export const DECISIONS = [
   },
 ];
 
+const totalPotentialValueUsd = DECISIONS.reduce((sum, d) => sum + d.potentialValue.value, 0);
+const featuredValueUsd = DECISIONS.filter((d) => FEATURED_DECISIONS.includes(d.id)).reduce(
+  (sum, d) => sum + d.potentialValue.value,
+  0,
+);
+
+/**
+ * Portfolio outcome estimates — the effect of acting on the featured
+ * decisions. Single source of truth: Overview's Decision Intelligence preview
+ * and this page both render these numbers, so they can never diverge.
+ */
+export const PORTFOLIO_OUTCOMES = {
+  riskReductionPct: 62,
+  confidencePct: 28,
+  capacityPct: 22,
+  singleOwnerResolved: 3,
+  featuredValueUsd,
+};
+
 /** KPI strip values (spec section 5). */
 export const KPI_SUMMARY = {
-  decisionsRequiringAction: 6,
+  decisionsRequiringAction: DECISIONS.length,
   newInLast30Days: 2,
-  estimatedValue: '$1.3M',
-  riskReductionPct: '62%',
+  estimatedValue: formatCurrency({ value: totalPotentialValueUsd, currency: 'USD' }),
+  riskReductionPct: `${PORTFOLIO_OUTCOMES.riskReductionPct}%`,
   aiConfidencePct: '84%',
 };
 
 /** Bottom summary — Potential outcomes (spec section 12.B). */
 export const POTENTIAL_OUTCOMES = [
-  { key: 'riskReduction', arrow: 'down', value: '62%', label: 'Risk reduction' },
-  { key: 'capacity', arrow: 'up', value: '28%', label: 'Capacity' },
-  { key: 'estimatedValue', arrow: null, value: '$727K', label: 'Value' },
-  { key: 'singleOwner', arrow: null, value: '3', label: 'Single-owner risks resolved' },
+  { key: 'riskReduction', arrow: 'down', value: `${PORTFOLIO_OUTCOMES.riskReductionPct}%`, label: 'Risk reduction' },
+  { key: 'capacity', arrow: 'up', value: `${PORTFOLIO_OUTCOMES.capacityPct}%`, label: 'Capacity' },
+  {
+    key: 'estimatedValue',
+    arrow: null,
+    value: formatCurrency({ value: PORTFOLIO_OUTCOMES.featuredValueUsd, currency: 'USD' }),
+    label: 'Value',
+  },
+  { key: 'singleOwner', arrow: null, value: String(PORTFOLIO_OUTCOMES.singleOwnerResolved), label: 'Single-owner risks resolved' },
 ];

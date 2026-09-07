@@ -13,17 +13,17 @@ function average(values) {
 export async function getOverview() {
   const [projects, areas, teams] = await Promise.all([listProjects(), listAreas(), listTeams()]);
   const atRisk = projects.filter((project) => project.status === 'at_risk');
-  const criticalKnowledge = areas.filter((area) => area.riskLevel === 'critical');
+  const knowledgeAreasAtRisk = areas.filter((area) => area.riskLevel === 'critical' || area.riskLevel === 'high');
   const maxPressure = Math.max(0, ...teams.map((team) => team.deliveryPressure));
   return {
     summary: {
       health: average(projects.map((project) => project.healthScore)),
       projectsAtRisk: atRisk.length,
-      criticalKnowledgeRisks: criticalKnowledge.length,
+      knowledgeAreasAtRisk: knowledgeAreasAtRisk.length,
       highestTeamPressure: maxPressure,
     },
     projects: projects.slice(0, 5),
-    knowledgeRisks: criticalKnowledge,
+    knowledgeRisks: knowledgeAreasAtRisk,
     teams,
   };
 }

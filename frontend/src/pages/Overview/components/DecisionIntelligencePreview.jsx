@@ -7,7 +7,7 @@ import Surface from '../../../components/styled/Surface.jsx';
 import StatusBadge from '../../../components/common/StatusBadge.jsx';
 import { paths } from '../../../config/paths.js';
 import { formatCurrency } from '../../../config/currency.js';
-import { DECISIONS } from '../../DecisionIntelligence/data/decisions.js';
+import { DECISIONS, FEATURED_DECISIONS, PORTFOLIO_OUTCOMES } from '../../DecisionIntelligence/data/decisions.js';
 import { DECISION_DETAILS } from '../../DecisionDetail/data/decisionDetails.js';
 import { DECISION_SEVERITY } from '../../DecisionIntelligence/components/DecisionMeta.jsx';
 
@@ -21,7 +21,7 @@ import { DECISION_SEVERITY } from '../../DecisionIntelligence/components/Decisio
  */
 
 /** Ordered ids — Critical first, then High, then Medium (matches Task 3 badge ladder). */
-const PREVIEW_ORDER = ['payment-backup', 'payments-delivery', 'data-lake-transfer'];
+const PREVIEW_ORDER = FEATURED_DECISIONS;
 
 /** Presentation-only supporting caption under the real monetary value. */
 const IMPACT_CAPTION = {
@@ -31,15 +31,12 @@ const IMPACT_CAPTION = {
 };
 
 /** Aggregated impact summary — derived from the same real decisions below. */
-const TOTAL_VALUE_PROTECTED = PREVIEW_ORDER.reduce(
-  (sum, id) => sum + (DECISIONS.find((d) => d.id === id)?.potentialValue.value ?? 0),
-  0,
-);
+const TOTAL_VALUE_PROTECTED = PORTFOLIO_OUTCOMES.featuredValueUsd;
 
 const IMPACT_METRICS = [
-  { value: 62, direction: 'down', label: 'Risk exposure reduction', short: 'risk' },
-  { value: 28, direction: 'up', label: 'Delivery confidence', short: 'confidence' },
-  { value: 22, direction: 'up', label: 'Team capacity improvement', short: 'capacity' },
+  { value: PORTFOLIO_OUTCOMES.riskReductionPct, direction: 'down', label: 'Risk exposure reduction', short: 'risk' },
+  { value: PORTFOLIO_OUTCOMES.confidencePct, direction: 'up', label: 'Delivery confidence', short: 'confidence' },
+  { value: PORTFOLIO_OUTCOMES.capacityPct, direction: 'up', label: 'Team capacity improvement', short: 'capacity' },
 ];
 
 /** Signal tone → value color (mirrors DecisionCard — decorative only). */

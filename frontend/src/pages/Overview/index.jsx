@@ -87,9 +87,9 @@ const Overview = () => {
     { label: 'Engineering health', value: kpis.health.value, delta: kpis.health.delta, icon: <HealthAndSafety color="success" /> },
     { label: 'Projects at risk', value: kpis.projectsAtRisk.value, detail: kpis.projectsAtRisk.detail, icon: <WarningAmber color="warning" /> },
     {
-      label: 'Knowledge concentration',
-      value: kpis.knowledgeConcentration.value,
-      detail: kpis.knowledgeConcentration.detail,
+      label: 'Knowledge areas at risk',
+      value: kpis.knowledgeAreasAtRisk.value,
+      detail: kpis.knowledgeAreasAtRisk.detail,
       icon: <WorkspacePremium color="primary" />,
       chain: singleOwners.map((a) => (
         <Chip key={a.id} size="small" component={Link} to={paths.system(a.id)} clickable label={a.name} variant="outlined" />
